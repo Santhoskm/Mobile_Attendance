@@ -1,0 +1,11 @@
+insightface==0.7.3
+onnxruntime
+Pillow
+numpy
+celery[redis]
+redis
+django
+djangorestframework
+psycopg2-binary
+pgvector
+python-decouple
