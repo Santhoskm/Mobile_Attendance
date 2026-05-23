@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IET Smart Solution — Admin Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0B0F1A;--bg2:#111827;--bg3:#1C2333;--bg4:#242D3F;
+  --border:#2A3347;--border2:#364060;
+  --text1:#F0F4FF;--text2:#94A3B8;--text3:#64748B;
+  --accent:#3B82F6;--accent2:#60A5FA;--aglow:rgba(59,130,246,.15);
+  --green:#10B981;--gbg:rgba(16,185,129,.1);
+  --amber:#F59E0B;--abg:rgba(245,158,11,.1);
+  --red:#EF4444;--rbg:rgba(239,68,68,.1);
+  --purple:#8B5CF6;--pbg:rgba(139,92,246,.1);
+  --teal:#06B6D4;--tbg:rgba(6,182,212,.1);
+  --sw:240px;--font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+  --r:10px;--rl:14px;--sh:0 4px 24px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--text1);display:flex;min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* SIDEBAR */
+.sb{width:var(--sw);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow-y:auto}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.logo-m{width:36px;height:36px;background:linear-gradient(135deg,#3B82F6,#06B6D4);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.logo-t{font-size:13px;font-weight:600;color:var(--text1);line-height:1.3}
+.logo-s{font-size:10px;color:var(--text3)}
+.sb-sec{padding:14px 10px 4px}
+.sb-lbl{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);padding:0 8px;margin-bottom:4px}
+.ni{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:all .15s;color:var(--text2);font-size:13px;font-weight:500;margin-bottom:1px;position:relative}
+.ni:hover{background:var(--bg3);color:var(--text1)}
+.ni.active{background:var(--aglow);color:var(--accent2);border:1px solid rgba(59,130,246,.2)}
+.ni.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--accent);border-radius:0 2px 2px 0}
+.ni-ico{font-size:15px;width:20px;text-align:center;flex-shrink:0}
+.ni-badge{margin-left:auto;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:99px}
+.sb-foot{margin-top:auto;padding:14px 10px;border-top:1px solid var(--border)}
+.u-card{display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border-radius:8px}
+.u-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#3B82F6,#8B5CF6);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#fff;flex-shrink:0}
+.u-nm{font-size:12px;font-weight:600;color:var(--text1)}
+.u-rl{font-size:10px;color:var(--text3)}
+
+/* MAIN */
+.main{margin-left:var(--sw);flex:1;display:flex;flex-direction:column}
+.topbar{height:60px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 26px;gap:14px;position:sticky;top:0;z-index:50}
+.tb-title{font-size:16px;font-weight:600;color:var(--text1)}
+.tb-sub{font-size:11px;color:var(--text3);margin-top:1px}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.srch{display:flex;align-items:center;gap:7px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 12px;width:220px}
+.srch input{background:none;border:none;outline:none;color:var(--text1);font-family:var(--font);font-size:12px;width:100%}
+.srch input::placeholder{color:var(--text3)}
+.ico-btn{width:36px;height:36px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;color:var(--text2);position:relative;transition:all .15s}
+.ico-btn:hover{border-color:var(--accent);color:var(--accent2)}
+.ndot{position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--red);border-radius:50%;border:1.5px solid var(--bg2)}
+.content{padding:26px;flex:1}
+
+/* SECTIONS */
+.sec{display:none}.sec.active{display:block}
+
+/* STATS */
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.sg3{grid-template-columns:repeat(3,1fr)}
+.sg5{grid-template-columns:repeat(5,1fr)}
+.sc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:18px;position:relative;overflow:hidden;transition:border-color .2s}
+.sc:hover{border-color:var(--border2)}
+.sc::after{content:'';position:absolute;top:0;right:0;width:55px;height:55px;border-radius:0 var(--rl) 0 55px;opacity:.08}
+.sc.blue::after{background:var(--accent)}.sc.green::after{background:var(--green)}.sc.amber::after{background:var(--amber)}.sc.red::after{background:var(--red)}.sc.purple::after{background:var(--purple)}.sc.teal::after{background:var(--teal)}
+.sc-lbl{font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.sc-val{font-size:30px;font-weight:700;color:var(--text1);font-family:var(--mono);line-height:1}
+.sc-ch{font-size:11px;margin-top:7px;display:flex;align-items:center;gap:3px}
+.sc-ch.up{color:var(--green)}.sc-ch.dn{color:var(--red)}.sc-ico{position:absolute;top:16px;right:16px;font-size:19px;opacity:.35}
+
+/* HEADER */
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.sh-title{font-size:18px;font-weight:600;color:var(--text1)}
+.sh-sub{font-size:12px;color:var(--text3);margin-top:2px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s}
+.btn-p{background:var(--accent);color:#fff}.btn-p:hover{background:#2563EB}
+.btn-s{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}.btn-s:hover{border-color:var(--border2);color:var(--text1)}
+.btn-sm{padding:6px 12px;font-size:12px}
+
+/* TABLE */
+.tw{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden}
+.ttb{display:flex;align-items:center;gap:8px;padding:14px 18px;border-bottom:1px solid var(--border)}
+.ftabs{display:flex;gap:3px}
+.ft{padding:5px 11px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;color:var(--text3);transition:all .15s}
+.ft:hover{color:var(--text1)}.ft.active{background:var(--aglow);color:var(--accent2);border:1px solid rgba(59,130,246,.2)}
+.tsrch{display:flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:6px 10px}
+.tsrch input{background:none;border:none;outline:none;color:var(--text1);font-size:12px;font-family:var(--font);width:150px}
+.tsrch input::placeholder{color:var(--text3)}
+table{width:100%;border-collapse:collapse}
+thead th{padding:10px 14px;text-align:left;font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;background:var(--bg3);border-bottom:1px solid var(--border)}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--bg3)}
+tbody td{padding:11px 14px;font-size:13px;color:var(--text2)}
+.ec{display:flex;align-items:center;gap:9px}
+.av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;flex-shrink:0}
+.en{font-size:13px;font-weight:500;color:var(--text1)}
+.eid{font-size:11px;color:var(--text3);font-family:var(--mono)}
+.badge{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:99px;font-size:11px;font-weight:500}
+.badge::before{content:'';width:4px;height:4px;border-radius:50%;background:currentColor}
+.bg{background:var(--gbg);color:var(--green)}.br{background:var(--rbg);color:var(--red)}.ba{background:var(--abg);color:var(--amber)}.bb{background:var(--aglow);color:var(--accent2)}.bp{background:var(--pbg);color:var(--purple)}.bt{background:var(--tbg);color:var(--teal)}.bgr{background:var(--bg4);color:var(--text3)}
+.acts{display:flex;gap:5px}
+.ab{padding:4px 9px;border-radius:5px;font-size:11px;font-weight:500;cursor:pointer;border:none;font-family:var(--font);transition:all .15s}
+.av-b{background:var(--aglow);color:var(--accent2)}.ae{background:var(--abg);color:var(--amber)}.ad{background:var(--rbg);color:var(--red)}.aen{background:var(--gbg);color:var(--green)}.aas{background:var(--pbg);color:var(--purple)}
+.pag{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-top:1px solid var(--border)}
+.pi{font-size:12px;color:var(--text3)}
+.pbs{display:flex;gap:3px}
+.pb{width:28px;height:28px;border-radius:5px;background:var(--bg3);border:1px solid var(--border);color:var(--text2);font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+.pb:hover,.pb.active{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* CHART */
+.dg{display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-bottom:20px}
+.cc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:20px}
+.ct{font-size:13px;font-weight:600;color:var(--text1);margin-bottom:3px}
+.cs{font-size:11px;color:var(--text3);margin-bottom:16px}
+.bc{display:flex;align-items:flex-end;gap:5px;height:110px}
+.bg-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.bar{width:100%;border-radius:3px 3px 0 0;transition:opacity .2s;min-height:3px}
+.bar:hover{opacity:.75}
+.bl{font-size:9px;color:var(--text3);text-align:center}
+.dw{display:flex;align-items:center;justify-content:center;gap:20px}
+.dl{display:flex;flex-direction:column;gap:7px}
+.li{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text2)}
+.ld{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+.al{display:flex;flex-direction:column;gap:0}
+.ai{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border)}
+.ai:last-child{border-bottom:none}
+.adot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.at{font-size:12px;color:var(--text2);flex:1}
+.at strong{color:var(--text1);font-weight:500}
+.atm{font-size:11px;color:var(--text3);font-family:var(--mono)}
+
+/* MODAL */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:200;display:none;align-items:center;justify-content:center}
+.mo.open{display:flex}
+.md{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);width:700px;max-height:85vh;overflow-y:auto;box-shadow:var(--sh)}
+.mh{padding:20px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg2);z-index:1}
+.mt{font-size:15px;font-weight:600;color:var(--text1)}
+.mc{width:30px;height:30px;border-radius:7px;background:var(--bg3);border:1px solid var(--border);color:var(--text2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px}
+.mb{padding:22px}
+.mf{padding:16px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;position:sticky;bottom:0;background:var(--bg2)}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fgrp{display:flex;flex-direction:column;gap:5px}.fgrp.full{grid-column:1/-1}
+.fl{font-size:12px;font-weight:500;color:var(--text2)}.fl span{color:var(--red)}
+.fi{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text1);font-family:var(--font);font-size:13px;outline:none;transition:border-color .15s;width:100%}
+.fi:focus{border-color:var(--accent)}.fi::placeholder{color:var(--text3)}
+select.fi option{background:var(--bg3)}
+.fsec{margin-top:18px;padding-top:18px;border-top:1px solid var(--border)}
+.fsec-t{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:12px}
+
+/* PROJECT */
+.pg{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px}
+.pc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:18px;transition:border-color .2s;cursor:pointer}
+.pc:hover{border-color:var(--border2)}
+.pc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
+.pn{font-size:14px;font-weight:600;color:var(--text1)}
+.pc-code{font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:2px}
+.pm{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.pmr{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2)}
+.pbw{background:var(--bg4);border-radius:99px;height:4px;overflow:hidden;margin-top:12px}
+.pbf{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--teal))}
+.pft{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+.avs{display:flex}
+.avs .av{width:24px;height:24px;border:2px solid var(--bg2);margin-left:-7px;font-size:9px}
+.avs .av:first-child{margin-left:0}
+
+/* ASSIGN */
+.asl{display:flex;flex-direction:column;gap:5px;max-height:280px;overflow-y:auto}
+.asi{display:flex;align-items:center;gap:9px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .15s}
+.asi:hover{border-color:var(--border2)}.asi.sel{border-color:var(--accent);background:var(--aglow)}
+.achk{width:17px;height:17px;border-radius:4px;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;color:var(--accent2)}
+.asi.sel .achk{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* VIOLATION */
+.vc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:10px;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center}
+.vc.un{border-left:3px solid var(--red)}.vc.res{border-left:3px solid var(--green);opacity:.65}
+
+/* TASK BOARD */
+.tb{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.tc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:14px}
+.tch{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.tct{font-size:13px;font-weight:600;color:var(--text1)}
+.tcnt{background:var(--bg4);color:var(--text3);font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px}
+.ti{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:11px;margin-bottom:7px;cursor:pointer;transition:border-color .15s}
+.ti:hover{border-color:var(--border2)}.ti:last-child{margin-bottom:0}
+.ti-t{font-size:12px;font-weight:500;color:var(--text1);margin-bottom:5px;line-height:1.4}
+.ti-m{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.tp{font-size:10px;font-weight:600;padding:2px 7px;border-radius:99px}
+.ph{background:var(--rbg);color:var(--red)}.pm2{background:var(--abg);color:var(--amber)}.pl{background:var(--gbg);color:var(--green)}
+
+/* SETTINGS */
+.stg{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.stc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:20px}
+.stt{font-size:14px;font-weight:600;color:var(--text1);margin-bottom:12px}
+.str{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--border)}
+.str:last-child{border-bottom:none}
+.stl{font-size:13px;color:var(--text1)}.std{font-size:11px;color:var(--text3);margin-top:2px}
+.tgl{width:38px;height:20px;border-radius:99px;background:var(--bg4);position:relative;cursor:pointer;transition:background .2s;border:none;flex-shrink:0}
+.tgl.on{background:var(--accent)}.tgl::after{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .2s}.tgl.on::after{transform:translateX(18px)}
+
+/* PROFILE */
+.ph2{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:26px;margin-bottom:18px;display:flex;gap:22px;align-items:flex-start}
+.pav{width:76px;height:76px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:#fff;flex-shrink:0;background:linear-gradient(135deg,#3B82F6,#06B6D4)}
+.pname{font-size:20px;font-weight:700;color:var(--text1)}
+.pdes{font-size:13px;color:var(--text3);margin-top:2px}
+.ptags{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.pfs{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.fr{display:flex;flex-direction:column;padding:12px 0;border-bottom:1px solid var(--border)}
+.fr:nth-child(odd){padding-right:22px;border-right:1px solid var(--border)}.fr:nth-child(even){padding-left:22px}
+.frl{font-size:10px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+.frv{font-size:13px;color:var(--text1);font-weight:500}
+.ct2{width:100%;border-collapse:collapse;margin-top:6px}
+.ct2 td{padding:9px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text2)}
+.ct2 td:first-child{color:var(--text1);font-weight:500;width:40%}.ct2 tr:last-child td{border-bottom:none}
+.ic{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:18px;margin-bottom:14px}
+.ic-t{font-size:13px;font-weight:600;color:var(--text1);margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.cg{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* REPORT */
+.rfc{display:flex;gap:9px;margin-bottom:18px;flex-wrap:wrap}
+.rc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:18px;margin-bottom:18px}
+.trnd{display:flex;align-items:flex-end;gap:2px;height:70px;margin-top:14px}
+.trb{flex:1;border-radius:2px 2px 0 0;min-height:3px;transition:opacity .2s}.trb:hover{opacity:.7}
+
+/* ENROLL */
+.ep{background:var(--bg3);border-radius:10px;height:180px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);margin-bottom:14px;flex-direction:column;gap:8px}
+
+/* TOAST */
+.tw2{position:fixed;bottom:22px;right:22px;z-index:999;display:flex;flex-direction:column;gap:7px}
+.tst{background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:11px 15px;font-size:13px;color:var(--text1);display:flex;align-items:center;gap:9px;box-shadow:var(--sh);animation:si .3s ease;min-width:240px}
+@keyframes si{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sb">
+  <div class="sb-logo">
+    <div class="logo-m">IET</div>
+    <div><div class="logo-t">Smart Solution</div><div class="logo-s">Admin Portal</div></div>
+  </div>
+  <div class="sb-sec">
+    <div class="sb-lbl">Overview</div>
+    <div class="ni active" onclick="show('dashboard',this)"><span class="ni-ico">🏠</span>Dashboard</div>
+  </div>
+  <div class="sb-sec">
+    <div class="sb-lbl">Workforce</div>
+    <div class="ni" onclick="show('employees',this)"><span class="ni-ico">👤</span>Employees<span class="ni-badge">230</span></div>
+    <div class="ni" onclick="show('enrollment',this)"><span class="ni-ico">📷</span>Face Enrollment</div>
+    <div class="ni" onclick="show('profile-view',this)"><span class="ni-ico">🪪</span>Employee Profile</div>
+  </div>
+  <div class="sb-sec">
+    <div class="sb-lbl">Projects</div>
+    <div class="ni" onclick="show('projects',this)"><span class="ni-ico">🏗️</span>Projects</div>
+    <div class="ni" onclick="show('assign',this)"><span class="ni-ico">🔗</span>Assignments</div>
+    <div class="ni" onclick="show('geofence',this)"><span class="ni-ico">📍</span>Geo-fence Zones</div>
+  </div>
+  <div class="sb-sec">
+    <div class="sb-lbl">Attendance</div>
+    <div class="ni" onclick="show('attendance',this)"><span class="ni-ico">📋</span>Daily Attendance</div>
+    <div class="ni" onclick="show('reports',this)"><span class="ni-ico">📊</span>Reports</div>
+    <div class="ni" onclick="show('violations',this)"><span class="ni-ico">⚠️</span>Violations<span class="ni-badge">3</span></div>
+  </div>
+  <div class="sb-sec">
+    <div class="sb-lbl">Work</div>
+    <div class="ni" onclick="show('tasks',this)"><span class="ni-ico">✅</span>Tasks</div>
+  </div>
+  <div class="sb-sec">
+    <div class="sb-lbl">System</div>
+    <div class="ni" onclick="show('settings',this)"><span class="ni-ico">⚙️</span>Settings</div>
+  </div>
+  <div class="sb-foot">
+    <div class="u-card"><div class="u-av">AD</div><div><div class="u-nm">Admin User</div><div class="u-rl">Super Administrator</div></div></div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div><div class="tb-title" id="tbt">Dashboard</div><div class="tb-sub">Wednesday, 20 May 2026</div></div>
+    <div class="tb-right">
+      <div class="srch"><span style="color:var(--text3)">🔍</span><input type="text" placeholder="Search IET No or name..."></div>
+      <div class="ico-btn">📥</div>
+      <div class="ico-btn" onclick="show('violations',null)">⚠️<div class="ndot"></div></div>
+      <div class="u-av" style="width:36px;height:36px;font-size:13px;border-radius:8px;cursor:pointer">AD</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="sec active" id="sec-dashboard">
+      <div class="sg">
+        <div class="sc blue"><span class="sc-ico">👥</span><div class="sc-lbl">Total Employees</div><div class="sc-val">{{totalemployees}}</div><div class="sc-ch up">↑ 4 this month</div></div>
+        <div class="sc green"><span class="sc-ico">✅</span><div class="sc-lbl">Present Today</div><div class="sc-val"><a href="{% url 'presenttoday' %}" style="text-decoration: none; color:white;">{{presentcount}}</a></div><div class="sc-ch up">↑ 86% attendance</div></div>
+        <div class="sc red"><span class="sc-ico">❌</span><div class="sc-lbl">Absent Today</div><div class="sc-val"><a href="{% url 'absenttoday' %}" style="text-decoration: none; color:white;">{{absentcount}}</a></div><div class="sc-ch dn">14% absence rate</div></div>
+        <div class="sc amber"><span class="sc-ico">⏰</span><div class="sc-lbl">Late Check-ins</div><div class="sc-val">{{late_checkinscount}}</div><div class="sc-ch dn">↑ 4 vs yesterday</div></div>
+      </div>
+      <div class="sg">
+        <div class="sc teal"><span class="sc-ico">🏗️</span><div class="sc-lbl">Active Projects</div><div class="sc-val">8</div><div class="sc-ch up">↑ 2 new this week</div></div>
+        <div class="sc red"><span class="sc-ico">🚨</span><div class="sc-lbl">Violations Today</div><div class="sc-val">3</div><div class="sc-ch dn">2 unresolved</div></div>
+        <div class="sc purple"><span class="sc-ico">📋</span><div class="sc-lbl">Tasks Due Today</div><div class="sc-val">14</div><div class="sc-ch">6 completed</div></div>
+        <div class="sc amber"><span class="sc-ico">📄</span><div class="sc-lbl">WP Expiring (30d)</div><div class="sc-val">34</div><div class="sc-ch dn">Action required</div></div>
+      </div>
+      <div class="dg">
+        <div class="cc">
+          <div class="ct">Weekly Attendance Trend</div><div class="cs">Last 7 days</div>
+          <div class="bc">
+            <div class="bg-col"><div class="bar" style="height:75%;background:var(--accent)"></div><div class="bl">Mon</div></div>
+            <div class="bg-col"><div class="bar" style="height:88%;background:var(--accent)"></div><div class="bl">Tue</div></div>
+            <div class="bg-col"><div class="bar" style="height:82%;background:var(--accent)"></div><div class="bl">Wed</div></div>
+            <div class="bg-col"><div class="bar" style="height:91%;background:var(--accent)"></div><div class="bl">Thu</div></div>
+            <div class="bg-col"><div class="bar" style="height:86%;background:var(--accent)"></div><div class="bl">Fri</div></div>
+            <div class="bg-col"><div class="bar" style="height:60%;background:var(--bg4)"></div><div class="bl">Sat</div></div>
+            <div class="bg-col"><div class="bar" style="height:86%;background:var(--teal)"></div><div class="bl">Today</div></div>
+          </div>
+        </div>
+        <div class="cc">
+          <div class="ct">Deployment Type</div><div class="cs">446 total deployments</div>
+          <div class="dw" style="margin-top:10px">
+            <svg width="110" height="110" viewBox="0 0 42 42">
+              <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--bg4)" stroke-width="4"/>
+              <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--accent)" stroke-width="4" stroke-dasharray="52 100" stroke-dashoffset="25" transform="rotate(-90 21 21)"/>
+              <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--green)" stroke-width="4" stroke-dasharray="33 100" stroke-dashoffset="-27" transform="rotate(-90 21 21)"/>
+              <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--amber)" stroke-width="4" stroke-dasharray="15 100" stroke-dashoffset="-60" transform="rotate(-90 21 21)"/>
+            </svg>
+            <div class="dl">
+              <div class="li"><div class="ld" style="background:var(--accent)"></div>IET (233)</div>
+              <div class="li"><div class="ld" style="background:var(--green)"></div>Sub-Con (149)</div>
+              <div class="li"><div class="ld" style="background:var(--amber)"></div>BCA (64)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="dg">
+        <div class="cc">
+          <div class="ct">Recent Check-ins</div><div class="cs">Live feed</div>
+          <div class="al">
+            <div class="ai"><div class="adot" style="background:var(--green)"></div><div class="at"><strong>Veerappan Kandhasamy</strong> IET-009 checked in at Harbour Road</div><div class="atm">09:02</div></div>
+            <div class="ai"><div class="adot" style="background:var(--green)"></div><div class="at"><strong>Chinniah Adaikkalam</strong> IET-015 checked in at Marina Bay</div><div class="atm">09:07</div></div>
+            <div class="ai"><div class="adot" style="background:var(--amber)"></div><div class="at"><strong>Subbiah Ravichandran</strong> IET-017 late check-in Jurong West</div><div class="atm">09:24</div></div>
+            <div class="ai"><div class="adot" style="background:var(--red)"></div><div class="at"><strong>Rajan Muthu</strong> IET-023 geo-fence violation at Tuas Link</div><div class="atm">09:31</div></div>
+            <div class="ai"><div class="adot" style="background:var(--green)"></div><div class="at"><strong>Palaniswamy K</strong> IET-031 checked in at Harbour Road</div><div class="atm">09:33</div></div>
+          </div>
+        </div>
+        <div class="cc">
+          <div class="ct">Alerts</div><div class="cs">Require action today</div>
+          <div class="al">
+            <div class="ai"><div class="adot" style="background:var(--red)"></div><div class="at"><strong>3</strong> geo-fence violations unresolved</div><button class="ab av-b" onclick="show('violations',null)">View</button></div>
+            <div class="ai"><div class="adot" style="background:var(--amber)"></div><div class="at"><strong>12</strong> passports expiring in 30 days</div><button class="ab ae">Review</button></div>
+            <div class="ai"><div class="adot" style="background:var(--amber)"></div><div class="at"><strong>34</strong> work permits expiring soon</div><button class="ab ae">Review</button></div>
+            <div class="ai"><div class="adot" style="background:var(--purple)"></div><div class="at"><strong>18</strong> employees not face-enrolled</div><button class="ab aen" onclick="show('enrollment',null)">Enroll</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMPLOYEES -->
+    <div class="sec" id="sec-employees">
+      <div class="sh"><div><div class="sh-title">Employee Management</div><div class="sh-sub">230 employees across all projects</div></div>
+        <div style="display:flex;gap:8px"><button class="btn btn-s btn-sm">📥 Export CSV</button><button class="btn btn-p" onclick="om('m-emp')">+ Add Employee</button></div>
+      </div>
+      <div class="tw">
+        <div class="ttb">
+          <div class="ftabs"><div class="ft active">All (230)</div><div class="ft">Live (212)</div><div class="ft">Inactive (18)</div><div class="ft">Not Enrolled (18)</div></div>
+          <div style="display:flex;gap:7px;margin-left:auto">
+            <select class="fi" style="width:140px;padding:6px 10px;font-size:12px"><option>All Designations</option><option>Rigger Signalman</option><option>General Worker</option><option>Lifting Supervisor</option></select>
+            <div class="tsrch"><span style="color:var(--text3);font-size:13px">🔍</span><input type="text" placeholder="Search name or IET No..."></div>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>Employee</th><th>IET No</th><th>Designation</th><th>Dept</th><th>WP Status</th><th>Face</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="emp-tbody"></tbody>
+        </table>
+        <div class="pag"><div class="pi">Showing 1–10 of 230</div><div class="pbs"><div class="pb">‹</div><div class="pb active">1</div><div class="pb">2</div><div class="pb">3</div><div class="pb">…</div><div class="pb">23</div><div class="pb">›</div></div></div>
+      </div>
+    </div>
+
+    <!-- ENROLLMENT -->
+    <div class="sec" id="sec-enrollment">
+      <div class="sh"><div><div class="sh-title">Face Enrollment</div><div class="sh-sub">18 employees not yet enrolled</div></div></div>
+      <div class="sg sg3">
+        <div class="sc green"><div class="sc-lbl">Enrolled</div><div class="sc-val">212</div></div>
+        <div class="sc red"><div class="sc-lbl">Not Enrolled</div><div class="sc-val">18</div></div>
+        <div class="sc amber"><div class="sc-lbl">Re-enroll Due</div><div class="sc-val">4</div></div>
+      </div>
+      <div class="tw">
+        <div class="ttb"><div class="ftabs"><div class="ft active">Not Enrolled (18)</div><div class="ft">All Employees</div></div></div>
+        <table>
+          <thead><tr><th>Employee</th><th>IET No</th><th>Designation</th><th>Deployment Site</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td><div class="ec"><div class="av" style="background:#8B5CF6">RK</div><div><div class="en">Rajesh Kumar</div><div class="eid">IET-044</div></div></div></td><td><span style="font-family:var(--mono);font-size:12px;color:var(--text3)">IET-044</span></td><td>Scaffolder</td><td>Tuas Link Phase 3</td><td><span class="badge br">Not Enrolled</span></td><td><button class="btn btn-p btn-sm" onclick="om('m-enroll')">📷 Enroll Now</button></td></tr>
+            <tr><td><div class="ec"><div class="av" style="background:#F59E0B">MS</div><div><div class="en">Muthu Selvam</div><div class="eid">IET-067</div></div></div></td><td><span style="font-family:var(--mono);font-size:12px;color:var(--text3)">IET-067</span></td><td>Welder</td><td>Jurong West Site</td><td><span class="badge br">Not Enrolled</span></td><td><button class="btn btn-p btn-sm" onclick="om('m-enroll')">📷 Enroll Now</button></td></tr>
+            <tr><td><div class="ec"><div class="av" style="background:#10B981">AP</div><div><div class="en">Arjunan Pillai</div><div class="eid">IET-089</div></div></div></td><td><span style="font-family:var(--mono);font-size:12px;color:var(--text3)">IET-089</span></td><td>General Worker</td><td>Marina Bay Site</td><td><span class="badge ba">Re-enroll Due</span></td><td><button class="btn btn-p btn-sm" onclick="om('m-enroll')">📷 Re-enroll</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PROFILE VIEW -->
+    <div class="sec" id="sec-profile-view">
+      <div class="sh"><div><div class="sh-title">Employee Profile — IET-009</div></div>
+        <div style="display:flex;gap:8px"><button class="btn btn-s btn-sm" onclick="show('employees',null)">← Back</button><button class="btn btn-s btn-sm" onclick="om('m-emp')">✏️ Edit</button><button class="btn btn-p btn-sm" onclick="om('m-enroll')">📷 Enroll Face</button></div>
+      </div>
+      <div class="ph2">
+        <div class="pav">VK</div>
+        <div style="flex:1">
+          <div class="pname">Veerappan Kandhasamy</div>
+          <div class="pdes">Rigger Signalman · Construction</div>
+          <div class="ptags"><span class="badge bg">● Live</span><span class="badge bb">IET-009</span><span class="badge bt">R1-CT</span><span class="badge bg">Face Enrolled ✓</span><span class="badge bp">Employee Role</span></div>
+        </div>
+        <div style="text-align:right"><div style="font-size:11px;color:var(--text3);margin-bottom:3px">Checked in today</div><div style="font-size:18px;font-weight:700;color:var(--green);font-family:var(--mono)">09:02 AM</div><div style="font-size:11px;color:var(--text3);margin-top:3px">Harbour Road Site</div></div>
+      </div>
+      <div class="cg">
+        <div class="ic">
+          <div class="ic-t">🪪 Identity & Contact</div>
+          <div class="pfs">
+            <div class="fr"><div class="frl">Employee No</div><div class="frv" style="font-family:var(--mono)">IET-009</div></div>
+            <div class="fr"><div class="frl">FIN No</div><div class="frv" style="font-family:var(--mono)">G8129937X</div></div>
+            <div class="fr"><div class="frl">WP No</div><div class="frv" style="font-family:var(--mono)">0 33942087</div></div>
+            <div class="fr"><div class="frl">Contact</div><div class="frv">+65 8064 2379</div></div>
+            <div class="fr"><div class="frl">Email</div><div class="frv" style="font-size:11px">kandhasamysamy31@gmail.com</div></div>
+            <div class="fr"><div class="frl">Nationality</div><div class="frv">Indian</div></div>
+            <div class="fr"><div class="frl">Type of Worker</div><div class="frv">R1-CT</div></div>
+            <div class="fr"><div class="frl">Date Joined</div><div class="frv">12 Mar 2022</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="ic">
+            <div class="ic-t">🏗️ Current Deployment</div>
+            <div style="font-size:14px;font-weight:600;color:var(--text1)">Harbour Road Phase 2</div>
+            <div style="font-size:12px;color:var(--text3);margin-top:4px">Supervisor: Subbiah IET-017</div>
+            <div style="margin-top:10px;display:flex;gap:7px"><span class="badge bg">● Active</span><span class="badge bb">IET Deployment</span></div>
+          </div>
+          <div class="ic">
+            <div class="ic-t">📱 Mobile App Access</div>
+            <div class="str"><div><div class="stl" style="font-size:12px">App Role</div></div><span class="badge bp">Supervisor</span></div>
+            <div class="str"><div><div class="stl" style="font-size:12px">Face Enrolled</div></div><span class="badge bg">Yes ✓</span></div>
+            <div class="str" style="border-bottom:none"><div><div class="stl" style="font-size:12px">Mobile PIN</div></div><span style="font-family:var(--mono);font-size:13px;color:var(--text3)">●●●●</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="ic" style="margin-top:0">
+        <div class="ic-t">🎓 Certifications & Training</div>
+        <table class="ct2">
+          <tr><td>CSOC Renewal</td><td>Aug 24, 2028</td><td><span class="badge bg">Valid</span></td></tr>
+          <tr><td>OPSOC</td><td>—</td><td><span class="badge bgr">None</span></td></tr>
+          <tr><td>MHSOC</td><td>—</td><td><span class="badge bgr">None</span></td></tr>
+          <tr><td>2nd Skill / CT/MS</td><td>Oct 30, 2025</td><td><span class="badge br">Expired</span></td></tr>
+          <tr><td>AWSHCS / CSOC</td><td>Aug 24, 2028</td><td><span class="badge bg">Valid</span></td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- PROJECTS -->
+    <div class="sec" id="sec-projects">
+      <div class="sh"><div><div class="sh-title">Project Management</div><div class="sh-sub">8 active · 2 pending approval</div></div>
+        <div style="display:flex;gap:8px">
+          <div class="ftabs"><div class="ft active">Active (8)</div><div class="ft">Pending (2)</div><div class="ft">Archived (5)</div></div>
+          <button class="btn btn-p" onclick="om('m-proj')">+ New Project</button>
+        </div>
+      </div>
+      <div class="pg" id="proj-grid"></div>
+    </div>
+
+    <!-- ASSIGNMENTS -->
+    <div class="sec" id="sec-assign">
+      <div class="sh"><div><div class="sh-title">Project Assignments</div><div class="sh-sub">Assign supervisors and employees to projects</div></div></div>
+      <div class="cg">
+        <div>
+          <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">Select Project</div>
+          <div class="asl" style="max-height:none;gap:6px">
+            {% for project in projects %}
+            <div class="asi sel" onclick="selProj(this)"><div class="achk">✓</div><div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text1)">{{i.projectname}}</div><div style="font-size:11px;color:var(--text3)">HR-P2 · 24 employees</div></div><span class="badge bg">Active</span></div>
+            {% endfor %}
+            <div class="asi sel" onclick="selProj(this)"><div class="achk">✓</div><div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text1)">Harbour Road Phase 2</div><div style="font-size:11px;color:var(--text3)">HR-P2 · 24 employees</div></div><span class="badge bg">Active</span></div>
+            <!-- <div class="asi" onclick="selProj(this)"><div class="achk"></div><div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text1)">Marina Bay Construction</div><div style="font-size:11px;color:var(--text3)">MBC-1 · 18 employees</div></div><span class="badge bg">Active</span></div>
+            <div class="asi" onclick="selProj(this)"><div class="achk"></div><div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text1)">Tuas Link Phase 3</div><div style="font-size:11px;color:var(--text3)">TL-P3 · 31 employees</div></div><span class="badge bg">Active</span></div>
+            <div class="asi" onclick="selProj(this)"><div class="achk"></div><div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text1)">Jurong West Site</div><div style="font-size:11px;color:var(--text3)">JW-01 · 15 employees</div></div><span class="badge ba">Pending</span></div> -->
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">Harbour Road Phase 2 — Team</div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:7px;font-weight:500">Supervisor</div>
+          <div class="asi sel" style="margin-bottom:12px"><div class="achk">✓</div><div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text1)">Subbiah Ravichandran</div><div style="font-size:11px;color:var(--text3)">IET-017 · Lifting Supervisor</div></div><span class="badge bp">Supervisor</span></div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:7px;font-weight:500">Employees (24)</div>
+          <div class="asl">
+            <div class="asi sel" onclick="togAsi(this)"><div class="achk">✓</div><div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text1)">Veerappan Kandhasamy</div><div style="font-size:11px;color:var(--text3)">IET-009</div></div></div>
+            <div class="asi sel" onclick="togAsi(this)"><div class="achk">✓</div><div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text1)">Chinniah Adaikkalam</div><div style="font-size:11px;color:var(--text3)">IET-015</div></div></div>
+            <div class="asi" onclick="togAsi(this)"><div class="achk"></div><div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text1)">Palaniswamy K</div><div style="font-size:11px;color:var(--text3)">IET-031</div></div></div>
+            <div class="asi" onclick="togAsi(this)"><div class="achk"></div><div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text1)">Rajan Muthu</div><div style="font-size:11px;color:var(--text3)">IET-023</div></div></div>
+            <div class="asi sel" onclick="togAsi(this)"><div class="achk">✓</div><div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text1)">Selvakumar Arumugam</div><div style="font-size:11px;color:var(--text3)">IET-042</div></div></div>
+          </div>
+          <div style="display:flex;gap:9px;margin-top:13px">
+            <button class="btn btn-p" style="flex:1" onclick="toast('Assignments saved','✅')">Save Assignments</button>
+            <button class="btn btn-s">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GEO-FENCE -->
+    <div class="sec" id="sec-geofence">
+      <div class="sh"><div><div class="sh-title">Geo-fence Zones</div><div class="sh-sub">8 active zones</div></div><button class="btn btn-p" onclick="om('m-zone')">+ Add Zone</button></div>
+      <div class="tw">
+        <div class="ttb"><div class="ftabs"><div class="ft active">All Zones (8)</div><div class="ft">Active (8)</div></div></div>
+        <table>
+          <thead><tr><th>Zone Name</th><th>Linked Project</th><th>Coordinates</th><th>Radius</th><th>Active Hours</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr><td><strong style="color:var(--text1)">Harbour Road Main Gate</strong></td><td>Harbour Road Phase 2</td><td><span style="font-family:var(--mono);font-size:11px;color:var(--text3)">1.2897°N 103.8501°E</span></td><td>200m</td><td>06:00–20:00</td><td><span class="badge bg">Active</span></td><td><div class="acts"><button class="ab av-b">View</button><button class="ab ae">Edit</button><button class="ab ad">Delete</button></div></td></tr>
+            <tr><td><strong style="color:var(--text1)">Marina Bay Site A</strong></td><td>Marina Bay Construction</td><td><span style="font-family:var(--mono);font-size:11px;color:var(--text3)">1.2818°N 103.8636°E</span></td><td>150m</td><td>07:00–19:00</td><td><span class="badge bg">Active</span></td><td><div class="acts"><button class="ab av-b">View</button><button class="ab ae">Edit</button><button class="ab ad">Delete</button></div></td></tr>
+            <tr><td><strong style="color:var(--text1)">Tuas Link Zone B</strong></td><td>Tuas Link Phase 3</td><td><span style="font-family:var(--mono);font-size:11px;color:var(--text3)">1.3273°N 103.6364°E</span></td><td>300m</td><td>07:00–18:00</td><td><span class="badge bg">Active</span></td><td><div class="acts"><button class="ab av-b">View</button><button class="ab ae">Edit</button><button class="ab ad">Delete</button></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ATTENDANCE -->
+    <div class="sec" id="sec-attendance">
+      <div class="sh"><div><div class="sh-title">Daily Attendance</div><div class="sh-sub">20 May 2026 — 198 present, 32 absent, 11 late</div></div>
+        <div style="display:flex;gap:8px"><input type="date" class="fi" value="2026-05-20" style="width:150px;padding:7px 10px"><select class="fi" style="width:170px;padding:7px 10px"><option>All Projects</option><option>Harbour Road Phase 2</option><option>Marina Bay</option></select><button class="btn btn-s btn-sm">📥 Export CSV</button></div>
+      </div>
+      <div class="sg sg5" style="margin-bottom:18px">
+        <div class="sc green"><div class="sc-lbl">Present</div><div class="sc-val" style="font-size:24px">198</div></div>
+        <div class="sc red"><div class="sc-lbl">Absent</div><div class="sc-val" style="font-size:24px">32</div></div>
+        <div class="sc amber"><div class="sc-lbl">Late</div><div class="sc-val" style="font-size:24px">11</div></div>
+        <div class="sc teal"><div class="sc-lbl">Checked Out</div><div class="sc-val" style="font-size:24px">87</div></div>
+        <div class="sc red"><div class="sc-lbl">Violations</div><div class="sc-val" style="font-size:24px">3</div></div>
+      </div>
+      <div class="tw">
+        <div class="ttb">
+          <div class="ftabs"><div class="ft active">All</div><div class="ft">Present</div><div class="ft">Absent</div><div class="ft">Late</div><div class="ft">Violations</div></div>
+          <div class="tsrch" style="margin-left:auto"><span style="color:var(--text3)">🔍</span><input type="text" placeholder="Search employee..."></div>
+        </div>
+        <table>
+          <thead><tr><th>Employee</th><th>Project</th><th>Check-in</th><th>Check-out</th><th>Hours</th><th>Face</th><th>In Zone</th><th>Status</th><th>Note</th></tr></thead>
+          <tbody>
+            <tr><td><div class="ec"><div class="av" style="background:#3B82F6">VK</div><div><div class="en">Veerappan Kandhasamy</div><div class="eid">IET-009</div></div></div></td><td style="font-size:12px">Harbour Road P2</td><td><span style="font-family:var(--mono);color:var(--green);font-size:12px">09:02</span></td><td><span style="font-family:var(--mono);font-size:12px;color:var(--text3)">—</span></td><td style="font-family:var(--mono);font-size:12px">4h 31m</td><td><span class="badge bg">✓ Yes</span></td><td><span class="badge bg">✓ Yes</span></td><td><span class="badge bg">Present</span></td><td>—</td></tr>
+            <tr><td><div class="ec"><div class="av" style="background:#10B981">CA</div><div><div class="en">Chinniah Adaikkalam</div><div class="eid">IET-015</div></div></div></td><td style="font-size:12px">Marina Bay</td><td><span style="font-family:var(--mono);color:var(--green);font-size:12px">09:07</span></td><td><span style="font-family:var(--mono);font-size:12px">13:45</span></td><td style="font-family:var(--mono);font-size:12px">4h 38m</td><td><span class="badge bg">✓ Yes</span></td><td><span class="badge bg">✓ Yes</span></td><td><span class="badge bg">Present</span></td><td>—</td></tr>
+            <tr><td><div class="ec"><div class="av" style="background:#F59E0B">SR</div><div><div class="en">Subbiah Ravichandran</div><div class="eid">IET-017</div></div></div></td><td style="font-size:12px">Jurong West</td><td><span style="font-family:var(--mono);color:var(--amber);font-size:12px">09:24</span></td><td><span style="font-family:var(--mono);font-size:12px;color:var(--text3)">—</span></td><td style="font-family:var(--mono);font-size:12px">4h 09m</td><td><span class="badge bg">✓ Yes</span></td><td><span class="badge bg">✓ Yes</span></td><td><span class="badge ba">Late</span></td><td style="font-size:11px;color:var(--text3)">+24 min</td></tr>
+            <tr><td><div class="ec"><div class="av" style="background:#EF4444">RM</div><div><div class="en">Rajan Muthu</div><div class="eid">IET-023</div></div></div></td><td style="font-size:12px">Tuas Link P3</td><td><span style="font-family:var(--mono);color:var(--red);font-size:12px">09:31</span></td><td>—</td><td style="font-family:var(--mono);font-size:12px">4h 02m</td><td><span class="badge bg">✓ Yes</span></td><td><span class="badge br">✗ No</span></td><td><span class="badge br">Violation</span></td><td><button class="ab av-b">Resolve</button></td></tr>
+            <tr><td><div class="ec"><div class="av" style="background:#8B5CF6">PK</div><div><div class="en">Palaniswamy K</div><div class="eid">IET-031</div></div></div></td><td style="font-size:12px">Harbour Road P2</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="badge br">Absent</span></td><td>—</td></tr>
+          </tbody>
+        </table>
+        <div class="pag"><div class="pi">Showing 1–10 of 230</div><div class="pbs"><div class="pb">‹</div><div class="pb active">1</div><div class="pb">2</div><div class="pb">3</div><div class="pb">›</div></div></div>
+      </div>
+    </div>
+
+    <!-- REPORTS -->
+    <div class="sec" id="sec-reports">
+      <div class="sh"><div><div class="sh-title">Attendance Reports</div><div class="sh-sub">Generate and export detailed reports</div></div><button class="btn btn-p">📥 Export CSV</button></div>
+      <div class="rfc">
+        <select class="fi" style="width:140px;padding:7px 10px"><option>This Month</option><option>Last 7 Days</option><option>Last Month</option></select>
+        <select class="fi" style="width:190px;padding:7px 10px"><option>All Projects</option><option>Harbour Road Phase 2</option></select>
+        <select class="fi" style="width:150px;padding:7px 10px"><option>All Employees</option><option>IET Direct</option><option>Sub-Con</option></select>
+        <button class="btn btn-p">Generate</button>
+      </div>
+      <div class="sg">
+        <div class="sc green"><div class="sc-lbl">Avg Attendance</div><div class="sc-val">86%</div><div class="sc-ch up">↑ 2% vs last month</div></div>
+        <div class="sc blue"><div class="sc-lbl">Total Hours</div><div class="sc-val" style="font-size:22px">12,840</div></div>
+        <div class="sc red"><div class="sc-lbl">Total Violations</div><div class="sc-val">28</div><div class="sc-ch dn">↑ 6 vs last month</div></div>
+        <div class="sc amber"><div class="sc-lbl">Late Check-ins</div><div class="sc-val">143</div></div>
+      </div>
+      <div class="rc">
+        <div style="font-size:14px;font-weight:600;color:var(--text1);margin-bottom:3px">Daily Attendance — May 2026</div>
+        <div style="font-size:12px;color:var(--text3)">Present count per day</div>
+        <div class="trnd">
+          <div class="trb" style="height:75%;background:var(--accent)"></div><div class="trb" style="height:82%;background:var(--accent)"></div><div class="trb" style="height:88%;background:var(--accent)"></div><div class="trb" style="height:91%;background:var(--accent)"></div><div class="trb" style="height:79%;background:var(--accent)"></div><div class="trb" style="height:45%;background:var(--bg4)"></div><div class="trb" style="height:30%;background:var(--bg4)"></div><div class="trb" style="height:88%;background:var(--accent)"></div><div class="trb" style="height:84%;background:var(--accent)"></div><div class="trb" style="height:92%;background:var(--accent)"></div><div class="trb" style="height:87%;background:var(--accent)"></div><div class="trb" style="height:83%;background:var(--accent)"></div><div class="trb" style="height:40%;background:var(--bg4)"></div><div class="trb" style="height:35%;background:var(--bg4)"></div><div class="trb" style="height:90%;background:var(--accent)"></div><div class="trb" style="height:86%;background:var(--accent)"></div><div class="trb" style="height:88%;background:var(--accent)"></div><div class="trb" style="height:93%;background:var(--accent)"></div><div class="trb" style="height:85%;background:var(--accent)"></div><div class="trb" style="height:86%;background:var(--teal)"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:5px"><span style="font-size:10px;color:var(--text3)">May 1</span><span style="font-size:10px;color:var(--text3)">May 10</span><span style="font-size:10px;color:var(--text3)">May 20</span></div>
+      </div>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Employee</th><th>Days Present</th><th>Days Absent</th><th>Days Late</th><th>Total Hours</th><th>Violations</th></tr></thead>
+          <tbody>
+            <tr><td><div class="ec"><div class="av" style="background:#3B82F6">VK</div><div><div class="en">Veerappan Kandhasamy</div><div class="eid">IET-009</div></div></div></td><td style="font-family:var(--mono);color:var(--green)">18</td><td style="font-family:var(--mono);color:var(--red)">2</td><td style="font-family:var(--mono);color:var(--amber)">1</td><td style="font-family:var(--mono)">162h</td><td style="font-family:var(--mono)">0</td></tr>
+            <tr><td><div class="ec"><div class="av" style="background:#10B981">CA</div><div><div class="en">Chinniah Adaikkalam</div><div class="eid">IET-015</div></div></div></td><td style="font-family:var(--mono);color:var(--green)">20</td><td style="font-family:var(--mono);color:var(--red)">0</td><td style="font-family:var(--mono);color:var(--amber)">0</td><td style="font-family:var(--mono)">180h</td><td style="font-family:var(--mono)">0</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- VIOLATIONS -->
+    <div class="sec" id="sec-violations">
+      <div class="sh"><div><div class="sh-title">Geo-fence Violations</div><div class="sh-sub">3 unresolved violations require action</div></div><button class="btn btn-s btn-sm">📥 Export</button></div>
+      <div class="sg sg3">
+        <div class="sc red"><div class="sc-lbl">Unresolved</div><div class="sc-val">3</div></div>
+        <div class="sc green"><div class="sc-lbl">Resolved Today</div><div class="sc-val">2</div></div>
+        <div class="sc blue"><div class="sc-lbl">Total This Month</div><div class="sc-val">28</div></div>
+      </div>
+      <div class="vc un">
+        <div>
+          <div style="display:flex;align-items:center;gap:9px;margin-bottom:8px">
+            <div class="av" style="background:#EF4444;width:34px;height:34px;font-size:12px">RM</div>
+            <div><div style="font-size:14px;font-weight:600;color:var(--text1)">Rajan Muthu — IET-023</div><div style="font-size:12px;color:var(--text3)">Tuas Link Phase 3 · Tuas Link Zone B</div></div>
+            <span class="badge br" style="margin-left:auto">Unresolved</span>
+          </div>
+          <div style="display:flex;gap:18px;font-size:12px;color:var(--text2)">
+            <div>⏰ <strong>09:31 AM</strong> today</div>
+            <div>📍 <span style="font-family:var(--mono)">1.3291°N 103.6401°E</span></div>
+            <div>Type: Check-in outside zone</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:7px">
+          <button class="btn btn-s btn-sm" onclick="om('m-resolve')">✏️ Resolve with Note</button>
+          <button class="btn btn-p btn-sm">✅ Mark Resolved</button>
+        </div>
+      </div>
+      <div class="vc un">
+        <div>
+          <div style="display:flex;align-items:center;gap:9px;margin-bottom:8px">
+            <div class="av" style="background:#F59E0B;width:34px;height:34px;font-size:12px">KS</div>
+            <div><div style="font-size:14px;font-weight:600;color:var(--text1)">Karuppaiah Selvam — IET-056</div><div style="font-size:12px;color:var(--text3)">Marina Bay Construction · Marina Bay Site A</div></div>
+            <span class="badge br" style="margin-left:auto">Unresolved</span>
+          </div>
+          <div style="display:flex;gap:18px;font-size:12px;color:var(--text2)">
+            <div>⏰ <strong>10:14 AM</strong> today</div>
+            <div>📍 <span style="font-family:var(--mono)">1.2845°N 103.8612°E</span></div>
+            <div>Type: Drift outside zone</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:7px">
+          <button class="btn btn-s btn-sm" onclick="om('m-resolve')">✏️ Resolve with Note</button>
+          <button class="btn btn-p btn-sm">✅ Mark Resolved</button>
+        </div>
+      </div>
+      <div class="vc res">
+        <div>
+          <div style="display:flex;align-items:center;gap:9px;margin-bottom:8px">
+            <div class="av" style="background:#10B981;width:34px;height:34px;font-size:12px">AP</div>
+            <div><div style="font-size:14px;font-weight:600;color:var(--text1)">Arumugam Pillai — IET-078</div><div style="font-size:12px;color:var(--text3)">Harbour Road Phase 2</div></div>
+            <span class="badge bg" style="margin-left:auto">Resolved</span>
+          </div>
+          <div style="display:flex;gap:18px;font-size:12px;color:var(--text2)">
+            <div>⏰ <strong>08:47 AM</strong></div><div>Type: Check-in outside zone</div><div>📝 "GPS drift confirmed at entrance"</div>
+          </div>
+        </div>
+        <div></div>
+      </div>
+    </div>
+
+    <!-- TASKS -->
+    <div class="sec" id="sec-tasks">
+      <div class="sh"><div><div class="sh-title">Task Management</div><div class="sh-sub">14 due today · 6 completed</div></div>
+        <div style="display:flex;gap:8px"><select class="fi" style="width:180px;padding:7px 10px"><option>All Projects</option><option>Harbour Road Phase 2</option></select><button class="btn btn-p" onclick="om('m-task')">+ New Task</button></div>
+      </div>
+      <div class="tb">
+        <div class="tc">
+          <div class="tch"><div class="tct">To Do</div><div class="tcnt">6</div></div>
+          <div class="ti"><div class="ti-t">Install scaffolding at Level 3 — Block B</div><div class="ti-m"><span class="tp ph">High</span><span style="font-size:10px;color:var(--text3)">IET-009</span><span style="font-size:10px;color:var(--text3)">Due today</span></div></div>
+          <div class="ti"><div class="ti-t">Safety inspection — Marina Bay Site</div><div class="ti-m"><span class="tp pm2">Med</span><span style="font-size:10px;color:var(--text3)">IET-017</span></div></div>
+          <div class="ti"><div class="ti-t">PPE distribution — new workers batch</div><div class="ti-m"><span class="tp pl">Low</span><span style="font-size:10px;color:var(--text3)">IET-031</span></div></div>
+        </div>
+        <div class="tc">
+          <div class="tch"><div class="tct">In Progress</div><div class="tcnt">5</div></div>
+          <div class="ti"><div class="ti-t">Concrete pour — Foundation Section 4</div><div class="ti-m"><span class="tp ph">High</span><span style="font-size:10px;color:var(--text3)">IET-015</span><span style="font-size:10px;color:var(--text3)">Due today</span></div></div>
+          <div class="ti"><div class="ti-t">Wiring installation — Level 2 East</div><div class="ti-m"><span class="tp pm2">Med</span><span style="font-size:10px;color:var(--text3)">IET-023</span></div></div>
+          <div class="ti"><div class="ti-t">Site cleanup — Sector C</div><div class="ti-m"><span class="tp pl">Low</span><span style="font-size:10px;color:var(--text3)">IET-042</span></div></div>
+        </div>
+        <div class="tc">
+          <div class="tch"><div class="tct">Done</div><div class="tcnt">6</div></div>
+          <div class="ti" style="opacity:.55"><div class="ti-t">Morning briefing — all team leads</div><div class="ti-m"><span class="tp ph">High</span><span style="font-size:10px;color:var(--green)">✓ Verified</span></div></div>
+          <div class="ti" style="opacity:.55"><div class="ti-t">Equipment check — crane and hoists</div><div class="ti-m"><span class="tp ph">High</span><span style="font-size:10px;color:var(--green)">✓ Verified</span></div></div>
+          <div class="ti" style="opacity:.55"><div class="ti-t">Formwork removal — Section 2</div><div class="ti-m"><span class="tp pm2">Med</span><span style="font-size:10px;color:var(--green)">✓ Verified</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="sec" id="sec-settings">
+      <div class="sh"><div><div class="sh-title">System Settings</div></div></div>
+      <div class="stg">
+        <div class="stc">
+          <div class="stt">⏱ Attendance Rules</div>
+          <div class="str"><div><div class="stl">Late Threshold</div><div class="std">Minutes after shift start = Late</div></div><input class="fi" value="15" style="width:60px;padding:5px;text-align:center;font-family:var(--mono)"></div>
+          <div class="str"><div><div class="stl">Auto-checkout</div><div class="std">Auto check-out at shift end</div></div><button class="tgl on" onclick="this.classList.toggle('on')"></button></div>
+          <div class="str"><div><div class="stl">Shift Start</div></div><input class="fi" value="08:00" type="time" style="width:110px;padding:5px"></div>
+          <div class="str"><div><div class="stl">Shift End</div></div><input class="fi" value="17:00" type="time" style="width:110px;padding:5px"></div>
+        </div>
+        <div class="stc">
+          <div class="stt">📍 Geo-fence</div>
+          <div class="str"><div><div class="stl">GPS Buffer</div><div class="std">Extra metres added to zones</div></div><input class="fi" value="30" style="width:60px;padding:5px;text-align:center;font-family:var(--mono)"></div>
+          <div class="str"><div><div class="stl">Check Interval (min)</div><div class="std">How often geo-fence is checked</div></div><input class="fi" value="5" style="width:60px;padding:5px;text-align:center;font-family:var(--mono)"></div>
+          <div class="str"><div><div class="stl">Violation Notifications</div><div class="std">Push alert on violation</div></div><button class="tgl on" onclick="this.classList.toggle('on')"></button></div>
+        </div>
+        <div class="stc">
+          <div class="stt">📷 Face Detection</div>
+          <div class="str"><div><div class="stl">Confidence Threshold</div><div class="std">Minimum match %</div></div><input class="fi" value="80" style="width:60px;padding:5px;text-align:center;font-family:var(--mono)"></div>
+          <div class="str"><div><div class="stl">Max Failed Attempts</div><div class="std">Before PIN fallback</div></div><input class="fi" value="3" style="width:60px;padding:5px;text-align:center;font-family:var(--mono)"></div>
+          <div class="str"><div><div class="stl">Liveness Check</div><div class="std">Require blink/movement</div></div><button class="tgl on" onclick="this.classList.toggle('on')"></button></div>
+          <div class="str"><div><div class="stl">Re-enrollment (months)</div></div><input class="fi" value="12" style="width:60px;padding:5px;text-align:center;font-family:var(--mono)"></div>
+        </div>
+        <div class="stc">
+          <div class="stt">🔔 Notifications</div>
+          <div class="str"><div><div class="stl">Check-in Reminders</div><div class="std">Remind employees before shift</div></div><button class="tgl on" onclick="this.classList.toggle('on')"></button></div>
+          <div class="str"><div><div class="stl">Absence Alert</div><div class="std">Alert supervisor after 30 min</div></div><button class="tgl on" onclick="this.classList.toggle('on')"></button></div>
+          <div class="str"><div><div class="stl">WP Expiry Warning Days</div></div><input class="fi" value="30" style="width:60px;padding:5px;text-align:center;font-family:var(--mono)"></div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:9px;margin-top:6px">
+        <button class="btn btn-s">Reset Defaults</button>
+        <button class="btn btn-p" onclick="toast('Settings saved','✅')">Save Settings</button>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- MODALS -->
+<div class="mo" id="m-emp">
+  <div class="md">
+    <div class="mh"><div class="mt">Add New Employee</div><div class="mc" onclick="cm('m-emp')">✕</div></div>
+    <div class="mb">
+      <div class="fg">
+        <div class="fgrp"><label class="fl">Full Name <span>*</span></label><input class="fi" placeholder="e.g. Veerappan Kandhasamy"></div>
+        <div class="fgrp"><label class="fl">Employee No <span>*</span></label><input class="fi" placeholder="IET-231" style="font-family:var(--mono)"></div>
+        <div class="fgrp"><label class="fl">FIN No <span>*</span></label><input class="fi" placeholder="G8129937X" style="font-family:var(--mono)"></div>
+        <div class="fgrp"><label class="fl">WP No</label><input class="fi" placeholder="Work Permit Number" style="font-family:var(--mono)"></div>
+        <div class="fgrp"><label class="fl">Email</label><input class="fi" type="email" placeholder="employee@email.com"></div>
+        <div class="fgrp"><label class="fl">Contact No</label><input class="fi" placeholder="+65 XXXX XXXX"></div>
+        <div class="fgrp"><label class="fl">Nationality</label><select class="fi"><option>Indian</option><option>Bangladeshi</option><option>Malaysian</option><option>Chinese</option></select></div>
+        <div class="fgrp"><label class="fl">Type of Worker</label><select class="fi"><option>R1-CT</option><option>R2</option><option>S-Pass</option><option>EP</option></select></div>
+        <div class="fgrp"><label class="fl">Designation <span>*</span></label><select class="fi"><option>General Worker</option><option>Rigger Signalman</option><option>Lifting Supervisor</option><option>Scaffolder</option><option>Welder</option></select></div>
+        <div class="fgrp"><label class="fl">Date of Joining</label><input class="fi" type="date"></div>
+        <div class="fgrp"><label class="fl">Status</label><select class="fi"><option>Live</option><option>Inactive</option></select></div>
+        <div class="fgrp"><label class="fl">BCA Category</label><select class="fi"><option>IET Booking</option><option>Subcontract</option><option>Outsourcing</option></select></div>
+      </div>
+      <div class="fsec">
+        <div class="fsec-t">📱 Mobile App Access</div>
+        <div class="fg">
+          <div class="fgrp"><label class="fl">App Role <span>*</span></label><select class="fi"><option>Employee</option><option>Supervisor</option><option>Admin</option></select></div>
+          <div class="fgrp"><label class="fl">Mobile Password <span>*</span></label><input class="fi" type="password" placeholder="Set mobile login password"></div>
+          <div class="fgrp"><label class="fl">Mobile PIN (4 digits)</label><input class="fi" placeholder="0000" maxlength="4" style="font-family:var(--mono);letter-spacing:.2em"></div>
+          <div class="fgrp"><label class="fl">Assign Supervisor</label><select class="fi"><option>— Select —</option><option>Subbiah IET-017</option><option>Krishnan IET-024</option></select></div>
+        </div>
+      </div>
+    </div>
+    <div class="mf"><button class="btn btn-s" onclick="cm('m-emp')">Cancel</button><button class="btn btn-p" onclick="cm('m-emp');toast('Employee added successfully','✅')">Save Employee</button></div>
+  </div>
+</div>
+
+<div class="mo" id="m-proj">
+  <div class="md">
+    <div class="mh"><div class="mt">Create New Project</div><div class="mc" onclick="cm('m-proj')">✕</div></div>
+    <form action="{% url 'create_project' %}" method="post">
+        {% csrf_token %}
+    <div class="mb">
+      <div class="fg">
+        <div class="fgrp"><label class="fl">Project Name <span>*</span></label><input name="projectname" class="fi" placeholder="e.g. Harbour Road Phase 2"></div>
+        <div class="fgrp"><label class="fl">Project Code <span>*</span></label><input name="projectcode" class="fi" placeholder="HR-P2" style="font-family:var(--mono)"></div>
+        <div class="fgrp"><label class="fl">Client Name</label><input name="clientname" class="fi" placeholder="Client company"></div>
+        <div class="fgrp"><label class="fl">Supervisor <span>*</span></label>
+            <select name="supervisor" class="fi">
+    {% for employee in employees %}
+        <option value="{{ employee.id }}">
+            {{ employee.empname }}
+        </option>
+    {% endfor %}
+</select>
+            <!-- <select name="supervisor" class="fi"><option>— Assign Supervisor —</option><option>Subbiah — IET-017</option><option>Krishnan — IET-024</option></select> -->
+        </div>
+        <div class="fgrp"><label class="fl">Start Date <span>*</span></label><input name="projectstartdate" class="fi" type="date"></div>
+        <div class="fgrp"><label class="fl">End Date</label><input name="projectenddate" class="fi" type="date"></div>
+        <div class="fgrp"><label class="fl">Shift Start</label><input name="shiftstarttime" class="fi" type="time" value="08:00"></div>
+        <div class="fgrp"><label class="fl">Shift End</label><input name="shiftendtime" class="fi" type="time" value="17:00"></div>
+        <div class="fgrp"><label class="fl">Late Threshold (min)</label><input name="threshold" class="fi" value="15"></div>
+        <div class="fgrp"><label class="fl">Geo-fence Zone <span>*</span></label><select name="geozone" class="fi"><option>— Select Zone —</option><option>Harbour Road Main Gate</option><option>Marina Bay Site A</option></select></div>
+        <div class="fgrp full"><label class="fl">Site Address</label><input name="siteaddress" class="fi" placeholder="Full site address"></div>
+        <div class="fgrp full"><label class="fl">Description</label><textarea name="description" class="fi" rows="2" placeholder="Project notes..."></textarea></div>
+        
+      </div>
+    </div>
+    
+    <div class="mf"><button class="btn btn-s" onclick="cm('m-proj')">Cancel</button>
+         <button type="submit" class="btn btn-p">
+        Create Project
+    </button>
+        <!-- <button class="btn btn-p" onclick="cm('m-proj');toast('Project created','✅')">Create Project</button> -->
+    </div>
+    </form>
+  </div>
+</div>
+
+<div class="mo" id="m-zone">
+  <div class="md" style="width:580px">
+    <div class="mh"><div class="mt">Add Geo-fence Zone</div><div class="mc" onclick="cm('m-zone')">✕</div></div>
+    <div class="mb">
+      <div style="background:var(--bg3);border-radius:10px;height:180px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);margin-bottom:14px;flex-direction:column;gap:8px;color:var(--text3)"><span style="font-size:36px">🗺️</span><span style="font-size:13px">Map view — set zone centre</span><span style="font-size:11px">(Google Maps API integration)</span></div>
+      <div class="fg">
+        <div class="fgrp"><label class="fl">Zone Name <span>*</span></label><input class="fi" placeholder="e.g. Harbour Road Main Gate"></div>
+        <div class="fgrp"><label class="fl">Linked Project <span>*</span></label><select class="fi"><option>Harbour Road Phase 2</option><option>Marina Bay Construction</option></select></div>
+        <div class="fgrp"><label class="fl">Zone Type</label><select class="fi"><option>Radius (Circle)</option><option>Polygon</option></select></div>
+        <div class="fgrp"><label class="fl">Radius (metres)</label><input class="fi" value="200" style="font-family:var(--mono)"></div>
+        <div class="fgrp"><label class="fl">Centre Latitude <span>*</span></label><input class="fi" placeholder="1.2897" style="font-family:var(--mono)"></div>
+        <div class="fgrp"><label class="fl">Centre Longitude <span>*</span></label><input class="fi" placeholder="103.8501" style="font-family:var(--mono)"></div>
+        <div class="fgrp"><label class="fl">Active From</label><input class="fi" type="time" value="06:00"></div>
+        <div class="fgrp"><label class="fl">Active Until</label><input class="fi" type="time" value="20:00"></div>
+      </div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:11px 14px;margin-top:12px;font-size:12px;color:var(--text3)">ℹ️ 30m GPS buffer added automatically. Effective radius: <strong style="color:var(--text1)">230m</strong></div>
+    </div>
+    <div class="mf"><button class="btn btn-s" onclick="cm('m-zone')">Cancel</button><button class="btn btn-p" onclick="cm('m-zone');toast('Geo-fence zone created','✅')">Create Zone</button></div>
+  </div>
+</div>
+
+<div class="mo" id="m-enroll">
+  <div class="md" style="width:500px">
+    <div class="mh"><div class="mt">📷 Face Enrollment — Rajesh Kumar IET-044</div><div class="mc" onclick="cm('m-enroll')">✕</div></div>
+    <div class="mb">
+      <div class="ep"><div style="font-size:44px">📷</div><div style="font-size:13px;color:var(--text2)">Camera Preview</div><div style="font-size:11px;color:var(--text3)">Position face in the oval guide</div></div>
+      <div style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:9px">Capture Progress — 5 images required</div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-bottom:8px">
+        <div style="aspect-ratio:1;background:var(--gbg);border:1px solid var(--green);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px">✓</div>
+        <div style="aspect-ratio:1;background:var(--gbg);border:1px solid var(--green);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px">✓</div>
+        <div style="aspect-ratio:1;background:var(--aglow);border:1px dashed var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--accent2)">3/5</div>
+        <div style="aspect-ratio:1;background:var(--bg4);border:1px dashed var(--border2);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--text3)">○</div>
+        <div style="aspect-ratio:1;background:var(--bg4);border:1px dashed var(--border2);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--text3)">○</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;font-size:10px;color:var(--text3);text-align:center;margin-bottom:14px"><div>Front</div><div>Smile</div><div>Left</div><div>Right</div><div>Relax</div></div>
+      <div style="background:var(--abg);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--amber)">⚠️ Ensure face is well-lit. No sunglasses or mask during enrollment.</div>
+    </div>
+    <div class="mf"><button class="btn btn-s" onclick="cm('m-enroll')">Cancel</button><button class="btn btn-p" onclick="cm('m-enroll');toast('Enrollment complete — Rajesh Kumar can now check in','✅')">Complete Enrollment</button></div>
+  </div>
+</div>
+
+<div class="mo" id="m-task">
+  <div class="md" style="width:540px">
+    <div class="mh"><div class="mt">Create New Task</div><div class="mc" onclick="cm('m-task')">✕</div></div>
+    <div class="mb">
+      <div class="fg">
+        <div class="fgrp full"><label class="fl">Task Title <span>*</span></label><input class="fi" placeholder="e.g. Install scaffolding at Level 3"></div>
+        <div class="fgrp full"><label class="fl">Description <span>*</span></label><textarea class="fi" rows="3" placeholder="Full instructions for the employee..."></textarea></div>
+        <div class="fgrp"><label class="fl">Project <span>*</span></label><select class="fi"><option>Harbour Road Phase 2</option><option>Marina Bay Construction</option></select></div>
+        <div class="fgrp"><label class="fl">Assign To <span>*</span></label><select class="fi"><option>Veerappan IET-009</option><option>Chinniah IET-015</option><option>Rajan IET-023</option></select></div>
+        <div class="fgrp"><label class="fl">Priority <span>*</span></label><select class="fi"><option>High</option><option>Medium</option><option>Low</option></select></div>
+        <div class="fgrp"><label class="fl">Due Date <span>*</span></label><input class="fi" type="date"></div>
+      </div>
+    </div>
+    <div class="mf"><button class="btn btn-s" onclick="cm('m-task')">Cancel</button><button class="btn btn-p" onclick="cm('m-task');toast('Task created and employee notified','✅')">Create Task</button></div>
+  </div>
+</div>
+
+<div class="mo" id="m-resolve">
+  <div class="md" style="width:460px">
+    <div class="mh"><div class="mt">Resolve Violation</div><div class="mc" onclick="cm('m-resolve')">✕</div></div>
+    <div class="mb">
+      <div style="background:var(--bg3);border-radius:8px;padding:13px;margin-bottom:14px;font-size:13px;color:var(--text2)"><div style="font-weight:600;color:var(--text1);margin-bottom:3px">Rajan Muthu — IET-023</div><div>Tuas Link Phase 3 · 09:31 AM · Check-in outside zone</div></div>
+      <div class="fgrp"><label class="fl">Resolution Note <span>*</span></label><textarea class="fi" rows="4" placeholder="e.g. Employee was at site entrance, GPS drift confirmed..."></textarea></div>
+      <div class="fgrp" style="margin-top:10px"><label class="fl">Attendance Action</label><select class="fi"><option>Keep as Violation (flagged)</option><option>Override — Mark as Present</option><option>Override — Mark as Absent</option></select></div>
+    </div>
+    <div class="mf"><button class="btn btn-s" onclick="cm('m-resolve')">Cancel</button><button class="btn btn-p" onclick="cm('m-resolve');toast('Violation resolved','✅')">Save Resolution</button></div>
+  </div>
+</div>
+
+<div class="tw2" id="toast-c"></div>
+
+<script>
+const emps=[
+  {n:'Veerappan Kandhasamy',id:'IET-009',des:'Rigger Signalman',dept:'Construction',wp:'Valid',face:true,c:'#3B82F6',i:'VK'},
+  {n:'Chinniah Adaikkalam',id:'IET-015',des:'General Worker',dept:'Construction',wp:'Valid',face:true,c:'#10B981',i:'CA'},
+  {n:'Subbiah Ravichandran',id:'IET-017',des:'Lifting Supervisor',dept:'Construction',wp:'Expiring',face:true,c:'#F59E0B',i:'SR'},
+  {n:'Rajan Muthu',id:'IET-023',des:'Welder',dept:'Construction',wp:'Valid',face:true,c:'#EF4444',i:'RM'},
+  {n:'Palaniswamy K',id:'IET-031',des:'Scaffolder',dept:'Construction',wp:'Valid',face:false,c:'#8B5CF6',i:'PK'},
+  {n:'Rajesh Kumar',id:'IET-044',des:'Scaffolder',dept:'Civil',wp:'Valid',face:false,c:'#8B5CF6',i:'RK'},
+  {n:'Muthu Selvam',id:'IET-067',des:'Welder',dept:'Civil',wp:'Expiring',face:false,c:'#F59E0B',i:'MS'},
+  {n:'Arjunan Pillai',id:'IET-089',des:'General Worker',dept:'Construction',wp:'Valid',face:true,c:'#10B981',i:'AP'},
+  {n:'Selvakumar Arumugam',id:'IET-042',des:'General Worker',dept:'Construction',wp:'Valid',face:true,c:'#06B6D4',i:'SA'},
+  {n:'Karuppaiah Selvam',id:'IET-056',des:'Crane Operator',dept:'Heavy Works',wp:'Valid',face:true,c:'#EC4899',i:'KS'},
+];
+document.getElementById('emp-tbody').innerHTML=emps.map(e=>`<tr>
+  <td><div class="ec"><div class="av" style="background:${e.c}">${e.i}</div><div><div class="en">${e.n}</div><div class="eid">${e.id}</div></div></div></td>
+  <td><span style="font-family:var(--mono);font-size:12px;color:var(--text3)">${e.id}</span></td>
+  <td>${e.des}</td><td>${e.dept}</td>
+  <td>${e.wp==='Expiring'?'<span class="badge ba">Expiring</span>':'<span class="badge bg">Valid</span>'}</td>
+  <td>${e.face?'<span class="badge bg">✓ Enrolled</span>':'<span class="badge br">Not Enrolled</span>'}</td>
+  <td><span class="badge bg">● Live</span></td>
+  <td><div class="acts"><button class="ab av-b" onclick="show('profile-view',null)">View</button><button class="ab ae" onclick="om('m-emp')">Edit</button>${!e.face?'<button class="ab aen" onclick="om(\'m-enroll\')">Enroll</button>':''}<button class="ab ad">Delete</button></div></td>
+</tr>`).join('');
+
+// const projs=[
+//   {n:'Harbour Road Phase 2',code:'HR-P2',sup:'Subbiah IET-017',cnt:24,st:'Active',prog:62,c:'#3B82F6'},
+//   {n:'Marina Bay Construction',code:'MBC-1',sup:'Krishnan IET-024',cnt:18,st:'Active',prog:38,c:'#10B981'},
+//   {n:'Tuas Link Phase 3',code:'TL-P3',sup:'Murugan IET-033',cnt:31,st:'Active',prog:81,c:'#F59E0B'},
+//   {n:'Jurong West Site',code:'JW-01',sup:'Ravi IET-041',cnt:15,st:'Pending',prog:0,c:'#8B5CF6'},
+//   {n:'Buona Vista Works',code:'BV-02',sup:'Arun IET-052',cnt:22,st:'Active',prog:55,c:'#06B6D4'},
+//   {n:'Clementi Ave 6',code:'CA-06',sup:'Kumar IET-061',cnt:11,st:'Active',prog:29,c:'#EC4899'},
+// ];
+const projs = [
+    {% for project in projects %}
+    {
+        n: '{{ project.projectname|escapejs }}',
+        code: '{{ project.projectcode|escapejs }}',
+        sup: '{{ project.supervisor|escapejs }}',
+        cnt: {{ project.employee_count|default:0 }},
+        st: '{{ project.status|escapejs }}',
+        prog: {{ project.progress|default:0 }},
+        c: '#3B82F6'
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+];
+document.getElementById('proj-grid').innerHTML=projs.map(p=>`<div class="pc">
+  <div class="pc-top"><div><div class="pn">${p.n}</div><div class="pc-code">${p.code}</div></div><span class="badge ${p.st==='Active'?'bg':'ba'}">${p.st==='Active'?'● ':''}${p.st}</span></div>
+  <div class="pm"><div class="pmr">👷 <span>${p.sup}</span></div><div class="pmr">👥 <span>${p.cnt} employees</span></div></div>
+  ${p.st==='Active'?`<div class="pbw"><div class="pbf" style="width:${p.prog}%"></div></div><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-top:3px"><span>Tasks</span><span>${p.prog}%</span></div>`:''}
+  <div class="pft">
+    <div class="avs"><div class="av" style="background:${p.c}">A</div><div class="av" style="background:#8B5CF6">B</div><div class="av" style="background:#10B981">C</div><div class="av" style="background:var(--bg4);color:var(--text3);font-size:9px">+${p.cnt-3}</div></div>
+    <div style="display:flex;gap:5px"><button class="ab aas" onclick="show('assign',null)">Assign</button><button class="ab ae" onclick="om('m-proj')">Edit</button></div>
+  </div>
+</div>`).join('');
+
+function show(id,el){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  if(el){document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));el.classList.add('active');}
+  const t={dashboard:'Dashboard',employees:'Employee Management',enrollment:'Face Enrollment','profile-view':'Employee Profile',projects:'Project Management',assign:'Assignments',geofence:'Geo-fence Zones',attendance:'Daily Attendance',reports:'Reports',violations:'Violations Log',tasks:'Task Management',settings:'Settings'};
+  document.getElementById('tbt').textContent=t[id]||id;
+}
+function om(id){document.getElementById(id).classList.add('open')}
+function cm(id){document.getElementById(id).classList.remove('open')}
+document.querySelectorAll('.mo').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')}));
+function toast(msg,icon){
+  const c=document.getElementById('toast-c');
+  const t=document.createElement('div');t.className='tst';
+  t.innerHTML=`<span>${icon||'ℹ️'}</span><span>${msg}</span>`;
+  c.appendChild(t);setTimeout(()=>t.remove(),3500);
+}
+function togAsi(el){
+  el.classList.toggle('sel');
+  el.querySelector('.achk').textContent=el.classList.contains('sel')?'✓':'';
+}
+function selProj(el){
+  document.querySelectorAll('#sec-assign .asl:first-of-type .asi').forEach(i=>{i.classList.remove('sel');i.querySelector('.achk').textContent='';});
+  el.classList.add('sel');el.querySelector('.achk').textContent='✓';
+}
+</script>
+</body>
+</html>
