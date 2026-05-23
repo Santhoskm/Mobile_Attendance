@@ -9,6 +9,15 @@ from rest_framework.views import APIView
 from django.contrib.auth import authenticate
 from .serializers import UserRegisterSerializer
 from .models import User
+from rest_framework.decorators import api_view, parser_classes
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.response import Response
+
+from face_ai.services.enroll import enroll_employee
+from face_ai.tasks import verify_face_task
+
+
+
 
 # Create your views here.
 def index(request):
@@ -185,3 +194,56 @@ class UserRegisterAPIView(APIView):
             },
             status=status.HTTP_400_BAD_REQUEST
         )  
+    
+
+
+
+
+
+
+
+
+@api_view(["POST"])
+@parser_classes([MultiPartParser, FormParser])
+def face_enroll(request):
+    empno = request.data.get("empno") or request.data.get("employee_id")
+    image = request.FILES.get("image")
+
+    if not empno or not image:
+        return Response({
+            "error": "empno and image required"
+        }, status=400)
+
+    image_bytes = image.read()
+
+    enroll_employee(
+        employee_id=empno,
+        image_bytes_list=[image_bytes]
+    )
+
+    return Response({
+        "message": "Face enrolled successfully",
+        "empno": empno
+    })
+
+
+@api_view(["POST"])
+@parser_classes([MultiPartParser, FormParser])
+def face_check_in(request):
+    empno = request.data.get("empno") or request.data.get("employee_id")
+    image = request.FILES.get("image")
+
+    if not empno or not image:
+        return Response({
+            "error": "empno and image required"
+        }, status=400)
+
+    image_bytes = image.read()
+
+    task = verify_face_task.delay(empno, image_bytes)
+
+    return Response({
+        "message": "Face verification started",
+        "empno": empno,
+        "task_id": task.id
+    })
