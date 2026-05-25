@@ -189,6 +189,11 @@ class Attendance(models.Model):
         auto_now=True
     )
 
+    checkin_latitude  = models.FloatField(null=True, blank=True)
+    checkin_longitude = models.FloatField(null=True, blank=True)
+    checkout_latitude  = models.FloatField(null=True, blank=True)
+    checkout_longitude = models.FloatField(null=True, blank=True)
+
     def __str__(self):
         return f"{self.employee.empno} - {self.date}"
     

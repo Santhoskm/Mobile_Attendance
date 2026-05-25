@@ -233,18 +233,28 @@ def face_enroll(request):
 @api_view(["POST"])
 @parser_classes([MultiPartParser, FormParser])
 def face_check_in(request):
-    empno = request.data.get("empno") or request.data.get("employee_id")
-    image = request.FILES.get("image")
+    empno  = request.data.get("empno") or request.data.get("employee_id")
+    image  = request.FILES.get("image")
+    lat    = request.data.get("latitude")
+    lon    = request.data.get("longitude")
 
     if not empno or not image:
         return Response({"error": "empno and image required"}, status=400)
 
-    employee = EmployeeRegistrationWorkforce.objects.filter(empno=empno).first()
+    if not lat or not lon:
+        return Response({"error": "latitude and longitude required"}, status=400)
 
+    try:
+        lat = float(lat)
+        lon = float(lon)
+    except ValueError:
+        return Response({"error": "Invalid coordinates"}, status=400)
+
+    employee = EmployeeRegistrationWorkforce.objects.filter(empno=empno).first()
     if not employee:
         return Response({"error": "Employee not found"}, status=404)
 
-    task = verify_face_task.delay(empno, image.read())
+    task   = verify_face_task.delay(empno, image.read())
     result = task.get(timeout=30)
 
     if not result["matched"]:
@@ -259,7 +269,9 @@ def face_check_in(request):
         date=now().date(),
         defaults={
             "check_in": now().time(),
-            "status": "Present"
+            "status": "Present",
+            "checkin_latitude": lat,
+            "checkin_longitude": lon,
         }
     )
 
@@ -274,25 +286,37 @@ def face_check_in(request):
         "matched": True,
         "message": "Check-in successful",
         "empno": empno,
-        "confidence": result["confidence"]
+        "confidence": result["confidence"],
+        "checkin_latitude": lat,
+        "checkin_longitude": lon,
     })
 
 
 @api_view(["POST"])
 @parser_classes([MultiPartParser, FormParser])
 def face_check_out(request):
-    empno = request.data.get("empno") or request.data.get("employee_id")
-    image = request.FILES.get("image")
+    empno  = request.data.get("empno") or request.data.get("employee_id")
+    image  = request.FILES.get("image")
+    lat    = request.data.get("latitude")
+    lon    = request.data.get("longitude")
 
     if not empno or not image:
         return Response({"error": "empno and image required"}, status=400)
 
-    employee = EmployeeRegistrationWorkforce.objects.filter(empno=empno).first()
+    if not lat or not lon:
+        return Response({"error": "latitude and longitude required"}, status=400)
 
+    try:
+        lat = float(lat)
+        lon = float(lon)
+    except ValueError:
+        return Response({"error": "Invalid coordinates"}, status=400)
+
+    employee = EmployeeRegistrationWorkforce.objects.filter(empno=empno).first()
     if not employee:
         return Response({"error": "Employee not found"}, status=404)
 
-    task = verify_face_task.delay(empno, image.read())
+    task   = verify_face_task.delay(empno, image.read())
     result = task.get(timeout=30)
 
     if not result["matched"]:
@@ -320,12 +344,16 @@ def face_check_out(request):
             "empno": empno
         })
 
-    attendance.check_out = now().time()
+    attendance.check_out         = now().time()
+    attendance.checkout_latitude  = lat
+    attendance.checkout_longitude = lon
     attendance.save()
 
     return Response({
         "matched": True,
         "message": "Check-out successful",
         "empno": empno,
-        "confidence": result["confidence"]
+        "confidence": result["confidence"],
+        "checkout_latitude": lat,
+        "checkout_longitude": lon,
     })
