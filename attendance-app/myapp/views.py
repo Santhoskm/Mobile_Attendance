@@ -17,6 +17,7 @@ from rest_framework.response import Response
 from face_ai.services.enroll import enroll_employee
 from face_ai.tasks import verify_face_task
 from .models import Attendance, EmployeeRegistrationWorkforce
+from .utils import get_place_name
 
 
 
@@ -233,14 +234,13 @@ def face_enroll(request):
 @api_view(["POST"])
 @parser_classes([MultiPartParser, FormParser])
 def face_check_in(request):
-    empno  = request.data.get("empno") or request.data.get("employee_id")
-    image  = request.FILES.get("image")
-    lat    = request.data.get("latitude")
-    lon    = request.data.get("longitude")
+    empno = request.data.get("empno") or request.data.get("employee_id")
+    image = request.FILES.get("image")
+    lat   = request.data.get("latitude")
+    lon   = request.data.get("longitude")
 
     if not empno or not image:
         return Response({"error": "empno and image required"}, status=400)
-
     if not lat or not lon:
         return Response({"error": "latitude and longitude required"}, status=400)
 
@@ -264,14 +264,18 @@ def face_check_in(request):
             "confidence": result["confidence"]
         }, status=400)
 
+    # Get place name from coordinates
+    place = get_place_name(lat, lon)
+
     attendance, created = Attendance.objects.get_or_create(
         employee=employee,
         date=now().date(),
         defaults={
-            "check_in": now().time(),
-            "status": "Present",
-            "checkin_latitude": lat,
+            "check_in":          now().time(),
+            "status":            "Present",
+            "checkin_latitude":  lat,
             "checkin_longitude": lon,
+            "checkin_place":     place,   # ← SAVE
         }
     )
 
@@ -283,26 +287,26 @@ def face_check_in(request):
         })
 
     return Response({
-        "matched": True,
-        "message": "Check-in successful",
-        "empno": empno,
-        "confidence": result["confidence"],
-        "checkin_latitude": lat,
+        "matched":           True,
+        "message":           "Check-in successful",
+        "empno":             empno,
+        "confidence":        result["confidence"],
+        "checkin_latitude":  lat,
         "checkin_longitude": lon,
+        "checkin_place":     place,   # ← RETURN TO APP
     })
 
 
 @api_view(["POST"])
 @parser_classes([MultiPartParser, FormParser])
 def face_check_out(request):
-    empno  = request.data.get("empno") or request.data.get("employee_id")
-    image  = request.FILES.get("image")
-    lat    = request.data.get("latitude")
-    lon    = request.data.get("longitude")
+    empno = request.data.get("empno") or request.data.get("employee_id")
+    image = request.FILES.get("image")
+    lat   = request.data.get("latitude")
+    lon   = request.data.get("longitude")
 
     if not empno or not image:
         return Response({"error": "empno and image required"}, status=400)
-
     if not lat or not lon:
         return Response({"error": "latitude and longitude required"}, status=400)
 
@@ -344,16 +348,21 @@ def face_check_out(request):
             "empno": empno
         })
 
-    attendance.check_out         = now().time()
+    # Get place name from coordinates
+    place = get_place_name(lat, lon)
+
+    attendance.check_out          = now().time()
     attendance.checkout_latitude  = lat
     attendance.checkout_longitude = lon
+    attendance.checkout_place     = place   # ← SAVE
     attendance.save()
 
     return Response({
-        "matched": True,
-        "message": "Check-out successful",
-        "empno": empno,
-        "confidence": result["confidence"],
-        "checkout_latitude": lat,
+        "matched":            True,
+        "message":            "Check-out successful",
+        "empno":              empno,
+        "confidence":         result["confidence"],
+        "checkout_latitude":  lat,
         "checkout_longitude": lon,
+        "checkout_place":     place,   # ← RETURN TO APP
     })
