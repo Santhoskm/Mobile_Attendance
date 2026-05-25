@@ -175,6 +175,22 @@ class UserRegisterAPIView(APIView):
 
     def post(self, request):
 
+        empno = request.data.get('empno')
+
+        # Check employee exists
+        employee_exists = EmployeeRegistrationWorkforce.objects.filter(
+            empno=empno
+        ).exists()
+
+        if not employee_exists:
+            return Response(
+                {
+                    'status': False,
+                    'message': 'Employee not found. Registration not allowed.'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         serializer = UserRegisterSerializer(data=request.data)
 
         if serializer.is_valid():
@@ -196,7 +212,7 @@ class UserRegisterAPIView(APIView):
                 'errors': serializer.errors
             },
             status=status.HTTP_400_BAD_REQUEST
-        )  
+        ) 
     
 
 
