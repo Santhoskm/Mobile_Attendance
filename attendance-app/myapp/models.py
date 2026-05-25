@@ -3,6 +3,8 @@ import datetime
 from datetime import date
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth.models import AbstractUser
+from pgvector.django import VectorField
+
 
 
 
@@ -221,3 +223,16 @@ class ProjectEmployee(models.Model):
     )
 
     assigned_date = models.DateField(auto_now_add=True)    
+
+
+class FaceEnrollment(models.Model):
+    employee_id = models.CharField(max_length=20, unique=True)
+    avg_vector = VectorField(dimensions=512)
+    enrolled_at = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = "face_enrollments"
+
+    def __str__(self):
+        return self.employee_id

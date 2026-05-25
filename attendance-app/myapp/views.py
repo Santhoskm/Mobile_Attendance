@@ -9,12 +9,14 @@ from rest_framework.views import APIView
 from django.contrib.auth import authenticate
 from .serializers import UserRegisterSerializer
 from .models import User
+from django.utils.timezone import now
 from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 
 from face_ai.services.enroll import enroll_employee
 from face_ai.tasks import verify_face_task
+from .models import Attendance, EmployeeRegistrationWorkforce
 
 
 
@@ -210,15 +212,16 @@ def face_enroll(request):
     image = request.FILES.get("image")
 
     if not empno or not image:
-        return Response({
-            "error": "empno and image required"
-        }, status=400)
+        return Response({"error": "empno and image required"}, status=400)
 
-    image_bytes = image.read()
+    employee = EmployeeRegistrationWorkforce.objects.filter(empno=empno).first()
+
+    if not employee:
+        return Response({"error": "Employee not found"}, status=404)
 
     enroll_employee(
         employee_id=empno,
-        image_bytes_list=[image_bytes]
+        image_bytes_list=[image.read()]
     )
 
     return Response({
@@ -234,16 +237,95 @@ def face_check_in(request):
     image = request.FILES.get("image")
 
     if not empno or not image:
+        return Response({"error": "empno and image required"}, status=400)
+
+    employee = EmployeeRegistrationWorkforce.objects.filter(empno=empno).first()
+
+    if not employee:
+        return Response({"error": "Employee not found"}, status=404)
+
+    task = verify_face_task.delay(empno, image.read())
+    result = task.get(timeout=30)
+
+    if not result["matched"]:
         return Response({
-            "error": "empno and image required"
+            "matched": False,
+            "message": "Face verification failed",
+            "confidence": result["confidence"]
         }, status=400)
 
-    image_bytes = image.read()
+    attendance, created = Attendance.objects.get_or_create(
+        employee=employee,
+        date=now().date(),
+        defaults={
+            "check_in": now().time(),
+            "status": "Present"
+        }
+    )
 
-    task = verify_face_task.delay(empno, image_bytes)
+    if not created:
+        return Response({
+            "matched": True,
+            "message": "Already checked in today",
+            "empno": empno
+        })
 
     return Response({
-        "message": "Face verification started",
+        "matched": True,
+        "message": "Check-in successful",
         "empno": empno,
-        "task_id": task.id
+        "confidence": result["confidence"]
+    })
+
+
+@api_view(["POST"])
+@parser_classes([MultiPartParser, FormParser])
+def face_check_out(request):
+    empno = request.data.get("empno") or request.data.get("employee_id")
+    image = request.FILES.get("image")
+
+    if not empno or not image:
+        return Response({"error": "empno and image required"}, status=400)
+
+    employee = EmployeeRegistrationWorkforce.objects.filter(empno=empno).first()
+
+    if not employee:
+        return Response({"error": "Employee not found"}, status=404)
+
+    task = verify_face_task.delay(empno, image.read())
+    result = task.get(timeout=30)
+
+    if not result["matched"]:
+        return Response({
+            "matched": False,
+            "message": "Face verification failed",
+            "confidence": result["confidence"]
+        }, status=400)
+
+    attendance = Attendance.objects.filter(
+        employee=employee,
+        date=now().date()
+    ).first()
+
+    if not attendance:
+        return Response({
+            "message": "No check-in found today. Please check in first.",
+            "empno": empno
+        }, status=400)
+
+    if attendance.check_out:
+        return Response({
+            "matched": True,
+            "message": "Already checked out today",
+            "empno": empno
+        })
+
+    attendance.check_out = now().time()
+    attendance.save()
+
+    return Response({
+        "matched": True,
+        "message": "Check-out successful",
+        "empno": empno,
+        "confidence": result["confidence"]
     })
