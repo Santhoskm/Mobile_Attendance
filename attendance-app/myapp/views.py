@@ -120,20 +120,20 @@ class UserLoginAPIView(APIView):
 
     def post(self, request):
 
-        empno = request.data.get('empno')
+        empid = request.data.get('empid')
         password = request.data.get('password')
 
-        if not empno or not password:
+        if not empid or not password:
             return Response(
                 {
                     'status': False,
-                    'message': 'Empno and Password required'
+                    'message': 'empid and Password required'
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
 
         try:
-            user_obj = User.objects.get(empno=empno)
+            user_obj = User.objects.get(empid=empid)
 
         except User.DoesNotExist:
             return Response(
@@ -158,7 +158,7 @@ class UserLoginAPIView(APIView):
                     'message': 'Login Successful',
                     'user_id': user.id,
                     'username': user.username,
-                    'empno': user.empno,
+                    'empid': user.empid,
                 },
                 status=status.HTTP_200_OK
             )
@@ -175,11 +175,11 @@ class UserRegisterAPIView(APIView):
 
     def post(self, request):
 
-        empno = request.data.get('empno')
+        empid = request.data.get('empid')
 
         # Check employee exists
         employee_exists = EmployeeRegistrationWorkforce.objects.filter(
-            empno=empno
+            empid=empid
         ).exists()
 
         if not employee_exists:
@@ -225,38 +225,38 @@ class UserRegisterAPIView(APIView):
 @api_view(["POST"])
 @parser_classes([MultiPartParser, FormParser])
 def face_enroll(request):
-    empno = request.data.get("empno") or request.data.get("employee_id")
+    empid = request.data.get("empid") or request.data.get("employee_id")
     image = request.FILES.get("image")
 
-    if not empno or not image:
-        return Response({"error": "empno and image required"}, status=400)
+    if not empid or not image:
+        return Response({"error": "empid and image required"}, status=400)
 
-    employee = EmployeeRegistrationWorkforce.objects.filter(empno=empno).first()
+    employee = EmployeeRegistrationWorkforce.objects.filter(empid=empid).first()
 
     if not employee:
         return Response({"error": "Employee not found"}, status=404)
 
     enroll_employee(
-        employee_id=empno,
+        employee_id=empid,
         image_bytes_list=[image.read()]
     )
 
     return Response({
         "message": "Face enrolled successfully",
-        "empno": empno
+        "empid": empid
     })
 
 
 @api_view(["POST"])
 @parser_classes([MultiPartParser, FormParser])
 def face_check_in(request):
-    empno = request.data.get("empno") or request.data.get("employee_id")
+    empid = request.data.get("empid") or request.data.get("employee_id")
     image = request.FILES.get("image")
     lat   = request.data.get("latitude")
     lon   = request.data.get("longitude")
 
-    if not empno or not image:
-        return Response({"error": "empno and image required"}, status=400)
+    if not empid or not image:
+        return Response({"error": "empid and image required"}, status=400)
     if not lat or not lon:
         return Response({"error": "latitude and longitude required"}, status=400)
 
@@ -266,11 +266,11 @@ def face_check_in(request):
     except ValueError:
         return Response({"error": "Invalid coordinates"}, status=400)
 
-    employee = EmployeeRegistrationWorkforce.objects.filter(empno=empno).first()
+    employee = EmployeeRegistrationWorkforce.objects.filter(empid=empid).first()
     if not employee:
         return Response({"error": "Employee not found"}, status=404)
 
-    task   = verify_face_task.delay(empno, image.read())
+    task   = verify_face_task.delay(empid, image.read())
     result = task.get(timeout=30)
 
     if not result["matched"]:
@@ -299,13 +299,13 @@ def face_check_in(request):
         return Response({
             "matched": True,
             "message": "Already checked in today",
-            "empno": empno
+            "empid": empid
         })
 
     return Response({
         "matched":           True,
         "message":           "Check-in successful",
-        "empno":             empno,
+        "empid":             empid,
         "confidence":        result["confidence"],
         "checkin_latitude":  lat,
         "checkin_longitude": lon,
@@ -316,13 +316,13 @@ def face_check_in(request):
 @api_view(["POST"])
 @parser_classes([MultiPartParser, FormParser])
 def face_check_out(request):
-    empno = request.data.get("empno") or request.data.get("employee_id")
+    empid = request.data.get("empid") or request.data.get("employee_id")
     image = request.FILES.get("image")
     lat   = request.data.get("latitude")
     lon   = request.data.get("longitude")
 
-    if not empno or not image:
-        return Response({"error": "empno and image required"}, status=400)
+    if not empid or not image:
+        return Response({"error": "empid and image required"}, status=400)
     if not lat or not lon:
         return Response({"error": "latitude and longitude required"}, status=400)
 
@@ -332,11 +332,11 @@ def face_check_out(request):
     except ValueError:
         return Response({"error": "Invalid coordinates"}, status=400)
 
-    employee = EmployeeRegistrationWorkforce.objects.filter(empno=empno).first()
+    employee = EmployeeRegistrationWorkforce.objects.filter(empid=empid).first()
     if not employee:
         return Response({"error": "Employee not found"}, status=404)
 
-    task   = verify_face_task.delay(empno, image.read())
+    task   = verify_face_task.delay(empid, image.read())
     result = task.get(timeout=30)
 
     if not result["matched"]:
@@ -354,14 +354,14 @@ def face_check_out(request):
     if not attendance:
         return Response({
             "message": "No check-in found today. Please check in first.",
-            "empno": empno
+            "empid": empid
         }, status=400)
 
     if attendance.check_out:
         return Response({
             "matched": True,
             "message": "Already checked out today",
-            "empno": empno
+            "empid": empid
         })
 
     # Get place name from coordinates
@@ -376,7 +376,7 @@ def face_check_out(request):
     return Response({
         "matched":            True,
         "message":            "Check-out successful",
-        "empno":              empno,
+        "empid":              empid,
         "confidence":         result["confidence"],
         "checkout_latitude":  lat,
         "checkout_longitude": lon,

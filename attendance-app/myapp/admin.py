@@ -75,7 +75,7 @@ class EmployeeRegistrationWorkforceResource(resources.ModelResource):
 
 class EmployeeRegistrationWorkforceAdmin(ImportExportModelAdmin):
     resource_class = EmployeeRegistrationWorkforceResource
-    list_display = ('empno','empname',)
+    list_display = ('empid','empname',)
 
 
 class AttendanceAdmin(ImportExportModelAdmin):

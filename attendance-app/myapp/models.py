@@ -46,11 +46,11 @@ class User(AbstractUser):
     sidemenustatus=models.IntegerField(default='0')
     workerrequiredstatus=models.IntegerField(default='0')
     ppestatus=models.IntegerField(default='0')
-    empno = models.CharField(max_length=200,default='')
+    empid = models.CharField(max_length=200,default='')
 
 
 class EmployeeRegistrationWorkforce(models.Model):
-    empno = models.CharField(max_length=200)
+    empid = models.CharField(max_length=200)
     empname = models.CharField(max_length=200)
     joiningdate = models.DateField(null=True, blank=True)
     applicationdate = models.DateField(null=True,blank=True)
@@ -126,7 +126,7 @@ class EmployeeRegistrationWorkforce(models.Model):
 
 
     def __str__(self):
-        return f"{self.empno} - {self.empname}"
+        return f"{self.empid} - {self.empname}"
     
     def save(self, *args, **kwargs):
         if self.joiningdate:
@@ -198,7 +198,7 @@ class Attendance(models.Model):
     checkout_place     = models.CharField(max_length=500, null=True, blank=True)  # ← ADD
 
     def __str__(self):
-        return f"{self.employee.empno} - {self.date}"
+        return f"{self.employee.empid} - {self.date}"
     
 
 class ProjectAttendance(models.Model):

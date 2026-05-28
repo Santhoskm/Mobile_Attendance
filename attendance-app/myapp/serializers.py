@@ -11,13 +11,13 @@ class AttendanceSerializer(serializers.ModelSerializer):
     )
 
     employee_no = serializers.CharField(
-        source='employee.empno',
+        source='employee.empid',
         read_only=True
     )
 
     employee = serializers.SlugRelatedField(
         queryset=EmployeeRegistrationWorkforce.objects.all(),
-        slug_field='empno'
+        slug_field='empid'
     )
 
     class Meta:
@@ -33,7 +33,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'username',
-            'empno',
+            'empid',
             'email',
             'password'
         ]
