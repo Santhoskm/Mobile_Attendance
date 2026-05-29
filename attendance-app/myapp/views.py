@@ -116,24 +116,80 @@ def create_project(request):
     return render(request, 'project.html',{"employees":employees})
 
 
+# class UserLoginAPIView(APIView):
+
+#     def post(self, request):
+
+#         empid = request.data.get('empid')
+#         password = request.data.get('password')
+
+#         if not empid or not password:
+#             return Response(
+#                 {
+#                     'status': False,
+#                     'message': 'empid and Password required'
+#                 },
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
+
+#         try:
+#             user_obj = User.objects.get(empid=empid)
+
+#         except User.DoesNotExist:
+#             return Response(
+#                 {
+#                     'status': False,
+#                     'message': 'Employee Number Not Found'
+#                 },
+#                 status=status.HTTP_404_NOT_FOUND
+#             )
+
+#         user = authenticate(
+#             request,
+#             username=user_obj.username,
+#             password=password
+#         )
+
+#         if user is not None:
+
+#             return Response(
+#                 {
+#                     'status': True,
+#                     'message': 'Login Successful',
+#                     'user_id': user.id,
+#                     'username': user.username,
+#                     'empid': user.empid,
+#                 },
+#                 status=status.HTTP_200_OK
+#             )
+
+#         return Response(
+#             {
+#                 'status': False,
+#                 'message': 'Invalid Password'
+#             },
+#             status=status.HTTP_401_UNAUTHORIZED
+#         )    
+
+
 class UserLoginAPIView(APIView):
 
     def post(self, request):
 
-        empid = request.data.get('empid')
+        empno = request.data.get('empno')
         password = request.data.get('password')
 
-        if not empid or not password:
+        if not empno or not password:
             return Response(
                 {
                     'status': False,
-                    'message': 'empid and Password required'
+                    'message': 'Empno and Password required'
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
 
         try:
-            user_obj = User.objects.get(empid=empid)
+            user_obj = User.objects.get(empno=empno)
 
         except User.DoesNotExist:
             return Response(
@@ -158,7 +214,7 @@ class UserLoginAPIView(APIView):
                     'message': 'Login Successful',
                     'user_id': user.id,
                     'username': user.username,
-                    'empid': user.empid,
+                    'empno': user.empno,
                 },
                 status=status.HTTP_200_OK
             )
@@ -169,17 +225,60 @@ class UserLoginAPIView(APIView):
                 'message': 'Invalid Password'
             },
             status=status.HTTP_401_UNAUTHORIZED
-        )    
+        )
     
+# class UserRegisterAPIView(APIView):
+
+#     def post(self, request):
+
+#         empid = request.data.get('empid')
+
+#         # Check employee exists
+#         employee_exists = EmployeeRegistrationWorkforce.objects.filter(
+#             empid=empid
+#         ).exists()
+
+#         if not employee_exists:
+#             return Response(
+#                 {
+#                     'status': False,
+#                     'message': 'Employee not found. Registration not allowed.'
+#                 },
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
+
+#         serializer = UserRegisterSerializer(data=request.data)
+
+#         if serializer.is_valid():
+
+#             serializer.save()
+
+#             return Response(
+#                 {
+#                     'status': True,
+#                     'message': 'User Registered Successfully',
+#                     'data': serializer.data
+#                 },
+#                 status=status.HTTP_201_CREATED
+#             )
+
+#         return Response(
+#             {
+#                 'status': False,
+#                 'errors': serializer.errors
+#             },
+#             status=status.HTTP_400_BAD_REQUEST
+#         ) 
+
 class UserRegisterAPIView(APIView):
 
     def post(self, request):
 
         empid = request.data.get('empid')
 
-        # Check employee exists
+        # CHECK EMPLOYEE EXISTS
         employee_exists = EmployeeRegistrationWorkforce.objects.filter(
-            empid=empid
+            empno=empid
         ).exists()
 
         if not employee_exists:
@@ -187,6 +286,20 @@ class UserRegisterAPIView(APIView):
                 {
                     'status': False,
                     'message': 'Employee not found. Registration not allowed.'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # CHECK EMPNO ALREADY REGISTERED
+        already_registered = User.objects.filter(
+            empid=empid
+        ).exists()
+
+        if already_registered:
+            return Response(
+                {
+                    'status': False,
+                    'message': 'This Employee Number is already registered.'
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
@@ -212,7 +325,7 @@ class UserRegisterAPIView(APIView):
                 'errors': serializer.errors
             },
             status=status.HTTP_400_BAD_REQUEST
-        ) 
+        )
     
 
 
