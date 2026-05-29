@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Dashboard</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+
+        body{
+            background:#f4f6f9;
+        }
+
+        .dashboard-title{
+            font-size:32px;
+            font-weight:700;
+            color:#1b2a4e;
+        }
+
+        .dashboard-card{
+            border:none;
+            border-radius:15px;
+            padding:20px;
+            color:white;
+            transition:0.3s;
+            box-shadow:0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .dashboard-card:hover{
+            transform:translateY(-5px);
+        }
+
+        .dashboard-card i{
+            font-size:40px;
+            opacity:0.8;
+        }
+
+        .dashboard-card h2{
+            font-size:34px;
+            font-weight:bold;
+        }
+
+        .dashboard-card p{
+            margin-bottom:0;
+            font-size:16px;
+        }
+
+        .bg-blue{
+            background:linear-gradient(135deg,#1e3c72,#2a5298);
+        }
+
+        .bg-green{
+            background:linear-gradient(135deg,#11998e,#38ef7d);
+        }
+
+        .bg-red{
+            background:linear-gradient(135deg,#cb2d3e,#ef473a);
+        }
+
+        .bg-orange{
+            background:linear-gradient(135deg,#ff8008,#ffc837);
+        }
+
+        .bg-purple{
+            background:linear-gradient(135deg,#654ea3,#eaafc8);
+        }
+
+        .bg-darkblue{
+            background:linear-gradient(135deg,#141e30,#243b55);
+        }
+
+        .feed-box{
+            background:white;
+            border-radius:15px;
+            padding:20px;
+            box-shadow:0 4px 10px rgba(0,0,0,0.08);
+        }
+
+        .feed-item{
+            border-bottom:1px solid #eee;
+            padding:12px 0;
+        }
+
+        .feed-item:last-child{
+            border-bottom:none;
+        }
+
+        .project-card{
+            background:white;
+            border-radius:15px;
+            padding:20px;
+            box-shadow:0 4px 10px rgba(0,0,0,0.08);
+        }
+
+        .progress{
+            height:10px;
+            border-radius:10px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="dashboard-title">Employee Attendance Dashboard</h1>
+
+        <button class="btn btn-primary">
+            <i class="bi bi-download"></i> Export Report
+        </button>
+    </div>
+
+    <!-- Top Cards -->
+    <div class="row g-4">
+
+        <div class="col-md-3">
+            <div class="dashboard-card bg-blue">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <p>Total Employees</p>
+                        <h2>{{totalemployees}}</h2>
+                    </div>
+
+                    <i class="bi bi-people-fill"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="dashboard-card bg-green">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <p>Present Today</p>
+                        <h2><a href="{% url 'presenttoday' %}" style="text-decoration: none; color:white;">{{presentcount}}</a></h2>
+                    </div>
+
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="dashboard-card bg-red">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <p>Absent Today</p>
+                        <h2><a href="{% url 'absenttoday' %}" style="text-decoration: none; color:white;">{{absentcount}}</a></h2>
+                    </div>
+
+                    <i class="bi bi-x-circle-fill"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="dashboard-card bg-orange">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <p>Active Projects</p>
+                        <h2>18</h2>
+                    </div>
+
+                    <i class="bi bi-kanban-fill"></i>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Second Row -->
+    <div class="row g-4 mt-1">
+
+        <div class="col-md-6">
+            <div class="dashboard-card bg-purple">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <p>Violations Today</p>
+                        <h2>12</h2>
+                    </div>
+
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="dashboard-card bg-darkblue">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <p>Tasks Due Today</p>
+                        <h2>34</h2>
+                    </div>
+
+                    <i class="bi bi-list-task"></i>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Feed Section -->
+    <div class="row mt-4 g-4">
+
+        <div class="col-md-6">
+
+            <div class="feed-box">
+
+                <h4 class="mb-4">
+                    <i class="bi bi-clock-history"></i>
+                    Recent Check-ins Feed
+                </h4>
+                {% for i in recent_checkins%}
+                <div class="feed-item">
+                    <strong>{{ i.employee.empname }}</strong> checked in at
+                    <span class="text-primary">{{ i.check_in }}</span>
+                </div>
+                {% endfor %}
+
+                <!-- <div class="feed-item">
+                    <strong>David</strong> checked in at
+                    <span class="text-primary">09:10 AM</span>
+                </div>
+
+                <div class="feed-item">
+                    <strong>Ramesh</strong> checked in at
+                    <span class="text-primary">09:15 AM</span>
+                </div>
+
+                <div class="feed-item">
+                    <strong>Arun</strong> checked in at
+                    <span class="text-primary">09:20 AM</span>
+                </div> -->
+
+            </div>
+
+        </div>
+
+        <!-- Violations -->
+        <div class="col-md-6">
+
+            <div class="feed-box">
+
+                <h4 class="mb-4 text-danger">
+                    <i class="bi bi-bell-fill"></i>
+                    Violation Alerts
+                </h4>
+
+                <div class="feed-item">
+                    <strong>John</strong> late check-in detected.
+                </div>
+
+                <div class="feed-item">
+                    <strong>David</strong> geo-fence violation.
+                </div>
+
+                <div class="feed-item">
+                    <strong>Ramesh</strong> missing check-out.
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Project Health -->
+    <div class="row mt-4">
+
+        <div class="col-md-12">
+
+            <div class="project-card">
+
+                <h4 class="mb-4">
+                    <i class="bi bi-bar-chart-fill"></i>
+                    Project Health Cards
+                </h4>
+
+                <div class="row">
+
+                    <div class="col-md-4">
+
+                        <div class="border rounded p-3 mb-3">
+
+                            <h5>Airport Project</h5>
+
+                            <p class="mb-1">Attendance</p>
+
+                            <div class="progress mb-3">
+                                <div class="progress-bar"
+                                    style="width:90%">
+                                </div>
+                            </div>
+
+                            <p class="mb-1">Task Progress</p>
+
+                            <div class="progress mb-3">
+                                <div class="progress-bar bg-success"
+                                    style="width:75%">
+                                </div>
+                            </div>
+
+                            <p class="text-danger">
+                                2 Violations
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <div class="border rounded p-3 mb-3">
+
+                            <h5>Metro Project</h5>
+
+                            <p class="mb-1">Attendance</p>
+
+                            <div class="progress mb-3">
+                                <div class="progress-bar"
+                                    style="width:85%">
+                                </div>
+                            </div>
+
+                            <p class="mb-1">Task Progress</p>
+
+                            <div class="progress mb-3">
+                                <div class="progress-bar bg-success"
+                                    style="width:60%">
+                                </div>
+                            </div>
+
+                            <p class="text-danger">
+                                4 Violations
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <div class="border rounded p-3 mb-3">
+
+                            <h5>Hospital Project</h5>
+
+                            <p class="mb-1">Attendance</p>
+
+                            <div class="progress mb-3">
+                                <div class="progress-bar"
+                                    style="width:95%">
+                                </div>
+                            </div>
+
+                            <p class="mb-1">Task Progress</p>
+
+                            <div class="progress mb-3">
+                                <div class="progress-bar bg-success"
+                                    style="width:88%">
+                                </div>
+                            </div>
+
+                            <p class="text-danger">
+                                1 Violation
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
