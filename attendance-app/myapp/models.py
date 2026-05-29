@@ -46,7 +46,7 @@ class User(AbstractUser):
     sidemenustatus=models.IntegerField(default='0')
     workerrequiredstatus=models.IntegerField(default='0')
     ppestatus=models.IntegerField(default='0')
-    empid = models.CharField(max_length=200,default='')
+    empid = models.CharField(max_length=200,unique=True,null=True,blank=True)
 
 
 class EmployeeRegistrationWorkforce(models.Model):
