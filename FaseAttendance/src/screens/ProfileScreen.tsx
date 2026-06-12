@@ -64,8 +64,8 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 >
                     <Ionicons name="arrow-back" size={28} color="#fff" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>My Profile</Text>
-                <View style={{ width: 40 }} />
+                {/* <Text style={styles.headerTitle}>My Profile</Text>
+                <View style={{ width: 40 }} /> */}
             </View>
 
             {/* Profile Info */}
@@ -81,7 +81,7 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             </View>
 
             {/* Stats Cards */}
-            <View style={styles.statsContainer}>
+            {/* <View style={styles.statsContainer}>
                 <View style={styles.statBox}>
                     <Text style={styles.statNumber}>12</Text>
                     <Text style={styles.statLabel}>Total Days</Text>
@@ -94,7 +94,7 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     <Text style={styles.statNumber}>0</Text>
                     <Text style={styles.statLabel}>Leaves</Text>
                 </View>
-            </View>
+            </View> */}
 
             {/* Menu Items */}
             <View style={styles.menuSection}>

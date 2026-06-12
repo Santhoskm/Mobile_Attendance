@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
     View,
     Text,
@@ -8,11 +8,14 @@ import {
     ActivityIndicator,
     Image,
     Dimensions,
+    Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Camera, CameraView } from 'expo-camera';
+import { Audio } from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { apiService } from '../services/api';
+import { muteCameraSound } from '../utils/cameraOptimizer';
 
 const FaceEnrollmentScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const [hasPermission, setHasPermission] = useState<boolean | null>(null);
@@ -23,10 +26,15 @@ const FaceEnrollmentScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
     const cameraRef = useRef<CameraView>(null);
     const [userData, setUserData] = useState<any>(null);
 
-    React.useEffect(() => {
+    useEffect(() => {
         loadUserData();
         requestCameraPermission();
+        setupMutedCamera();
     }, []);
+
+    const setupMutedCamera = async () => {
+        await muteCameraSound();
+    };
 
     const loadUserData = async () => {
         try {
@@ -37,7 +45,6 @@ const FaceEnrollmentScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
                 const data = JSON.parse(userDataString);
                 console.log('Parsed user data:', data);
 
-                // Check different possible field names for employee ID
                 const empid = data.empid || data.employee_id || data.empno || data.employeeId;
                 console.log('Extracted empid:', empid);
 
@@ -97,9 +104,19 @@ const FaceEnrollmentScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
     const takePicture = async () => {
         if (cameraRef.current && cameraReady) {
             try {
+                if (Platform.OS === 'android') {
+                    await Audio.setAudioModeAsync({
+                        shouldDuckAndroid: true,
+                        playThroughEarpieceAndroid: false,
+                    });
+                }
+
                 const photo = await cameraRef.current.takePictureAsync({
-                    quality: 0.8,
+                    quality: 0.7,
                     base64: true,
+                    skipProcessing: true,
+                    mute: true,
+                    ...(Platform.OS === 'android' && { mute: true })
                 });
 
                 if (photo) {
@@ -124,7 +141,6 @@ const FaceEnrollmentScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
             return;
         }
 
-        // Get empid from userData
         const empid = userData?.empid;
         console.log('Using empid for enrollment:', empid);
 
@@ -145,7 +161,6 @@ const FaceEnrollmentScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
         setIsLoading(true);
 
         try {
-            // Create form data for API
             const formData = new FormData();
             formData.append('empid', empid);
             formData.append('image', {
@@ -156,16 +171,13 @@ const FaceEnrollmentScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
 
             console.log('Sending enrollment request for empid:', empid);
 
-            // Call the face enrollment API
             const response = await apiService.enrollFace(formData);
 
             console.log('Enrollment response:', response);
 
             if (response.message || response.status === 'success') {
-                // Save face enrollment status
                 await AsyncStorage.setItem('faceEnrolled', 'true');
 
-                // NEW: Verify with server that enrollment actually worked
                 try {
                     const verification = await apiService.checkFaceEnrollment(empid);
                     if (verification.enrolled) {
@@ -193,7 +205,6 @@ const FaceEnrollmentScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
                     }
                 } catch (verifyError) {
                     console.log('Verification error:', verifyError);
-                    // Still show success since enrollment worked
                     Alert.alert(
                         'Success',
                         response.message || 'Face enrolled successfully!',
@@ -300,6 +311,9 @@ const FaceEnrollmentScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
                                 style={styles.camera}
                                 facing="front"
                                 onCameraReady={() => setCameraReady(true)}
+                                mute={true}
+                                pictureSize="640x480"
+                                animateShutter={false}
                             />
                             <View style={styles.overlay}>
                                 <View style={styles.faceFrame}>

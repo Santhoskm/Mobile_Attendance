@@ -6,6 +6,7 @@ import RegisterScreen from '../screens/RegisterScreen';
 import DashboardScreen from '../screens/DashboardScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import FaceEnrollmentScreen from '../screens/FaceEnrollmentScreen';
+import TaskScreen from '../screens/TaskScreen';
 
 const Stack = createStackNavigator();
 
@@ -16,6 +17,7 @@ const AppNavigator = () => {
                 <Stack.Screen name="Login" component={LoginScreen} />
                 <Stack.Screen name="Register" component={RegisterScreen} />
                 <Stack.Screen name="Dashboard" component={DashboardScreen} />
+                <Stack.Screen name="Task" component={TaskScreen} />
                 <Stack.Screen name="Profile" component={ProfileScreen} />
                 <Stack.Screen name="FaceEnrollment" component={FaceEnrollmentScreen} />
             </Stack.Navigator>

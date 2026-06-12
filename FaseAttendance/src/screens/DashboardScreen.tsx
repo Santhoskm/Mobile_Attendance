@@ -10,12 +10,15 @@ import {
     RefreshControl,
     Modal,
     Dimensions,
+    Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import { Camera, CameraView } from 'expo-camera';
+import { Audio } from 'expo-av';
 import { apiService } from '../services/api';
+import { optimizeCameraForSpeed, muteCameraSound } from '../utils/cameraOptimizer';
 
 interface UserData {
     user_id?: number;
@@ -32,7 +35,7 @@ interface AttendanceStatus {
     checkOutPlace?: string;
 }
 
-const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
+const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation, route }) => {
     const [userData, setUserData] = useState<UserData | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
@@ -49,18 +52,30 @@ const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const cameraRef = useRef<CameraView>(null);
     const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
     const [locationPermission, setLocationPermission] = useState(false);
+    const selectedProject = route?.params?.selectedProject;
+    const projectId = route?.params?.projectId;
+    const projectName =
+        route?.params?.projectName ||
+        selectedProject?.projectname ||
+        selectedProject?.name ||
+        'NAN';
 
     useEffect(() => {
         loadUserData();
         requestPermissions();
+        setupAudioForMute();
     }, []);
 
-    // This will run whenever userData changes (after it's loaded)
     useEffect(() => {
         if (userData?.empid) {
             checkFaceEnrollment();
         }
     }, [userData]);
+
+    const setupAudioForMute = async () => {
+        await muteCameraSound();
+        await optimizeCameraForSpeed();
+    };
 
     const loadUserData = async () => {
         try {
@@ -77,37 +92,29 @@ const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const checkFaceEnrollment = async () => {
         try {
             const empid = userData?.empid;
-
-            // If we have empid, check with server
             if (empid) {
                 const result = await apiService.checkFaceEnrollment(empid);
                 setFaceEnrolled(result.enrolled);
-
-                // Update local storage to match server
                 if (result.enrolled) {
                     await AsyncStorage.setItem('faceEnrolled', 'true');
                 } else {
                     await AsyncStorage.removeItem('faceEnrolled');
                 }
             } else {
-                // Fallback to local storage if no empid
                 const faceStatus = await AsyncStorage.getItem('faceEnrolled');
                 setFaceEnrolled(faceStatus === 'true');
             }
         } catch (error) {
             console.log('Error checking face enrollment:', error);
-            // Fallback to local storage
             const faceStatus = await AsyncStorage.getItem('faceEnrolled');
             setFaceEnrolled(faceStatus === 'true');
         }
     };
 
     const requestPermissions = async () => {
-        // Request camera permission
         const cameraStatus = await Camera.requestCameraPermissionsAsync();
         setHasCameraPermission(cameraStatus.status === 'granted');
 
-        // Request location permission
         const locationStatus = await Location.requestForegroundPermissionsAsync();
         setLocationPermission(locationStatus.status === 'granted');
 
@@ -136,6 +143,10 @@ const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             Alert.alert('Error', 'Unable to get your location. Please enable GPS.');
             return null;
         }
+    };
+
+    const compressImage = async (uri: string): Promise<string> => {
+        return uri;
     };
 
     const handleCheckIn = () => {
@@ -182,7 +193,6 @@ const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const captureAndVerify = async () => {
         if (cameraRef.current && cameraReady) {
             try {
-                // Get current location
                 const currentLocation = await getCurrentLocation();
                 if (!currentLocation) {
                     Alert.alert('Error', 'Unable to get location. Please try again.');
@@ -190,14 +200,17 @@ const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     return;
                 }
 
-                // Take picture
+                setIsLoading(true);
+
                 const photo = await cameraRef.current.takePictureAsync({
-                    quality: 0.8,
+                    quality: 0.6,
                     base64: true,
+                    skipProcessing: true,
+                    mute: true,
+                    ...(Platform.OS === 'android' && { mute: true })
                 });
 
                 if (photo) {
-                    setIsLoading(true);
                     setShowCamera(false);
 
                     const empid = userData?.empid;
@@ -207,26 +220,36 @@ const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                         return;
                     }
 
-                    // Prepare form data
+                    const compressedUri = await compressImage(photo.uri);
+
                     const formData = new FormData();
                     formData.append('empid', empid);
                     formData.append('image', {
-                        uri: photo.uri,
+                        uri: compressedUri,
                         type: 'image/jpeg',
                         name: 'face_image.jpg',
                     } as any);
                     formData.append('latitude', currentLocation.coords.latitude.toString());
                     formData.append('longitude', currentLocation.coords.longitude.toString());
+                    formData.append('project_id', projectId ? projectId.toString() : '');
+                    formData.append('project_name', projectName || 'NAN');
 
-                    // Call appropriate API
+                    const timeoutPromise = new Promise((_, reject) =>
+                        setTimeout(() => reject(new Error('Request timeout')), 10000)
+                    );
+
                     let response;
                     if (cameraAction === 'checkin') {
-                        response = await apiService.faceCheckIn(formData);
+                        response = await Promise.race([
+                            apiService.faceCheckIn(formData),
+                            timeoutPromise
+                        ]);
                     } else {
-                        response = await apiService.faceCheckOut(formData);
+                        response = await Promise.race([
+                            apiService.faceCheckOut(formData),
+                            timeoutPromise
+                        ]);
                     }
-
-                    console.log(`${cameraAction} response:`, response);
 
                     if (response.matched === true) {
                         const currentTime = new Date().toLocaleTimeString();
@@ -241,7 +264,7 @@ const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                             });
                             Alert.alert(
                                 'Success',
-                                `Check-in successful!\nLocation: ${response.checkin_place || 'Unknown'}\nConfidence: ${(response.confidence * 100).toFixed(1)}%`
+                                `Check-in successful!\nConfidence: ${(response.confidence * 100).toFixed(1)}%`
                             );
                         } else {
                             setAttendanceStatus({
@@ -252,7 +275,7 @@ const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                             });
                             Alert.alert(
                                 'Success',
-                                `Check-out successful!\nLocation: ${response.checkout_place || 'Unknown'}\nConfidence: ${(response.confidence * 100).toFixed(1)}%`
+                                `Check-out successful!\nConfidence: ${(response.confidence * 100).toFixed(1)}%`
                             );
                         }
                     } else {
@@ -264,7 +287,6 @@ const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 }
             } catch (error: any) {
                 console.log(`${cameraAction} error:`, error);
-
                 let errorMessage = `Failed to ${cameraAction}. Please try again.`;
 
                 if (error.response?.data?.error) {
@@ -273,6 +295,8 @@ const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     errorMessage = error.response.data.message;
                 } else if (error.message === 'Network Error') {
                     errorMessage = 'Cannot connect to server. Please check your internet connection.';
+                } else if (error.message === 'Request timeout') {
+                    errorMessage = 'Request timed out. Please try again.';
                 }
 
                 Alert.alert('Error', errorMessage);
@@ -321,11 +345,12 @@ const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         return (
             <View style={styles.container}>
                 <View style={styles.header}>
-                    <View style={styles.avatar}>
-                        <Text style={styles.avatarText}>
-                            {userData?.username ? userData.username.charAt(0).toUpperCase() : 'U'}
-                        </Text>
-                    </View>
+                    <TouchableOpacity
+                        style={styles.backButton}
+                        onPress={() => navigation.goBack()}
+                    >
+                        <Ionicons name="arrow-back" size={28} color="#fff" />
+                    </TouchableOpacity>
                     <View style={styles.headerTextContainer}>
                         <Text style={styles.greeting}>{getGreeting()},</Text>
                         <Text style={styles.name}>{userData?.username || 'User'}</Text>
@@ -356,17 +381,12 @@ const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
                 }
             >
-                {/* Header */}
                 <View style={styles.header}>
                     <TouchableOpacity
-                        style={styles.profileButton}
-                        onPress={() => navigation.navigate('Profile')}
+                        style={styles.backButton}
+                        onPress={() => navigation.goBack()}
                     >
-                        <View style={styles.avatar}>
-                            <Text style={styles.avatarText}>
-                                {userData?.username ? userData.username.charAt(0).toUpperCase() : 'U'}
-                            </Text>
-                        </View>
+                        <Ionicons name="arrow-back" size={28} color="#fff" />
                     </TouchableOpacity>
                     <View style={styles.headerTextContainer}>
                         <Text style={styles.greeting}>{getGreeting()},</Text>
@@ -378,28 +398,33 @@ const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     </TouchableOpacity>
                 </View>
 
-                {/* Face Status Card */}
-                <TouchableOpacity
-                    style={[styles.faceCard, faceEnrolled ? styles.enrolledCard : styles.notEnrolledCard]}
-                    onPress={() => !faceEnrolled && navigation.navigate('FaceEnrollment')}
-                >
-                    <Ionicons
-                        name={faceEnrolled ? "checkmark-circle" : "scan-outline"}
-                        size={44}
-                        color={faceEnrolled ? "#22c55e" : "#fff"}
-                    />
-                    <View style={styles.faceCardText}>
-                        <Text style={styles.faceTitle}>
-                            {faceEnrolled ? "Face Registered" : "Face Not Registered"}
-                        </Text>
-                        <Text style={styles.faceSub}>
-                            {faceEnrolled ? "Ready for face recognition" : "Tap to enroll your face"}
-                        </Text>
+                {/* Project Card - Prominently displayed */}
+                <View style={styles.projectCard}>
+                    <Ionicons name="folder-outline" size={28} color="#007bff" />
+                    <View style={styles.projectInfo}>
+                        <Text style={styles.projectLabel}>Current Project</Text>
+                        <Text style={styles.projectName}>{projectName}</Text>
+                        {projectId && (
+                            <Text style={styles.projectId}>Project ID: {projectId}</Text>
+                        )}
                     </View>
-                    {!faceEnrolled && <Ionicons name="chevron-forward" size={24} color="#fff" />}
-                </TouchableOpacity>
+                </View>
 
-                {/* Location Status */}
+                {/* Face Status Card - Only show if not enrolled */}
+                {!faceEnrolled && (
+                    <TouchableOpacity
+                        style={styles.faceCard}
+                        onPress={() => navigation.navigate('FaceEnrollment')}
+                    >
+                        <Ionicons name="scan-outline" size={44} color="#fff" />
+                        <View style={styles.faceCardText}>
+                            <Text style={styles.faceTitle}>Face Not Registered</Text>
+                            <Text style={styles.faceSub}>Tap to enroll your face for attendance</Text>
+                        </View>
+                        <Ionicons name="chevron-forward" size={24} color="#fff" />
+                    </TouchableOpacity>
+                )}
+
                 <View style={styles.locationCard}>
                     <Ionicons name="location-outline" size={20} color={locationPermission ? "#28a745" : "#dc3545"} />
                     <Text style={styles.locationText}>
@@ -407,7 +432,6 @@ const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     </Text>
                 </View>
 
-                {/* Mark Attendance Card */}
                 <View style={styles.card}>
                     <View style={styles.cardHeader}>
                         <Text style={styles.cardTitle}>Mark Attendance</Text>
@@ -450,7 +474,6 @@ const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     </View>
                 </View>
 
-                {/* Today's Overview */}
                 <Text style={styles.sectionTitle}>Today's Overview</Text>
                 <View style={styles.overviewGrid}>
                     <View style={styles.overviewCard}>
@@ -476,7 +499,6 @@ const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 </View>
             </ScrollView>
 
-            {/* Camera Modal */}
             <Modal
                 visible={showCamera}
                 animationType="slide"
@@ -503,6 +525,11 @@ const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                         style={styles.camera}
                         facing="front"
                         onCameraReady={() => setCameraReady(true)}
+                        mute={true}
+                        pictureSize="640x480"
+                        animateShutter={false}
+                        enableTorch={false}
+                        zoom={0}
                     />
 
                     <View style={styles.faceFrameContainer}>
@@ -548,26 +575,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
     },
-    profileButton: {
-        width: 60,
-        height: 60,
-    },
-    avatar: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        backgroundColor: '#ffd400',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    avatarText: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        color: '#fff',
+    backButton: {
+        padding: 5,
+        marginRight: 10,
     },
     headerTextContainer: {
         flex: 1,
-        marginLeft: 15,
     },
     greeting: {
         color: '#dbeafe',
@@ -586,25 +599,55 @@ const styles = StyleSheet.create({
     logoutButton: {
         padding: 5,
     },
-    faceCard: {
+    projectCard: {
         margin: 20,
-        marginTop: -20,
+        marginTop: 20,
+        backgroundColor: '#fff',
         padding: 20,
-        borderRadius: 20,
+        borderRadius: 15,
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
         elevation: 3,
+        borderLeftWidth: 4,
+        borderLeftColor: '#007bff',
     },
-    enrolledCard: {
-        backgroundColor: '#28a745',
+    projectInfo: {
+        flex: 1,
+        marginLeft: 15,
     },
-    notEnrolledCard: {
+    projectLabel: {
+        fontSize: 12,
+        color: '#6c757d',
+        marginBottom: 4,
+    },
+    projectName: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#343a40',
+        marginBottom: 2,
+    },
+    projectId: {
+        fontSize: 12,
+        color: '#007bff',
+    },
+    faceCard: {
+        margin: 20,
+        marginTop: -10,
+        padding: 20,
+        borderRadius: 20,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
         backgroundColor: '#ff7a1a',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
     },
     faceCardText: {
         flex: 1,

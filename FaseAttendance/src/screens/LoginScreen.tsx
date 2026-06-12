@@ -67,7 +67,7 @@ const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 Alert.alert('Success', response.message || 'Login successful!');
 
                 // Navigate to Dashboard on success
-                navigation.replace('Dashboard');
+                navigation.replace('Task');
             } else {
                 // Login failed
                 Alert.alert('Login Failed', response.message || 'Invalid credentials');
