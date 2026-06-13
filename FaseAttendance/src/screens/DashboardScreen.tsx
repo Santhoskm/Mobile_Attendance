@@ -19,6 +19,12 @@ import { Camera, CameraView } from 'expo-camera';
 import { Audio } from 'expo-av';
 import { apiService } from '../services/api';
 import { optimizeCameraForSpeed, muteCameraSound } from '../utils/cameraOptimizer';
+import * as ImageManipulator from 'expo-image-manipulator';
+import { offlineQueue } from '../services/offlineQueue';
+import * as Crypto from 'expo-crypto';
+import { isWithinGeofence } from '../utils/geofence';
+
+
 
 interface UserData {
     user_id?: number;
@@ -52,7 +58,11 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
     const cameraRef = useRef<CameraView>(null);
     const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
     const [locationPermission, setLocationPermission] = useState(false);
+    const [pendingCount, setPendingCount] = useState(0);
     const selectedProject = route?.params?.selectedProject;
+    const siteLatitude = selectedProject?.latitude;
+    const siteLongitude = selectedProject?.longitude;
+    const geofenceRadius = selectedProject?.geofence_radius || 200;
     const projectId = route?.params?.projectId;
     const projectName =
         route?.params?.projectName ||
@@ -64,11 +74,13 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
         loadUserData();
         requestPermissions();
         setupAudioForMute();
+        refreshPendingCount();
     }, []);
 
     useEffect(() => {
         if (userData?.empid) {
             checkFaceEnrollment();
+            loadAttendanceStatus();
         }
     }, [userData]);
 
@@ -86,6 +98,32 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
             }
         } catch (error) {
             console.log('Error loading user data:', error);
+        }
+    };
+
+
+    const refreshPendingCount = async () => {
+        const count = await offlineQueue.count();
+        setPendingCount(count);
+    };
+
+    const loadAttendanceStatus = async () => {
+        try {
+            const empid = userData?.empid;
+            if (!empid) return;
+
+            const response = await apiService.getAttendanceStatus(empid);
+
+            setAttendanceStatus({
+                isCheckedIn: response.is_checked_in === true,
+                isCheckedOut: response.is_checked_out === true,
+                checkInTime: response.check_in_time || null,
+                checkOutTime: response.check_out_time || null,
+                checkInPlace: response.checkin_place || response.check_in_place,
+                checkOutPlace: response.checkout_place || response.check_out_place,
+            });
+        } catch (error) {
+            console.log('Attendance status load error:', error);
         }
     };
 
@@ -146,7 +184,17 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
     };
 
     const compressImage = async (uri: string): Promise<string> => {
-        return uri;
+        try {
+            const result = await ImageManipulator.manipulateAsync(
+                uri,
+                [{ resize: { width: 480 } }],
+                { compress: 0.5, format: ImageManipulator.SaveFormat.JPEG }
+            );
+            return result.uri;
+        } catch (error) {
+            console.log('Image compression error:', error);
+            return uri;
+        }
     };
 
     const handleCheckIn = () => {
@@ -190,19 +238,36 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
         setShowCamera(true);
     };
 
+    // TO:
     const captureAndVerify = async () => {
         if (cameraRef.current && cameraReady) {
+            let currentLocation: Location.LocationObject | null = null;
+            let photo: any = null;
+            let compressedUri: string = '';
+
             try {
-                const currentLocation = await getCurrentLocation();
+                currentLocation = await getCurrentLocation();
                 if (!currentLocation) {
                     Alert.alert('Error', 'Unable to get location. Please try again.');
                     setShowCamera(false);
                     return;
                 }
 
+                let geofenceStatus = 'unknown';
+                if (siteLatitude && siteLongitude) {
+                    const inside = isWithinGeofence(
+                        currentLocation.coords.latitude,
+                        currentLocation.coords.longitude,
+                        siteLatitude,
+                        siteLongitude,
+                        geofenceRadius
+                    );
+                    geofenceStatus = inside ? 'inside' : 'outside';
+                }
+
                 setIsLoading(true);
 
-                const photo = await cameraRef.current.takePictureAsync({
+                photo = await cameraRef.current.takePictureAsync({
                     quality: 0.6,
                     base64: true,
                     skipProcessing: true,
@@ -220,7 +285,7 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
                         return;
                     }
 
-                    const compressedUri = await compressImage(photo.uri);
+                    compressedUri = await compressImage(photo.uri);
 
                     const formData = new FormData();
                     formData.append('empid', empid);
@@ -233,6 +298,11 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
                     formData.append('longitude', currentLocation.coords.longitude.toString());
                     formData.append('project_id', projectId ? projectId.toString() : '');
                     formData.append('project_name', projectName || 'NAN');
+                    formData.append('geofence_status', geofenceStatus);
+
+                    const requestId = Crypto.randomUUID();
+                    formData.append('request_id', requestId);
+
 
                     const timeoutPromise = new Promise((_, reject) =>
                         setTimeout(() => reject(new Error('Request timeout')), 10000)
@@ -250,6 +320,44 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
                             timeoutPromise
                         ]);
                     }
+
+                    if (response.error === 'already_checked_in') {
+                        setAttendanceStatus({
+                            isCheckedIn: true,
+                            isCheckedOut: false,
+                            checkInTime: response.check_in_time || new Date().toLocaleTimeString(),
+                            checkOutTime: null,
+                            checkInPlace: response.checkin_place || response.check_in_place,
+                        });
+
+                        Alert.alert('Already Checked In', response.message || 'You are already checked in.');
+                        return;
+                    }
+
+                    if (response.error === 'wrong_project') {
+                        Alert.alert(
+                            'Wrong Project',
+                            response.message || 'You already checked in to another project. Please check out first.'
+                        );
+                        await loadAttendanceStatus();
+                        return;
+                    }
+
+                    if (response.error === 'no_open_checkin') {
+                        setAttendanceStatus({
+                            isCheckedIn: false,
+                            isCheckedOut: false,
+                            checkInTime: null,
+                            checkOutTime: null,
+                        });
+
+                        Alert.alert(
+                            'No Open Check-in',
+                            response.message || 'No active check-in found. Please check in first.'
+                        );
+                        return;
+                    }
+
 
                     if (response.matched === true) {
                         const currentTime = new Date().toLocaleTimeString();
@@ -287,19 +395,56 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
                 }
             } catch (error: any) {
                 console.log(`${cameraAction} error:`, error);
-                let errorMessage = `Failed to ${cameraAction}. Please try again.`;
 
-                if (error.response?.data?.error) {
-                    errorMessage = error.response.data.error;
-                } else if (error.response?.data?.message) {
-                    errorMessage = error.response.data.message;
-                } else if (error.message === 'Network Error') {
-                    errorMessage = 'Cannot connect to server. Please check your internet connection.';
-                } else if (error.message === 'Request timeout') {
-                    errorMessage = 'Request timed out. Please try again.';
+                const isConnectivityIssue =
+                    error.message === 'Network Error' || error.message === 'Request timeout';
+
+                if (isConnectivityIssue && photo && currentLocation) {
+                    // Queue for later sync instead of failing outright
+                    const loc = currentLocation;
+
+                    await offlineQueue.enqueue({
+                        empid: userData?.empid || '',
+                        photoUri: compressedUri,
+                        latitude: currentLocation.coords.latitude,
+                        longitude: currentLocation.coords.longitude,
+                        projectId: projectId ? projectId.toString() : '',
+                        projectName: projectName || 'NAN',
+                        action: cameraAction,
+                    });
+                    await refreshPendingCount();
+
+                    const currentTime = new Date().toLocaleTimeString();
+                    if (cameraAction === 'checkin') {
+                        setAttendanceStatus({
+                            isCheckedIn: true,
+                            isCheckedOut: false,
+                            checkInTime: currentTime,
+                            checkOutTime: null,
+                            checkInPlace: 'Pending sync',
+                        });
+                    } else {
+                        setAttendanceStatus(prev => ({
+                            ...prev,
+                            isCheckedOut: true,
+                            checkOutTime: currentTime,
+                            checkOutPlace: 'Pending sync',
+                        }));
+                    }
+
+                    Alert.alert(
+                        'Saved Offline',
+                        `No connection — your ${cameraAction} was saved and will sync automatically when you're back online.`
+                    );
+                } else {
+                    let errorMessage = `Failed to ${cameraAction}. Please try again.`;
+                    if (error.response?.data?.error) {
+                        errorMessage = error.response.data.error;
+                    } else if (error.response?.data?.message) {
+                        errorMessage = error.response.data.message;
+                    }
+                    Alert.alert('Error', errorMessage);
                 }
-
-                Alert.alert('Error', errorMessage);
             } finally {
                 setIsLoading(false);
                 setCameraReady(false);
@@ -311,6 +456,8 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
         setRefreshing(true);
         await loadUserData();
         await checkFaceEnrollment();
+        await loadAttendanceStatus();
+        await refreshPendingCount();
         setRefreshing(false);
     };
 
@@ -431,6 +578,24 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
                         {locationPermission ? "Location access granted" : "Location access required"}
                     </Text>
                 </View>
+
+                {pendingCount > 0 && (
+                    <View style={styles.locationCard}>
+                        <Ionicons name="cloud-upload-outline" size={20} color="#ff7a1a" />
+                        <Text style={styles.locationText}>
+                            {pendingCount} attendance record{pendingCount > 1 ? 's' : ''} waiting to sync
+                        </Text>
+                    </View>
+                )}
+
+                <TouchableOpacity
+                    style={styles.locationCard}
+                    onPress={() => navigation.navigate('AttendanceHistory')}
+                >
+                    <Ionicons name="time-outline" size={20} color="#007bff" />
+                    <Text style={styles.locationText}>View Attendance History</Text>
+                    <Ionicons name="chevron-forward" size={18} color="#6c757d" />
+                </TouchableOpacity>
 
                 <View style={styles.card}>
                     <View style={styles.cardHeader}>

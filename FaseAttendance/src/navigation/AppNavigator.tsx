@@ -7,6 +7,7 @@ import DashboardScreen from '../screens/DashboardScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import FaceEnrollmentScreen from '../screens/FaceEnrollmentScreen';
 import TaskScreen from '../screens/TaskScreen';
+import AttendanceHistoryScreen from '../screens/AttendanceHistoryScreen';
 
 const Stack = createStackNavigator();
 
@@ -20,6 +21,7 @@ const AppNavigator = () => {
                 <Stack.Screen name="Task" component={TaskScreen} />
                 <Stack.Screen name="Profile" component={ProfileScreen} />
                 <Stack.Screen name="FaceEnrollment" component={FaceEnrollmentScreen} />
+                <Stack.Screen name="AttendanceHistory" component={AttendanceHistoryScreen} />
             </Stack.Navigator>
         </NavigationContainer>
     );

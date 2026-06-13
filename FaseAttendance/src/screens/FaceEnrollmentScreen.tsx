@@ -16,6 +16,7 @@ import { Audio } from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { apiService } from '../services/api';
 import { muteCameraSound } from '../utils/cameraOptimizer';
+import * as ImageManipulator from 'expo-image-manipulator';
 
 const FaceEnrollmentScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const [hasPermission, setHasPermission] = useState<boolean | null>(null);
@@ -135,6 +136,24 @@ const FaceEnrollmentScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
         setShowCamera(true);
     };
 
+
+    const compressImage = async (uri: string): Promise<string> => {
+        try {
+            const result = await ImageManipulator.manipulateAsync(
+                uri,
+                [{ resize: { width: 480 } }],
+                { compress: 0.5, format: ImageManipulator.SaveFormat.JPEG }
+            );
+            return result.uri;
+        } catch (error) {
+            console.log('Image compression error:', error);
+            return uri;
+        }
+    };
+
+
+
+
     const enrollFace = async () => {
         if (!image) {
             Alert.alert('Error', 'Please take a photo first.');
@@ -160,11 +179,13 @@ const FaceEnrollmentScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
 
         setIsLoading(true);
 
+        const compressedUri = await compressImage(image);
+
         try {
             const formData = new FormData();
             formData.append('empid', empid);
             formData.append('image', {
-                uri: image,
+                uri: compressedUri,
                 type: 'image/jpeg',
                 name: 'face_image.jpg',
             } as any);

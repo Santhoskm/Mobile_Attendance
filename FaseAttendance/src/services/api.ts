@@ -44,6 +44,9 @@ export interface Project {
     department?: string;
     project_code?: string;
     manager?: string;
+    latitude?: number;     // ADD
+    longitude?: number;    // ADD
+    geofence_radius?: number; // ADD
 }
 
 export interface ProjectResponse {
@@ -181,6 +184,14 @@ export const apiService = {
                 'Content-Type': 'multipart/form-data',
                 'Accept': 'application/json',
             },
+            timeout: 10000,
+            cancelToken: cancelTokenSource.token,
+        });
+        return response.data;
+    },
+
+    async getAttendanceStatus(empid: string): Promise<any> {
+        const response = await api.get(`/api/attendance-status/?empid=${empid}`, {
             timeout: 10000,
             cancelToken: cancelTokenSource.token,
         });
