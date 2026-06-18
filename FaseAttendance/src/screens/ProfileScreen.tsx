@@ -666,11 +666,7 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         >
             {/* ── Header ── */}
             <View style={styles.header}>
-                <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-                    <Ionicons name="arrow-back" size={28} color="#fff" />
-                </TouchableOpacity>
                 <Text style={styles.headerTitle}>My Profile</Text>
-                <View style={{ width: 28 }} />
             </View>
 
             {/* ── Avatar & Name ── */}
@@ -1017,9 +1013,7 @@ const styles = StyleSheet.create({
         padding: 20,
         paddingTop: 55,
         paddingBottom: 50,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
+        alignItems: 'center',        // center the title
         borderBottomLeftRadius: 30,
         borderBottomRightRadius: 30,
     },

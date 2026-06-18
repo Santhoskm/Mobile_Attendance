@@ -268,6 +268,46 @@ export const apiService = {
         }
     },
 
+    async getMyViolations(empid: string): Promise<any> {
+        try {
+            const response = await api.get(`/api/my-violations/?empid=${empid}`, {
+                timeout: 10000,
+                cancelToken: cancelTokenSource.token,
+            });
+            return response.data;
+        } catch (error) {
+            console.log('Get violations error:', error);
+            return { violations: [] };
+        }
+    },
+
+    async getMyDocuments(empid: string): Promise<any> {
+        try {
+            const response = await api.get(`/api/my-documents/?empid=${empid}`, {
+                timeout: 10000,
+                cancelToken: cancelTokenSource.token,
+            });
+            return response.data;
+        } catch (error) {
+            console.log('Get documents error:', error);
+            return { received: [], uploaded: [] };
+        }
+    },
+
+    async uploadDocument(formData: FormData): Promise<any> {
+        try {
+            const response = await api.post('/api/upload-document/', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+                timeout: 30000,
+                cancelToken: cancelTokenSource.token,
+            });
+            return response.data;
+        } catch (error) {
+            console.log('Upload document error:', error);
+            throw error;
+        }
+    },
+
     async checkInToProject(projectId: number, empid: string, location?: { latitude: number; longitude: number }, notes?: string): Promise<ProjectCheckInResponse> {
         try {
             const formData = new FormData();

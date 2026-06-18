@@ -1,6 +1,38 @@
+// import React from 'react';
+// import { NavigationContainer } from '@react-navigation/native';
+// import { createStackNavigator } from '@react-navigation/stack';
+// import LoginScreen from '../screens/LoginScreen';
+// import RegisterScreen from '../screens/RegisterScreen';
+// import DashboardScreen from '../screens/DashboardScreen';
+// import ProfileScreen from '../screens/ProfileScreen';
+// import FaceEnrollmentScreen from '../screens/FaceEnrollmentScreen';
+// import TaskScreen from '../screens/TaskScreen';
+// import AttendanceHistoryScreen from '../screens/AttendanceHistoryScreen';
+
+// const Stack = createStackNavigator();
+
+// const AppNavigator = () => {
+//     return (
+//         <NavigationContainer>
+//             <Stack.Navigator screenOptions={{ headerShown: false }}>
+//                 <Stack.Screen name="Login" component={LoginScreen} />
+//                 <Stack.Screen name="Register" component={RegisterScreen} />
+//                 <Stack.Screen name="Dashboard" component={DashboardScreen} />
+//                 <Stack.Screen name="Task" component={TaskScreen} />
+//                 <Stack.Screen name="Profile" component={ProfileScreen} />
+//                 <Stack.Screen name="FaceEnrollment" component={FaceEnrollmentScreen} />
+//                 <Stack.Screen name="AttendanceHistory" component={AttendanceHistoryScreen} />
+//             </Stack.Navigator>
+//         </NavigationContainer>
+//     );
+// };
+
+// export default AppNavigator;
+import 'react-native-gesture-handler';
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import DashboardScreen from '../screens/DashboardScreen';
@@ -8,6 +40,9 @@ import ProfileScreen from '../screens/ProfileScreen';
 import FaceEnrollmentScreen from '../screens/FaceEnrollmentScreen';
 import TaskScreen from '../screens/TaskScreen';
 import AttendanceHistoryScreen from '../screens/AttendanceHistoryScreen';
+import DocumentsScreen from '../screens/DocumentsScreen';
+import ViolationsScreen from '../screens/ViolationsScreen';
+import MainTabScreen from '../screens/MainTabScreen';
 
 const Stack = createStackNavigator();
 
@@ -17,9 +52,8 @@ const AppNavigator = () => {
             <Stack.Navigator screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="Login" component={LoginScreen} />
                 <Stack.Screen name="Register" component={RegisterScreen} />
+                <Stack.Screen name="Main" component={MainTabScreen} />
                 <Stack.Screen name="Dashboard" component={DashboardScreen} />
-                <Stack.Screen name="Task" component={TaskScreen} />
-                <Stack.Screen name="Profile" component={ProfileScreen} />
                 <Stack.Screen name="FaceEnrollment" component={FaceEnrollmentScreen} />
                 <Stack.Screen name="AttendanceHistory" component={AttendanceHistoryScreen} />
             </Stack.Navigator>

@@ -497,7 +497,7 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
                 <View style={styles.header}>
                     <TouchableOpacity
                         style={styles.backButton}
-                        onPress={() => navigation.goBack()}
+                        onPress={() => navigation.navigate('Main')}
                     >
                         <Ionicons name="arrow-back" size={28} color="#fff" />
                     </TouchableOpacity>

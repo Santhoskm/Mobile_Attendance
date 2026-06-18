@@ -1527,15 +1527,6 @@ const TaskScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     <Text style={styles.quickActionText}>Mark Attendance</Text>
                     <Text style={styles.quickActionSubtext}>Check In/Out</Text>
                 </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={styles.quickActionButton}
-                    onPress={() => navigation.navigate('Profile')}
-                >
-                    <Ionicons name="person-outline" size={28} color="#007bff" />
-                    <Text style={styles.quickActionText}>My Profile</Text>
-                    <Text style={styles.quickActionSubtext}>View & Edit</Text>
-                </TouchableOpacity>
             </View>
 
             {/* Check-in Modal */}
