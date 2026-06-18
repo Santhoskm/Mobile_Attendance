@@ -18,6 +18,9 @@ import { apiService } from '../services/api';
 import { muteCameraSound } from '../utils/cameraOptimizer';
 import * as ImageManipulator from 'expo-image-manipulator';
 
+
+
+
 const FaceEnrollmentScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const [hasPermission, setHasPermission] = useState<boolean | null>(null);
     const [cameraReady, setCameraReady] = useState(false);

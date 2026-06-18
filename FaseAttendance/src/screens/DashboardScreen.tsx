@@ -26,6 +26,8 @@ import { isWithinGeofence } from '../utils/geofence';
 
 
 
+
+
 interface UserData {
     user_id?: number;
     username?: string;
@@ -240,6 +242,7 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
 
     // TO:
     const captureAndVerify = async () => {
+        if (!cameraRef.current || !cameraReady || isLoading) return;
         if (cameraRef.current && cameraReady) {
             let currentLocation: Location.LocationObject | null = null;
             let photo: any = null;
@@ -695,6 +698,7 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
                         animateShutter={false}
                         enableTorch={false}
                         zoom={0}
+                        autofocus="on"
                     />
 
                     <View style={styles.faceFrameContainer}>

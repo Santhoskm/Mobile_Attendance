@@ -76,6 +76,11 @@ export interface ProjectCheckInsResponse {
         latitude?: number;
         longitude?: number;
         notes?: string;
+        check_in_place?: string;   // ADD
+        checkin_place?: string;    // ADD (alternative naming)
+        check_out_place?: string;  // ADD
+        checkout_place?: string;   // ADD (alternative naming)
+
     }>;
 }
 
@@ -196,6 +201,19 @@ export const apiService = {
             cancelToken: cancelTokenSource.token,
         });
         return response.data;
+    },
+
+    async getMyProfile(empid: string): Promise<any> {
+        try {
+            const response = await api.get(`/api/my-profile/?empid=${empid}`, {
+                timeout: 10000,
+                cancelToken: cancelTokenSource.token,
+            });
+            return response.data;
+        } catch (error) {
+            console.log('Get my profile error:', error);
+            return null;
+        }
     },
 
     // Project endpoints
