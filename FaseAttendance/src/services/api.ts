@@ -268,9 +268,17 @@ export const apiService = {
         }
     },
 
-    async getMyViolations(empid: string): Promise<any> {
+    // api.ts - Add these methods to your existing apiService
+
+    // Add to apiService object in api.ts:
+
+    async getViolations(empid: string, projectId?: string): Promise<any> {
         try {
-            const response = await api.get(`/api/my-violations/?empid=${empid}`, {
+            let url = `/api/violations/?empid=${empid}`;
+            if (projectId) {
+                url += `&project_id=${projectId}`;
+            }
+            const response = await api.get(url, {
                 timeout: 10000,
                 cancelToken: cancelTokenSource.token,
             });
@@ -281,33 +289,143 @@ export const apiService = {
         }
     },
 
-    async getMyDocuments(empid: string): Promise<any> {
+    async getViolationTypes(): Promise<any> {
         try {
-            const response = await api.get(`/api/my-documents/?empid=${empid}`, {
+            const response = await api.get('/api/violation-types/', {
+                timeout: 10000,
+                cancelToken: cancelTokenSource.token,
+            });
+            return response.data;
+        } catch (error) {
+            console.log('Get violation types error:', error);
+            return { violation_types: [] };
+        }
+    },
+
+    async submitViolation(formData: FormData): Promise<any> {
+        try {
+            const response = await api.post('/api/violations/submit/', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'Accept': 'application/json',
+                },
+                timeout: 20000,
+                cancelToken: cancelTokenSource.token,
+            });
+            return response.data;
+        } catch (error) {
+            console.log('Submit violation error:', error);
+            throw error;
+        }
+    },
+
+    async reviewViolation(violationId: number, data: any): Promise<any> {
+        try {
+            const response = await api.post(`/api/violations/${violationId}/review/`, data, {
+                timeout: 10000,
+                cancelToken: cancelTokenSource.token,
+            });
+            return response.data;
+        } catch (error) {
+            console.log('Review violation error:', error);
+            throw error;
+        }
+    },
+
+    async getDocuments(empid: string, projectId?: string): Promise<any> {
+        try {
+            let url = `/api/documents/?empid=${empid}`;
+            if (projectId) {
+                url += `&project_id=${projectId}`;
+            }
+            const response = await api.get(url, {
                 timeout: 10000,
                 cancelToken: cancelTokenSource.token,
             });
             return response.data;
         } catch (error) {
             console.log('Get documents error:', error);
-            return { received: [], uploaded: [] };
+            return { documents: [] };
         }
     },
 
-    async uploadDocument(formData: FormData): Promise<any> {
+    async sendDocument(formData: FormData): Promise<any> {
         try {
-            const response = await api.post('/api/upload-document/', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' },
+            const response = await api.post('/api/documents/send/', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'Accept': 'application/json',
+                },
                 timeout: 30000,
                 cancelToken: cancelTokenSource.token,
             });
             return response.data;
         } catch (error) {
-            console.log('Upload document error:', error);
+            console.log('Send document error:', error);
             throw error;
         }
     },
 
+    async acknowledgeDocument(documentId: number, empid: string): Promise<any> {
+        try {
+            const response = await api.post(`/api/documents/${documentId}/acknowledge/`, { empid }, {
+                timeout: 10000,
+                cancelToken: cancelTokenSource.token,
+            });
+            return response.data;
+        } catch (error) {
+            console.log('Acknowledge document error:', error);
+            throw error;
+        }
+    },
+
+    // api.ts - Update getMyProjects method
+
+    // api.ts - Update getMyProjects method
+
+    async getMyProjects(empid: string): Promise<any> {
+        try {
+            const response = await api.get(`/api/my-projects/?empid=${empid}`, {
+                timeout: 10000,
+                cancelToken: cancelTokenSource.token,
+            });
+            console.log('getMyProjects response:', response.data);
+            return response.data;
+        } catch (error) {
+            console.log('Get my projects error:', error);
+            // Return a consistent format even on error
+            return { status: false, projects: [] };
+        }
+    },
+
+    // api.ts - This should already exist, but make sure it's there
+    async getMyProjectCheckIns(empid: string): Promise<ProjectCheckInsResponse> {
+        try {
+            const response = await api.get(`/api/my-project-checkins/?empid=${empid}`, {
+                timeout: 10000,
+                cancelToken: cancelTokenSource.token,
+            });
+            return response.data;
+        } catch (error: any) {
+            console.log('Get project check-ins error:', error);
+            return { status: false, checkins: [] };
+        }
+    },
+
+    // api.ts - Add this method
+
+    async getProjectEmployees(projectId: number, empid: string): Promise<any> {
+        try {
+            const response = await api.get(`/api/projects/${projectId}/employees/?empid=${empid}`, {
+                timeout: 10000,
+                cancelToken: cancelTokenSource.token,
+            });
+            return response.data;
+        } catch (error) {
+            console.log('Get project employees error:', error);
+            return { employees: [] };
+        }
+    },
     async checkInToProject(projectId: number, empid: string, location?: { latitude: number; longitude: number }, notes?: string): Promise<ProjectCheckInResponse> {
         try {
             const formData = new FormData();
@@ -364,18 +482,6 @@ export const apiService = {
         }
     },
 
-    async getMyProjectCheckIns(empid: string): Promise<ProjectCheckInsResponse> {
-        try {
-            const response = await api.get(`/api/my-project-checkins/?empid=${empid}`, {
-                timeout: 10000,
-                cancelToken: cancelTokenSource.token,
-            });
-            return response.data;
-        } catch (error: any) {
-            console.log('Get project check-ins error:', error);
-            return { status: false, checkins: [] };
-        }
-    },
 
     async getProjectCheckIns(projectId: number): Promise<any> {
         try {

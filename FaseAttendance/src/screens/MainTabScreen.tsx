@@ -1,3 +1,5 @@
+// MainTabScreen.tsx - Keep the same but ensure navigation works
+
 import React, { useState } from 'react';
 import {
     View, Text, TouchableOpacity, StyleSheet,
@@ -40,12 +42,10 @@ const MainTabScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
     return (
         <SafeAreaView style={styles.container}>
-            {/* Active screen */}
             <View style={styles.content}>
                 {renderScreen()}
             </View>
 
-            {/* Sticky footer tab bar */}
             <View style={styles.tabBar}>
                 {TABS.map((tab) => {
                     const isActive = activeTab === tab.key;
