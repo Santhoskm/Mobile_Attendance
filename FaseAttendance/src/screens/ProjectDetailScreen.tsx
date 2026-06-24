@@ -107,6 +107,9 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
     const [loadingEmployees, setLoadingEmployees] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
 
+    // Section nav bar state
+    const [activeTab, setActiveTab] = useState<'attendance' | 'team' | 'violations' | 'documents'>('attendance');
+
     // Attendance state
     const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
     const [loadingAttendance, setLoadingAttendance] = useState(false);
@@ -594,12 +597,18 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
         return v.status === violationFilter;
     });
 
+    // AFTER
     const filteredDocuments = documents.filter(d => {
         if (docFilter === 'all') return true;
-        if (docFilter === 'received') return d.direction === 'SUPERVISOR_TO_EMP';
-        if (docFilter === 'sent') return d.direction === 'EMP_TO_SUPERVISOR';
+        const iSentThis = d.sent_by_empno === userData?.empid;
+        if (docFilter === 'sent') return iSentThis;
+        if (docFilter === 'received') return !iSentThis;
         return true;
     });
+
+    // Badge counts for the section nav bar
+    const pendingViolationsCount = violations.filter(v => v.status === 'Pending').length;
+    const unreadDocumentsCount = documents.filter(d => d.status === 'Sent').length;
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -994,100 +1003,182 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                 </View>
             </View>
 
+            {/* Section Nav Bar */}
+            <View style={styles.tabBarContainer}>
+                <TouchableOpacity
+                    style={[styles.tabBarItem, activeTab === 'attendance' && styles.tabBarItemActive]}
+                    onPress={() => setActiveTab('attendance')}
+                    activeOpacity={0.7}
+                >
+                    <Ionicons
+                        name={activeTab === 'attendance' ? 'time' : 'time-outline'}
+                        size={18}
+                        color={activeTab === 'attendance' ? '#fff' : '#6c757d'}
+                    />
+                    <Text style={[styles.tabBarLabel, activeTab === 'attendance' && styles.tabBarLabelActive]}>
+                        Attendance
+                    </Text>
+                </TouchableOpacity>
+
+                {isSupervisor && (
+                    <TouchableOpacity
+                        style={[styles.tabBarItem, activeTab === 'team' && styles.tabBarItemActive]}
+                        onPress={() => setActiveTab('team')}
+                        activeOpacity={0.7}
+                    >
+                        <Ionicons
+                            name={activeTab === 'team' ? 'people' : 'people-outline'}
+                            size={18}
+                            color={activeTab === 'team' ? '#fff' : '#6c757d'}
+                        />
+                        <Text style={[styles.tabBarLabel, activeTab === 'team' && styles.tabBarLabelActive]}>
+                            Team
+                        </Text>
+                        {employees.length > 0 && (
+                            <View style={styles.tabBarBadge}>
+                                <Text style={styles.tabBarBadgeText}>{employees.length}</Text>
+                            </View>
+                        )}
+                    </TouchableOpacity>
+                )}
+
+                <TouchableOpacity
+                    style={[styles.tabBarItem, activeTab === 'violations' && styles.tabBarItemActive]}
+                    onPress={() => setActiveTab('violations')}
+                    activeOpacity={0.7}
+                >
+                    <Ionicons
+                        name={activeTab === 'violations' ? 'warning' : 'warning-outline'}
+                        size={18}
+                        color={activeTab === 'violations' ? '#fff' : '#6c757d'}
+                    />
+                    <Text style={[styles.tabBarLabel, activeTab === 'violations' && styles.tabBarLabelActive]}>
+                        Violations
+                    </Text>
+                    {pendingViolationsCount > 0 && (
+                        <View style={styles.tabBarBadge}>
+                            <Text style={styles.tabBarBadgeText}>{pendingViolationsCount}</Text>
+                        </View>
+                    )}
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={[styles.tabBarItem, activeTab === 'documents' && styles.tabBarItemActive]}
+                    onPress={() => setActiveTab('documents')}
+                    activeOpacity={0.7}
+                >
+                    <Ionicons
+                        name={activeTab === 'documents' ? 'document-text' : 'document-text-outline'}
+                        size={18}
+                        color={activeTab === 'documents' ? '#fff' : '#6c757d'}
+                    />
+                    <Text style={[styles.tabBarLabel, activeTab === 'documents' && styles.tabBarLabelActive]}>
+                        Documents
+                    </Text>
+                    {unreadDocumentsCount > 0 && (
+                        <View style={styles.tabBarBadge}>
+                            <Text style={styles.tabBarBadgeText}>{unreadDocumentsCount}</Text>
+                        </View>
+                    )}
+                </TouchableOpacity>
+            </View>
+
             <ScrollView
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                 showsVerticalScrollIndicator={false}
             >
                 {/* Attendance Section */}
-                <View style={styles.section}>
-                    <View style={styles.sectionHeader}>
-                        <Text style={styles.sectionTitle}>Attendance</Text>
-                        <View style={styles.attendanceStatusContainer}>
-                            {isCheckedIn ? (
-                                <View style={styles.checkedInBadge}>
-                                    <Ionicons name="checkmark-circle" size={14} color="#28a745" />
-                                    <Text style={styles.checkedInText}>Checked In</Text>
-                                </View>
-                            ) : otherProjectCheckIn ? (
-                                <View style={styles.otherProjectBadge}>
-                                    <Ionicons name="warning-outline" size={14} color="#ff7a1a" />
-                                    <Text style={styles.otherProjectText}>In: {otherProjectCheckIn}</Text>
-                                </View>
-                            ) : (
-                                <View style={styles.checkedOutBadge}>
-                                    <Ionicons name="time-outline" size={14} color="#6c757d" />
-                                    <Text style={styles.checkedOutText}>Checked Out</Text>
-                                </View>
-                            )}
-                            {pendingCount > 0 && (
-                                <View style={styles.pendingBadge}>
-                                    <Ionicons name="cloud-upload-outline" size={14} color="#ff7a1a" />
-                                    <Text style={styles.pendingBadgeText}>{pendingCount}</Text>
-                                </View>
-                            )}
+                {activeTab === 'attendance' && (
+                    <View style={styles.section}>
+                        <View style={styles.sectionHeader}>
+                            <Text style={styles.sectionTitle}>Attendance</Text>
+                            <View style={styles.attendanceStatusContainer}>
+                                {isCheckedIn ? (
+                                    <View style={styles.checkedInBadge}>
+                                        <Ionicons name="checkmark-circle" size={14} color="#28a745" />
+                                        <Text style={styles.checkedInText}>Checked In</Text>
+                                    </View>
+                                ) : otherProjectCheckIn ? (
+                                    <View style={styles.otherProjectBadge}>
+                                        <Ionicons name="warning-outline" size={14} color="#ff7a1a" />
+                                        <Text style={styles.otherProjectText}>In: {otherProjectCheckIn}</Text>
+                                    </View>
+                                ) : (
+                                    <View style={styles.checkedOutBadge}>
+                                        <Ionicons name="time-outline" size={14} color="#6c757d" />
+                                        <Text style={styles.checkedOutText}>Checked Out</Text>
+                                    </View>
+                                )}
+                                {pendingCount > 0 && (
+                                    <View style={styles.pendingBadge}>
+                                        <Ionicons name="cloud-upload-outline" size={14} color="#ff7a1a" />
+                                        <Text style={styles.pendingBadgeText}>{pendingCount}</Text>
+                                    </View>
+                                )}
+                            </View>
                         </View>
+
+                        {/* Show warning if checked in to another project */}
+                        {otherProjectCheckIn && (
+                            <View style={styles.warningInfo}>
+                                <Ionicons name="warning-outline" size={16} color="#ff7a1a" />
+                                <Text style={styles.warningInfoText}>
+                                    You are checked in to "{otherProjectCheckIn}". Please check out first.
+                                </Text>
+                            </View>
+                        )}
+
+                        <View style={styles.attendanceButtonRow}>
+                            <TouchableOpacity
+                                style={[styles.checkInButton, (isCheckedIn || otherProjectCheckIn) && styles.disabledButton]}
+                                onPress={() => handleAttendance('checkin')}
+                                disabled={isCheckedIn || !!otherProjectCheckIn || isLoading}
+                            >
+                                <Ionicons name="log-in-outline" size={24} color="#fff" />
+                                <Text style={styles.attendanceButtonText}>Check In</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={[styles.checkOutButton, (!isCheckedIn && !otherProjectCheckIn) && styles.disabledButton]}
+                                onPress={() => handleAttendance('checkout')}
+                                disabled={(!isCheckedIn && !otherProjectCheckIn) || isLoading}
+                            >
+                                <Ionicons name="log-out-outline" size={24} color="#fff" />
+                                <Text style={styles.attendanceButtonText}>Check Out</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        {isCheckedIn && checkInTime && (
+                            <View style={styles.checkInInfo}>
+                                <Ionicons name="time-outline" size={16} color="#28a745" />
+                                <Text style={styles.checkInInfoText}>
+                                    Checked in at: {checkInTime}
+                                </Text>
+                            </View>
+                        )}
+
+                        {/* Attendance History */}
+                        {loadingAttendance ? (
+                            <ActivityIndicator size="small" color="#007bff" style={{ marginTop: 8 }} />
+                        ) : attendanceRecords.length > 0 ? (
+                            <View style={styles.attendanceHistory}>
+                                <Text style={styles.attendanceHistoryTitle}>Recent Activity</Text>
+                                <FlatList
+                                    data={attendanceRecords.slice(0, 5)}
+                                    keyExtractor={(item) => String(item.id)}
+                                    renderItem={renderAttendanceItem}
+                                    scrollEnabled={false}
+                                    nestedScrollEnabled
+                                />
+                            </View>
+                        ) : (
+                            <Text style={styles.emptyText}>No attendance records for this project</Text>
+                        )}
                     </View>
-
-                    {/* Show warning if checked in to another project */}
-                    {otherProjectCheckIn && (
-                        <View style={styles.warningInfo}>
-                            <Ionicons name="warning-outline" size={16} color="#ff7a1a" />
-                            <Text style={styles.warningInfoText}>
-                                You are checked in to "{otherProjectCheckIn}". Please check out first.
-                            </Text>
-                        </View>
-                    )}
-
-                    <View style={styles.attendanceButtonRow}>
-                        <TouchableOpacity
-                            style={[styles.checkInButton, (isCheckedIn || otherProjectCheckIn) && styles.disabledButton]}
-                            onPress={() => handleAttendance('checkin')}
-                            disabled={isCheckedIn || !!otherProjectCheckIn || isLoading}
-                        >
-                            <Ionicons name="log-in-outline" size={24} color="#fff" />
-                            <Text style={styles.attendanceButtonText}>Check In</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={[styles.checkOutButton, (!isCheckedIn && !otherProjectCheckIn) && styles.disabledButton]}
-                            onPress={() => handleAttendance('checkout')}
-                            disabled={(!isCheckedIn && !otherProjectCheckIn) || isLoading}
-                        >
-                            <Ionicons name="log-out-outline" size={24} color="#fff" />
-                            <Text style={styles.attendanceButtonText}>Check Out</Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    {isCheckedIn && checkInTime && (
-                        <View style={styles.checkInInfo}>
-                            <Ionicons name="time-outline" size={16} color="#28a745" />
-                            <Text style={styles.checkInInfoText}>
-                                Checked in at: {checkInTime}
-                            </Text>
-                        </View>
-                    )}
-
-                    {/* Attendance History */}
-                    {loadingAttendance ? (
-                        <ActivityIndicator size="small" color="#007bff" style={{ marginTop: 8 }} />
-                    ) : attendanceRecords.length > 0 ? (
-                        <View style={styles.attendanceHistory}>
-                            <Text style={styles.attendanceHistoryTitle}>Recent Activity</Text>
-                            <FlatList
-                                data={attendanceRecords.slice(0, 5)}
-                                keyExtractor={(item) => String(item.id)}
-                                renderItem={renderAttendanceItem}
-                                scrollEnabled={false}
-                                nestedScrollEnabled
-                            />
-                        </View>
-                    ) : (
-                        <Text style={styles.emptyText}>No attendance records for this project</Text>
-                    )}
-                </View>
+                )}
 
                 {/* Employee List (Supervisor only) */}
-                {isSupervisor && (
+                {activeTab === 'team' && isSupervisor && (
                     <View style={styles.section}>
                         <View style={styles.sectionHeader}>
                             <Text style={styles.sectionTitle}>Team Members</Text>
@@ -1110,91 +1201,95 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                 )}
 
                 {/* Violations Section */}
-                <View style={styles.section}>
-                    <View style={styles.sectionHeader}>
-                        <Text style={styles.sectionTitle}>Violations</Text>
-                        <View style={styles.sectionActions}>
-                            {isSupervisor && (
-                                <TouchableOpacity
-                                    style={styles.addButton}
-                                    onPress={() => setShowViolationModal(true)}
-                                >
-                                    <Ionicons name="add" size={20} color="#007bff" />
-                                </TouchableOpacity>
-                            )}
+                {activeTab === 'violations' && (
+                    <View style={styles.section}>
+                        <View style={styles.sectionHeader}>
+                            <Text style={styles.sectionTitle}>Violations</Text>
+                            <View style={styles.sectionActions}>
+                                {isSupervisor && (
+                                    <TouchableOpacity
+                                        style={styles.addButton}
+                                        onPress={() => setShowViolationModal(true)}
+                                    >
+                                        <Ionicons name="add" size={20} color="#007bff" />
+                                    </TouchableOpacity>
+                                )}
+                            </View>
                         </View>
+
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
+                            {(['all', 'Pending', 'Reviewed', 'Rejected'] as const).map(f => (
+                                <TouchableOpacity
+                                    key={f}
+                                    style={[styles.filterChip, violationFilter === f && styles.filterChipActive]}
+                                    onPress={() => setViolationFilter(f)}
+                                >
+                                    <Text style={[styles.filterChipText, violationFilter === f && styles.filterChipTextActive]}>
+                                        {f === 'all' ? 'All' : f}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
+
+                        {loadingViolations ? (
+                            <ActivityIndicator size="small" color="#007bff" />
+                        ) : filteredViolations.length === 0 ? (
+                            <Text style={styles.emptyText}>No violations found</Text>
+                        ) : (
+                            <FlatList
+                                data={filteredViolations}
+                                keyExtractor={(item) => String(item.id)}
+                                renderItem={renderViolationItem}
+                                scrollEnabled={false}
+                                nestedScrollEnabled
+                            />
+                        )}
                     </View>
-
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
-                        {(['all', 'Pending', 'Reviewed', 'Rejected'] as const).map(f => (
-                            <TouchableOpacity
-                                key={f}
-                                style={[styles.filterChip, violationFilter === f && styles.filterChipActive]}
-                                onPress={() => setViolationFilter(f)}
-                            >
-                                <Text style={[styles.filterChipText, violationFilter === f && styles.filterChipTextActive]}>
-                                    {f === 'all' ? 'All' : f}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
-                    </ScrollView>
-
-                    {loadingViolations ? (
-                        <ActivityIndicator size="small" color="#007bff" />
-                    ) : filteredViolations.length === 0 ? (
-                        <Text style={styles.emptyText}>No violations found</Text>
-                    ) : (
-                        <FlatList
-                            data={filteredViolations}
-                            keyExtractor={(item) => String(item.id)}
-                            renderItem={renderViolationItem}
-                            scrollEnabled={false}
-                            nestedScrollEnabled
-                        />
-                    )}
-                </View>
+                )}
 
                 {/* Documents Section */}
-                <View style={styles.section}>
-                    <View style={styles.sectionHeader}>
-                        <Text style={styles.sectionTitle}>Documents</Text>
-                        <TouchableOpacity
-                            style={styles.addButton}
-                            onPress={() => setShowSendModal(true)}
-                        >
-                            <Ionicons name="send-outline" size={20} color="#007bff" />
-                            <Text style={styles.addButtonText}>Send</Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
-                        {(['all', 'received', 'sent'] as const).map(f => (
+                {activeTab === 'documents' && (
+                    <View style={styles.section}>
+                        <View style={styles.sectionHeader}>
+                            <Text style={styles.sectionTitle}>Documents</Text>
                             <TouchableOpacity
-                                key={f}
-                                style={[styles.filterChip, docFilter === f && styles.filterChipActive]}
-                                onPress={() => setDocFilter(f)}
+                                style={styles.addButton}
+                                onPress={() => setShowSendModal(true)}
                             >
-                                <Text style={[styles.filterChipText, docFilter === f && styles.filterChipTextActive]}>
-                                    {f === 'all' ? 'All' : f === 'received' ? 'Received' : 'Sent'}
-                                </Text>
+                                <Ionicons name="send-outline" size={20} color="#007bff" />
+                                <Text style={styles.addButtonText}>Send</Text>
                             </TouchableOpacity>
-                        ))}
-                    </ScrollView>
+                        </View>
 
-                    {loadingDocuments ? (
-                        <ActivityIndicator size="small" color="#007bff" />
-                    ) : filteredDocuments.length === 0 ? (
-                        <Text style={styles.emptyText}>No documents found</Text>
-                    ) : (
-                        <FlatList
-                            data={filteredDocuments}
-                            keyExtractor={(item) => String(item.id)}
-                            renderItem={renderDocumentItem}
-                            scrollEnabled={false}
-                            nestedScrollEnabled
-                        />
-                    )}
-                </View>
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
+                            {(['all', 'received', 'sent'] as const).map(f => (
+                                <TouchableOpacity
+                                    key={f}
+                                    style={[styles.filterChip, docFilter === f && styles.filterChipActive]}
+                                    onPress={() => setDocFilter(f)}
+                                >
+                                    <Text style={[styles.filterChipText, docFilter === f && styles.filterChipTextActive]}>
+                                        {f === 'all' ? 'All' : f === 'received' ? 'Received' : 'Sent'}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
+
+                        {loadingDocuments ? (
+                            <ActivityIndicator size="small" color="#007bff" />
+                        ) : filteredDocuments.length === 0 ? (
+                            <Text style={styles.emptyText}>No documents found</Text>
+                        ) : (
+                            <FlatList
+                                data={filteredDocuments}
+                                keyExtractor={(item) => String(item.id)}
+                                renderItem={renderDocumentItem}
+                                scrollEnabled={false}
+                                nestedScrollEnabled
+                            />
+                        )}
+                    </View>
+                )}
             </ScrollView>
 
             {/* Camera Modal for Attendance */}
@@ -1574,6 +1669,45 @@ const styles = StyleSheet.create({
     supervisorHeaderBadge: { backgroundColor: 'rgba(255,255,255,0.25)' },
     employeeHeaderBadge: { backgroundColor: 'rgba(40,167,69,0.3)' },
     roleHeaderBadgeText: { color: '#fff', fontSize: 12, fontWeight: '600' },
+
+    tabBarContainer: {
+        flexDirection: 'row',
+        backgroundColor: '#fff',
+        marginHorizontal: 16,
+        marginTop: -18,
+        marginBottom: 16,
+        borderRadius: 16,
+        padding: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
+        elevation: 4,
+    },
+    tabBarItem: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 4,
+        paddingVertical: 9,
+        borderRadius: 12,
+    },
+    tabBarItemActive: { backgroundColor: '#007bff' },
+    tabBarLabel: { fontSize: 12, fontWeight: '600', color: '#6c757d' },
+    tabBarLabelActive: { color: '#fff' },
+    tabBarBadge: {
+        backgroundColor: '#dc3545',
+        borderRadius: 9,
+        minWidth: 18,
+        height: 18,
+        paddingHorizontal: 4,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 1.5,
+        borderColor: '#fff',
+    },
+    tabBarBadgeText: { fontSize: 10, fontWeight: '700', color: '#fff' },
 
     section: { marginHorizontal: 16, marginBottom: 20 },
     sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },

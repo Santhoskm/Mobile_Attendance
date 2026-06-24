@@ -40,8 +40,8 @@ interface Document {
 }
 
 interface Project {
-    id: number;
-    projectname: string;
+    project_id: number;
+    project_name: string;
     role?: string;
 }
 
@@ -123,7 +123,7 @@ const DocumentsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             if (response.status && response.projects) {
                 setProjects(response.projects);
                 if (response.projects.length > 0 && !selectedProjectId) {
-                    setSelectedProjectId(String(response.projects[0].id));
+                    setSelectedProjectId(String(response.projects[0].project_id));
                 }
             }
         } catch (error) {
@@ -381,7 +381,7 @@ const DocumentsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     >
                         <Picker.Item label="All Projects" value="" />
                         {projects.map((p) => (
-                            <Picker.Item key={p.id} label={p.projectname} value={String(p.id)} />
+                            <Picker.Item key={p.project_id} label={p.project_name} value={String(p.project_id)} />
                         ))}
                     </Picker>
                 </View>
@@ -491,7 +491,7 @@ const DocumentsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                                     >
                                         <Picker.Item label="Select a project" value="" />
                                         {projects.map((p) => (
-                                            <Picker.Item key={p.id} label={p.projectname} value={String(p.id)} />
+                                            <Picker.Item key={p.project_id} label={p.project_name} value={String(p.project_id)} />
                                         ))}
                                     </Picker>
                                 </View>

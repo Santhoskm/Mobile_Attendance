@@ -48,8 +48,8 @@ interface Violation {
 }
 
 interface Project {
-    id: number;
-    projectname: string;
+    project_id: number;
+    project_name: string;
     role?: string;
 }
 
@@ -116,7 +116,7 @@ const ViolationsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             if (response.status && response.projects) {
                 setProjects(response.projects);
                 if (response.projects.length > 0 && !selectedProjectId) {
-                    setSelectedProjectId(String(response.projects[0].id));
+                    setSelectedProjectId(String(response.projects[0].project_id));
                 }
             }
         } catch (error) {
@@ -338,7 +338,7 @@ const ViolationsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
     const renderViolationItem = ({ item }: { item: Violation }) => {
         const isPending = item.status === 'Pending';
-        const isSupervisor = projects.some(p => p.id === item.project_id && p.role === 'Supervisor');
+        const isSupervisor = projects.some(p => p.project_id === item.project_id && p.role === 'Supervisor');
 
         return (
             <View style={[styles.card, !isPending && styles.cardDimmed]}>
@@ -424,7 +424,7 @@ const ViolationsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     >
                         <Picker.Item label="All Projects" value="" />
                         {projects.map((p) => (
-                            <Picker.Item key={p.id} label={p.projectname} value={String(p.id)} />
+                            <Picker.Item key={p.project_id} label={p.project_name} value={String(p.project_id)} />
                         ))}
                     </Picker>
                 </View>
@@ -515,7 +515,7 @@ const ViolationsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                                     >
                                         <Picker.Item label="Select a project" value="" />
                                         {projects.map((p) => (
-                                            <Picker.Item key={p.id} label={p.projectname} value={String(p.id)} />
+                                            <Picker.Item key={p.project_id} label={p.project_name} value={String(p.project_id)} />
                                         ))}
                                     </Picker>
                                 </View>
