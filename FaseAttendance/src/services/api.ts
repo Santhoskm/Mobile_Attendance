@@ -34,19 +34,18 @@ export interface RegisterResponse {
 
 export interface Project {
     id: number;
-    name: string;
     projectname?: string;
+    projectcode?: string;
+    clientname?: string;
     description?: string;
-    start_date?: string;
-    end_date?: string;
-    status?: string;
-    priority?: 'high' | 'medium' | 'low';
-    department?: string;
-    project_code?: string;
-    manager?: string;
-    latitude?: number;     // ADD
-    longitude?: number;    // ADD
-    geofence_radius?: number; // ADD
+    projectstartdate?: string;
+    projectenddate?: string;
+    shiftstarttime?: string;
+    shiftendtime?: string;
+    threshold?: number;
+    site_latitude?: number;
+    site_longitude?: number;
+    siteaddress?: string;
 }
 
 export interface ProjectResponse {

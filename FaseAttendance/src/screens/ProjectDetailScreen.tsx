@@ -523,6 +523,14 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                     return;
                 }
 
+                if (response.error === 'Check-in not allowed outside shift hours') {
+                    Alert.alert(
+                        'Outside Shift Hours',
+                        `Check-in is only allowed between ${response.shift_start} and ${response.shift_end}.`
+                    );
+                    return;
+                }
+
                 if (response.matched === true) {
                     if (cameraAction === 'checkin') {
                         setIsCheckedIn(true);
@@ -647,7 +655,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
         try {
             const formData = new FormData();
             formData.append('project_id', String(projectId));
-            formData.append('sender_empno', userData?.empid || '');
+            formData.append('sender_empno', userData?.empno || userData?.empid || '');
             formData.append('title', sendTitle.trim());
             formData.append('document_type', sendDocumentType);
             if (sendDescription.trim()) {
@@ -694,7 +702,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
 
     const handleAcknowledge = async (documentId: number) => {
         try {
-            const response = await apiService.acknowledgeDocument(documentId, userData?.empid || '');
+            const response = await apiService.acknowledgeDocument(documentId, userData?.empno || userData?.empid || '');
             if (response.status) {
                 Alert.alert('Success', 'Document acknowledged.');
                 loadDocuments();
@@ -722,7 +730,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
             const formData = new FormData();
             formData.append('project_id', String(projectId));
             formData.append('empno', targetEmpno.trim());
-            formData.append('raised_by_empno', userData?.empid || '');
+            formData.append('raised_by_empno', userData?.empno || userData?.empid || '');
             formData.append('description', violationDescription.trim());
             if (violationLocation.trim()) {
                 formData.append('location', violationLocation.trim());
@@ -779,7 +787,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
 
         try {
             const data = {
-                reviewer_empno: userData?.empid || '',
+                reviewer_empno: userData?.empno || userData?.empid || '',
                 action: reviewAction,
                 review_remarks: reviewRemarks.trim() || 'No remarks provided.',
             };

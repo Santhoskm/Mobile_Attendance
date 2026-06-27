@@ -213,7 +213,7 @@ const DocumentsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         try {
             const formData = new FormData();
             formData.append('project_id', sendProjectId);
-            formData.append('sender_empno', userData?.empid || '');
+            formData.append('sender_empno', userData?.empno || userData?.empid || '');
             formData.append('title', sendTitle.trim());
             formData.append('document_type', sendDocumentType);
             if (sendDescription.trim()) {
@@ -260,7 +260,7 @@ const DocumentsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
     const handleAcknowledge = async (documentId: number) => {
         try {
-            const response = await apiService.acknowledgeDocument(documentId, userData?.empid || '');
+            const response = await apiService.acknowledgeDocument(documentId, userData?.empno || userData?.empid || '');
             if (response.status) {
                 Alert.alert('Success', 'Document acknowledged.');
                 loadDocuments();

@@ -247,7 +247,7 @@ const ViolationsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             const formData = new FormData();
             formData.append('project_id', selectedProjectId);
             formData.append('empno', targetEmpno.trim());
-            formData.append('raised_by_empno', userData?.empid || '');
+            formData.append('raised_by_empno', userData?.empno || userData?.empid || '');
             formData.append('description', violationDescription.trim());
             if (violationLocation.trim()) {
                 formData.append('location', violationLocation.trim());
@@ -309,7 +309,7 @@ const ViolationsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
         try {
             const data = {
-                reviewer_empno: userData?.empid || '',
+                reviewer_empno: userData?.empno || userData?.empid || '',
                 action: reviewAction,
                 review_remarks: reviewRemarks.trim() || 'No remarks provided.',
             };

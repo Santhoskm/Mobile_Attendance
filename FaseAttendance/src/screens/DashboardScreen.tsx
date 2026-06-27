@@ -361,6 +361,14 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
                         return;
                     }
 
+                    if (response.error === 'Check-in not allowed outside shift hours') {
+                        Alert.alert(
+                            'Outside Shift Hours',
+                            `Check-in is only allowed between ${response.shift_start} and ${response.shift_end}.`
+                        );
+                        return;
+                    }
+
 
                     if (response.matched === true) {
                         const currentTime = new Date().toLocaleTimeString();
