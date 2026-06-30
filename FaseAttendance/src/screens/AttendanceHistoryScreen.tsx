@@ -14,6 +14,7 @@ interface AttendanceRecord {
     id: string | number;
     project_id?: number;
     project_name: string;
+    date?: string | null;
     check_in_time?: string | null;
     check_out_time?: string | null;
     status?: string;
@@ -114,24 +115,32 @@ const AttendanceHistoryScreen: React.FC<{ navigation: any }> = ({ navigation }) 
 
     const buildCSV = (rows: AttendanceRecord[]) => {
         const header = [
+            'Date',
             'Project',
             'Check-In Time',
             'Check-Out Time',
             'Working Hours',
             'Check-In Place',
             'Check-Out Place',
-            'Status',
+            'Attendance',
         ];
         const lines = [header.join(',')];
         for (const r of rows) {
+            const dateVal = r.date
+                ? new Date(r.date + 'T00:00:00').toLocaleDateString([], { dateStyle: 'medium' })
+                : r.check_in_time
+                    ? new Date(r.check_in_time).toLocaleDateString([], { dateStyle: 'medium' })
+                    : '';
+            const attendance = r.status === 'Absent' ? 'Absent' : r.check_in_time ? 'Present' : 'Absent';
             lines.push([
+                escapeCSV(dateVal),
                 escapeCSV(r.project_name),
                 escapeCSV(formatTime(r.check_in_time)),
                 escapeCSV(formatTime(r.check_out_time)),
                 escapeCSV(calcWorkingHours(r.check_in_time, r.check_out_time)),
                 escapeCSV(r.checkin_place || ''),
                 escapeCSV(r.checkout_place || ''),
-                escapeCSV(r.status || 'Synced'),
+                escapeCSV(attendance),
             ].join(','));
         }
         return lines.join('\n');
@@ -140,18 +149,28 @@ const AttendanceHistoryScreen: React.FC<{ navigation: any }> = ({ navigation }) 
     // Save directly to device Downloads folder (Android) or Files (iOS)
     const saveCSV = async (csv: string, filename: string) => {
         if (Platform.OS === 'android') {
-            // On Android: save to Downloads via SAF content URI approach
-            // We write to cache first then copy — simplest cross-version approach
             const cacheFile = new File(Paths.cache, filename);
             if (cacheFile.exists) cacheFile.delete();
             cacheFile.write(csv);
 
-            // Share with download intent — Android will offer "Save to Downloads"
+            // copy to Downloads folder so it appears in Files app directly
+            const downloadFile = new File(Paths.document, filename);
+            if (downloadFile.exists) downloadFile.delete();
+            downloadFile.write(csv);
+
+            // also open share sheet so user can share or save elsewhere
             await Sharing.shareAsync(cacheFile.uri, {
                 mimeType: 'text/csv',
-                dialogTitle: 'Save CSV Report',
+                dialogTitle: 'Download or Share CSV Report',
                 UTI: 'public.comma-separated-values-text',
             });
+
+            Alert.alert(
+                'Downloaded!',
+                `"${filename}" has been saved. You can also share it using the share sheet.`,
+                [{ text: 'OK' }]
+            );
+
         } else {
             // On iOS: save to Documents (appears in Files app under the app)
             const docFile = new File(Paths.document, filename);
