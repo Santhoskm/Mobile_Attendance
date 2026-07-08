@@ -26,6 +26,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Camera, CameraView } from 'expo-camera';
 import * as Location from 'expo-location';
 import { offlineQueue } from '../services/offlineQueue';
+import NetInfo from '@react-native-community/netinfo';
 import * as Crypto from 'expo-crypto';
 import { isWithinGeofence } from '../utils/geofence';
 import { muteCameraSound, optimizeCameraForSpeed } from '../utils/cameraOptimizer';
@@ -252,7 +253,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
             if (response.status && response.checkins) {
                 // Filter check-ins for this specific project
                 const projectCheckins = response.checkins.filter(
-                    (record: any) => record.project_id === projectId
+                    (record: any) => String(record.project_id) === String(projectId)
                 );
                 // Format the data for display
                 const formattedRecords = projectCheckins.map((record: any) => ({
@@ -281,7 +282,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
             const response = await apiService.getAttendanceStatus(empid);
             if (response.isCheckedIn) {
                 // Check if the active check-in is for THIS project
-                if (response.project_id === projectId) {
+                if (String(response.project_id) === String(projectId)) {
                     setIsCheckedIn(true);
                     setCheckInTime(response.check_in_time);
                     setCurrentCheckInId(response.id);
@@ -482,7 +483,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                 formData.append('request_id', requestId);
 
                 const timeoutPromise = new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error('Request timeout')), 10000)
+                    setTimeout(() => reject(new Error('Request timeout')), 15000)
                 );
 
                 let response;
@@ -561,10 +562,12 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
         } catch (error: any) {
             console.log(`${cameraAction} error:`, error);
 
-            const isConnectivityIssue =
+            const netState = await NetInfo.fetch();
+            const isActuallyOffline = !netState.isConnected || !netState.isInternetReachable;
+            const wasNetworkOrTimeout =
                 error.message === 'Network Error' || error.message === 'Request timeout';
 
-            if (isConnectivityIssue && photo && currentLocation) {
+            if (isActuallyOffline && wasNetworkOrTimeout && photo && currentLocation) {
                 await offlineQueue.enqueue({
                     empid: userData?.empid || '',
                     photoUri: compressedUri,
@@ -579,6 +582,11 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                 Alert.alert(
                     'Saved Offline',
                     `No connection — your ${cameraAction} was saved and will sync automatically.`
+                );
+            } else if (!isActuallyOffline && error.message === 'Request timeout') {
+                Alert.alert(
+                    'Server Slow',
+                    'The server took too long to respond. Please check your connection and try again.'
                 );
             } else {
                 let errorMessage = `Failed to ${cameraAction}. Please try again.`;

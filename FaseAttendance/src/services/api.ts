@@ -14,12 +14,15 @@ export interface RegisterCredentials {
     password: string;
 }
 
+
 export interface LoginResponse {
     status: boolean;
     message: string;
     user_id?: number;
     username?: string;
     empid?: string;
+    access?: string;
+    refresh?: string;
 }
 
 export interface RegisterResponse {
@@ -110,12 +113,25 @@ api.interceptors.request.use(
 // Response interceptor
 api.interceptors.response.use(
     (response) => {
-        console.log('Response status:', response.status);
-        console.log('Response data:', response.data);
+        if (__DEV__) {
+            console.log('Response status:', response.status);
+        }
         return response;
     },
-    (error) => {
-        console.log('Response error:', error.response?.status, error.response?.data);
+    async (error) => {
+        if (__DEV__) {
+            console.log('Response error:', error.response?.status, error.response?.data);
+        }
+
+        const originalRequest = error.config;
+        if (error.response?.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true;
+            const refreshed = await apiService.refreshAuthToken();
+            if (refreshed) {
+                return api(originalRequest);
+            }
+        }
+
         return Promise.reject(error);
     }
 );
@@ -134,6 +150,22 @@ export const apiService = {
         });
         return response.data;
     },
+
+    async logout() {
+        try {
+            const refreshToken = await AsyncStorage.getItem('refreshToken');
+            if (refreshToken) {
+                await api.post('/api/logout/', { refresh: refreshToken });
+            }
+        } catch (error) {
+            // even if the server call fails, still clear local storage
+        } finally {
+            await this.clearAuthData();
+        }
+    },
+
+
+
 
     async register(credentials: RegisterCredentials): Promise<RegisterResponse> {
         const response = await api.post('/api/register/', {
@@ -176,7 +208,7 @@ export const apiService = {
                 'Content-Type': 'multipart/form-data',
                 'Accept': 'application/json',
             },
-            timeout: 10000,
+            timeout: 40000,
             cancelToken: cancelTokenSource.token,
         });
         return response.data;
@@ -188,7 +220,7 @@ export const apiService = {
                 'Content-Type': 'multipart/form-data',
                 'Accept': 'application/json',
             },
-            timeout: 10000,
+            timeout: 40000,
             cancelToken: cancelTokenSource.token,
         });
         return response.data;
@@ -530,14 +562,18 @@ export const apiService = {
         api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     },
 
+
     async saveAuthData(userData: any) {
         await AsyncStorage.setItem('userData', JSON.stringify(userData));
         if (userData.user_id) {
             await AsyncStorage.setItem('userId', String(userData.user_id));
         }
-        if (userData.token) {
-            this.setAuthToken(userData.token);
-            await AsyncStorage.setItem('authToken', userData.token);
+        if (userData.access) {
+            this.setAuthToken(userData.access);
+            await AsyncStorage.setItem('authToken', userData.access);
+        }
+        if (userData.refresh) {
+            await AsyncStorage.setItem('refreshToken', userData.refresh);
         }
     },
 
@@ -557,10 +593,27 @@ export const apiService = {
         };
     },
 
+    async refreshAuthToken(): Promise<boolean> {
+        try {
+            const refreshToken = await AsyncStorage.getItem('refreshToken');
+            if (!refreshToken) return false;
+
+            const response = await api.post('/token/refresh/', { refresh: refreshToken });
+            const newAccess = response.data.access;
+
+            this.setAuthToken(newAccess);
+            await AsyncStorage.setItem('authToken', newAccess);
+            return true;
+        } catch (error) {
+            return false;
+        }
+    },
+
     async clearAuthData() {
         await AsyncStorage.removeItem('userData');
         await AsyncStorage.removeItem('userId');
         await AsyncStorage.removeItem('authToken');
+        await AsyncStorage.removeItem('refreshToken');
         await AsyncStorage.removeItem('rememberMe');
         await AsyncStorage.removeItem('faceEnrolled');
         await AsyncStorage.removeItem('checkedInProjects');

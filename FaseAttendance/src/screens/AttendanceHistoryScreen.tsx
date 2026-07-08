@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import {
     View, Text, StyleSheet, FlatList, ActivityIndicator,
-    TouchableOpacity, RefreshControl, Alert, Modal, Platform,
+    TouchableOpacity, RefreshControl, Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { apiService } from '../services/api';
 import { offlineQueue } from '../services/offlineQueue';
-import { File, Paths } from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
 
 interface AttendanceRecord {
     id: string | number;
@@ -32,8 +30,8 @@ const AttendanceHistoryScreen: React.FC<{ navigation: any }> = ({ navigation }) 
     const [projects, setProjects] = useState<Project[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
-    const [downloading, setDownloading] = useState(false);
-    const [showProjectPicker, setShowProjectPicker] = useState(false);
+    const [viewMode, setViewMode] = useState<'overall' | 'project'>('overall');
+    const [selectedProjectId, setSelectedProjectId] = useState<string>('');
     const [userData, setUserData] = useState<any>(null);
 
     useEffect(() => { loadHistory(); }, []);
@@ -105,126 +103,11 @@ const AttendanceHistoryScreen: React.FC<{ navigation: any }> = ({ navigation }) 
         return `${hrs}h ${mins}m`;
     };
 
-    const escapeCSV = (val: any) => {
-        if (val === null || val === undefined) return '';
-        const str = String(val);
-        if (str.includes(',') || str.includes('"') || str.includes('\n'))
-            return `"${str.replace(/"/g, '""')}"`;
-        return str;
-    };
-
-    const buildCSV = (rows: AttendanceRecord[]) => {
-        const header = [
-            'Date',
-            'Project',
-            'Check-In Time',
-            'Check-Out Time',
-            'Working Hours',
-            'Check-In Place',
-            'Check-Out Place',
-            'Attendance',
-        ];
-        const lines = [header.join(',')];
-        for (const r of rows) {
-            const dateVal = r.date
-                ? new Date(r.date + 'T00:00:00').toLocaleDateString([], { dateStyle: 'medium' })
-                : r.check_in_time
-                    ? new Date(r.check_in_time).toLocaleDateString([], { dateStyle: 'medium' })
-                    : '';
-            const attendance = r.status === 'Absent' ? 'Absent' : r.check_in_time ? 'Present' : 'Absent';
-            lines.push([
-                escapeCSV(dateVal),
-                escapeCSV(r.project_name),
-                escapeCSV(formatTime(r.check_in_time)),
-                escapeCSV(formatTime(r.check_out_time)),
-                escapeCSV(calcWorkingHours(r.check_in_time, r.check_out_time)),
-                escapeCSV(r.checkin_place || ''),
-                escapeCSV(r.checkout_place || ''),
-                escapeCSV(attendance),
-            ].join(','));
-        }
-        return lines.join('\n');
-    };
-
-    // Save directly to device Downloads folder (Android) or Files (iOS)
-    const saveCSV = async (csv: string, filename: string) => {
-        if (Platform.OS === 'android') {
-            const cacheFile = new File(Paths.cache, filename);
-            if (cacheFile.exists) cacheFile.delete();
-            cacheFile.write(csv);
-
-            // copy to Downloads folder so it appears in Files app directly
-            const downloadFile = new File(Paths.document, filename);
-            if (downloadFile.exists) downloadFile.delete();
-            downloadFile.write(csv);
-
-            // also open share sheet so user can share or save elsewhere
-            await Sharing.shareAsync(cacheFile.uri, {
-                mimeType: 'text/csv',
-                dialogTitle: 'Download or Share CSV Report',
-                UTI: 'public.comma-separated-values-text',
-            });
-
-            Alert.alert(
-                'Downloaded!',
-                `"${filename}" has been saved. You can also share it using the share sheet.`,
-                [{ text: 'OK' }]
-            );
-
-        } else {
-            // On iOS: save to Documents (appears in Files app under the app)
-            const docFile = new File(Paths.document, filename);
-            if (docFile.exists) docFile.delete();
-            docFile.write(csv);
-            Alert.alert(
-                'Saved!',
-                `"${filename}" has been saved to Files → On My iPhone → FaseAttendance.`,
-                [{ text: 'OK' }]
-            );
-        }
-    };
-
-    // ---------- Download handlers ----------
-
-    const downloadFull = async () => {
-        const serverOnly = records.filter(r => !String(r.id).startsWith('pending-'));
-        if (serverOnly.length === 0) {
-            Alert.alert('No Data', 'No attendance records to download.');
-            return;
-        }
-        setDownloading(true);
-        try {
-            const empid = userData?.empid || 'employee';
-            const csv = buildCSV(serverOnly);
-            await saveCSV(csv, `attendance_full_${empid}.csv`);
-        } catch (e) {
-            Alert.alert('Error', 'Failed to generate report.');
-        } finally {
-            setDownloading(false);
-        }
-    };
-
-    const downloadByProject = async (project: Project) => {
-        setShowProjectPicker(false);
-        setDownloading(true);
-        try {
-            const filtered = records.filter(
-                r => r.project_id === project.id && !String(r.id).startsWith('pending-')
-            );
-            if (filtered.length === 0) {
-                Alert.alert('No Data', `No records found for ${project.projectname}.`);
-                setDownloading(false);
-                return;
-            }
-            const safeName = (project.projectname || 'project').replace(/[^a-zA-Z0-9]/g, '_');
-            const csv = buildCSV(filtered);
-            await saveCSV(csv, `attendance_${safeName}.csv`);
-        } catch (e) {
-            Alert.alert('Error', 'Failed to generate report.');
-        } finally {
-            setDownloading(false);
-        }
-    };
+    const visibleRecords = viewMode === 'overall'
+        ? records
+        : selectedProjectId
+            ? records.filter(r => String(r.project_id) === selectedProjectId)
+            : records;
 
     // ---------- Render ----------
 
@@ -294,53 +177,72 @@ const AttendanceHistoryScreen: React.FC<{ navigation: any }> = ({ navigation }) 
                 <View style={{ width: 28 }} />
             </View>
 
-            {/* Download Buttons */}
-            <View style={styles.downloadBar}>
+            {/* Attendance View Tabs */}
+            <View style={styles.viewTabs}>
                 <TouchableOpacity
-                    style={[styles.downloadBtn, styles.downloadBtnFull, downloading && styles.btnDisabled]}
-                    onPress={downloadFull}
-                    disabled={downloading}
+                    style={[styles.viewTab, viewMode === 'overall' && styles.viewTabActive]}
+                    onPress={() => setViewMode('overall')}
                 >
-                    <Ionicons name="download-outline" size={16} color="#fff" />
-                    <Text style={styles.downloadBtnText}>
-                        {downloading ? 'Saving...' : 'Full Download'}
+                    <Ionicons
+                        name="list-outline"
+                        size={16}
+                        color={viewMode === 'overall' ? '#fff' : '#007bff'}
+                    />
+                    <Text style={[styles.viewTabText, viewMode === 'overall' && styles.viewTabTextActive]}>
+                        Overall Attendance
                     </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    style={[styles.downloadBtn, styles.downloadBtnProject, downloading && styles.btnDisabled]}
-                    onPress={() => {
-                        if (projects.length === 0) {
-                            Alert.alert('No Projects', 'No project records available.');
-                            return;
-                        }
-                        setShowProjectPicker(true);
-                    }}
-                    disabled={downloading}
+                    style={[styles.viewTab, viewMode === 'project' && styles.viewTabActive]}
+                    onPress={() => setViewMode('project')}
                 >
-                    <Ionicons name="folder-outline" size={16} color="#007bff" />
-                    <Text style={[styles.downloadBtnText, { color: '#007bff' }]}>Project Wise</Text>
+                    <Ionicons
+                        name="folder-outline"
+                        size={16}
+                        color={viewMode === 'project' ? '#fff' : '#007bff'}
+                    />
+                    <Text style={[styles.viewTabText, viewMode === 'project' && styles.viewTabTextActive]}>
+                        Project Wise
+                    </Text>
                 </TouchableOpacity>
             </View>
 
-            {downloading && (
-                <View style={styles.downloadingBar}>
-                    <ActivityIndicator size="small" color="#007bff" />
-                    <Text style={styles.downloadingText}>Saving report to your device...</Text>
+            {viewMode === 'project' && (
+                <View style={styles.projectFilterRow}>
+                    <TouchableOpacity
+                        style={[styles.projectChip, selectedProjectId === '' && styles.projectChipActive]}
+                        onPress={() => setSelectedProjectId('')}
+                    >
+                        <Text style={[styles.projectChipText, selectedProjectId === '' && styles.projectChipTextActive]}>
+                            All Projects
+                        </Text>
+                    </TouchableOpacity>
+                    {projects.map((p) => (
+                        <TouchableOpacity
+                            key={p.id}
+                            style={[styles.projectChip, selectedProjectId === String(p.id) && styles.projectChipActive]}
+                            onPress={() => setSelectedProjectId(String(p.id))}
+                        >
+                            <Text style={[styles.projectChipText, selectedProjectId === String(p.id) && styles.projectChipTextActive]}>
+                                {p.projectname || 'Project'}
+                            </Text>
+                        </TouchableOpacity>
+                    ))}
                 </View>
             )}
 
             {/* Records List */}
             {loading ? (
                 <ActivityIndicator style={{ marginTop: 40 }} size="large" color="#007bff" />
-            ) : records.length === 0 ? (
+            ) : visibleRecords.length === 0 ? (
                 <View style={styles.emptyState}>
                     <Ionicons name="document-text-outline" size={60} color="#cbd5e1" />
                     <Text style={styles.emptyText}>No attendance records yet</Text>
                 </View>
             ) : (
                 <FlatList
-                    data={records}
+                    data={visibleRecords}
                     keyExtractor={(item) => String(item.id)}
                     renderItem={renderItem}
                     contentContainerStyle={styles.list}
@@ -348,30 +250,6 @@ const AttendanceHistoryScreen: React.FC<{ navigation: any }> = ({ navigation }) 
                 />
             )}
 
-            {/* Project Picker Modal */}
-            <Modal visible={showProjectPicker} transparent animationType="slide">
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalBox}>
-                        <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>Select Project</Text>
-                            <TouchableOpacity onPress={() => setShowProjectPicker(false)}>
-                                <Ionicons name="close" size={24} color="#343a40" />
-                            </TouchableOpacity>
-                        </View>
-                        {projects.map(p => (
-                            <TouchableOpacity
-                                key={p.id}
-                                style={styles.projectOption}
-                                onPress={() => downloadByProject(p)}
-                            >
-                                <Ionicons name="folder-outline" size={20} color="#007bff" />
-                                <Text style={styles.projectOptionText}>{p.projectname}</Text>
-                                <Ionicons name="download-outline" size={18} color="#6c757d" />
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-                </View>
-            </Modal>
         </View>
     );
 };
@@ -392,13 +270,13 @@ const styles = StyleSheet.create({
     backButton: { padding: 5 },
     headerTitle: { color: '#fff', fontSize: 20, fontWeight: 'bold' },
 
-    downloadBar: {
+    viewTabs: {
         flexDirection: 'row',
         gap: 10,
         paddingHorizontal: 20,
         paddingVertical: 14,
     },
-    downloadBtn: {
+    viewTab: {
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
@@ -406,20 +284,31 @@ const styles = StyleSheet.create({
         gap: 6,
         paddingVertical: 10,
         borderRadius: 10,
+        backgroundColor: '#fff',
+        borderWidth: 1.5,
+        borderColor: '#007bff',
     },
-    downloadBtnFull: { backgroundColor: '#007bff' },
-    downloadBtnProject: { backgroundColor: '#fff', borderWidth: 1.5, borderColor: '#007bff' },
-    downloadBtnText: { color: '#fff', fontWeight: '600', fontSize: 14 },
-    btnDisabled: { opacity: 0.5 },
-
-    downloadingBar: {
+    viewTabActive: { backgroundColor: '#007bff' },
+    viewTabText: { color: '#007bff', fontWeight: '600', fontSize: 14 },
+    viewTabTextActive: { color: '#fff' },
+    projectFilterRow: {
         flexDirection: 'row',
-        alignItems: 'center',
+        flexWrap: 'wrap',
         gap: 8,
         paddingHorizontal: 20,
-        paddingBottom: 8,
+        paddingBottom: 10,
     },
-    downloadingText: { color: '#6c757d', fontSize: 13 },
+    projectChip: {
+        backgroundColor: '#fff',
+        borderWidth: 1,
+        borderColor: '#cbd5e1',
+        borderRadius: 20,
+        paddingHorizontal: 12,
+        paddingVertical: 7,
+    },
+    projectChipActive: { backgroundColor: '#007bff', borderColor: '#007bff' },
+    projectChipText: { color: '#343a40', fontSize: 13, fontWeight: '600' },
+    projectChipTextActive: { color: '#fff' },
 
     list: { padding: 20, paddingTop: 4 },
     recordCard: {

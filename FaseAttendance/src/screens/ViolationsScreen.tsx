@@ -96,7 +96,7 @@ const ViolationsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         if (userData?.empid) {
             loadViolations();
         }
-    }, [userData, selectedProjectId]);
+    }, [userData, selectedProjectId, projects]);
 
     const loadUserData = async () => {
         try {
@@ -116,7 +116,7 @@ const ViolationsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             if (response.status && response.projects) {
                 setProjects(response.projects);
                 if (response.projects.length > 0 && !selectedProjectId) {
-                    setSelectedProjectId(String(response.projects[0].project_id));
+                    setSelectedProjectId('');
                 }
             }
         } catch (error) {
@@ -135,16 +135,44 @@ const ViolationsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         }
     };
 
+    // const loadViolations = async () => {
+    //     setLoading(true);
+    //     try {
+    //         const projectId = selectedProjectId || undefined;
+    //         const response = await apiService.getViolations(userData?.empid, projectId);
+    //         if (response.status && response.violations) {
+    //             setViolations(response.violations);
+    //         } else {
+    //             setViolations([]);
+    //         }
+    //     } catch (error) {
+    //         console.log('Error loading violations:', error);
+    //         setViolations([]);
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
+
     const loadViolations = async () => {
         setLoading(true);
+
         try {
-            const projectId = selectedProjectId || undefined;
-            const response = await apiService.getViolations(userData?.empid, projectId);
-            if (response.status && response.violations) {
-                setViolations(response.violations);
+            let allViolations: Violation[] = [];
+
+            if (selectedProjectId) {
+                const response = await apiService.getViolations(userData?.empid, selectedProjectId);
+                allViolations = response.violations || [];
             } else {
-                setViolations([]);
+                const responses = await Promise.all(
+                    projects.map(p =>
+                        apiService.getViolations(userData?.empid, String(p.project_id))
+                    )
+                );
+
+                allViolations = responses.flatMap(res => res.violations || []);
             }
+
+            setViolations(allViolations);
         } catch (error) {
             console.log('Error loading violations:', error);
             setViolations([]);
@@ -776,9 +804,11 @@ const styles = StyleSheet.create({
         borderColor: '#e9ecef',
         overflow: 'hidden',
     },
+
     projectPicker: {
-        height: 44,
+        height: 56,
         color: '#343a40',
+        width: '100%',
     },
 
     filterRow: {

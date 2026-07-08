@@ -49,13 +49,18 @@ const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             console.log('Full response from server:', response);
 
             // Check if login was successful based on your API response structure
+
             if (response.status === true) {
                 // ALWAYS save user data (remove the if rememberMe condition)
                 await apiService.saveAuthData({
                     user_id: response.user_id,
                     username: response.username,
                     empid: response.empid,
+                    access: response.access,
+                    refresh: response.refresh,
                 });
+
+
 
                 // Optional: Save remember me preference separately if needed
                 if (rememberMe) {

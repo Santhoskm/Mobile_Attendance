@@ -481,8 +481,7 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
                 {
                     text: 'Logout',
                     onPress: async () => {
-                        await AsyncStorage.removeItem('userData');
-                        await AsyncStorage.removeItem('userId');
+                        await apiService.logout();
                         await AsyncStorage.removeItem('rememberMe');
                         navigation.replace('Login');
                     },

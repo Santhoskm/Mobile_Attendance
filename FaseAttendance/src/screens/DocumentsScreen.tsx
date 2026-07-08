@@ -103,7 +103,7 @@ const DocumentsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         if (userData?.empid) {
             loadDocuments();
         }
-    }, [userData, selectedProjectId, activeTab]);
+    }, [userData, selectedProjectId, activeTab, projects]);
 
     const loadUserData = async () => {
         try {
@@ -123,7 +123,7 @@ const DocumentsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             if (response.status && response.projects) {
                 setProjects(response.projects);
                 if (response.projects.length > 0 && !selectedProjectId) {
-                    setSelectedProjectId(String(response.projects[0].project_id));
+                    setSelectedProjectId('');
                 }
             }
         } catch (error) {
@@ -131,25 +131,60 @@ const DocumentsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         }
     };
 
+    // const loadDocuments = async () => {
+    //     setLoading(true);
+    //     try {
+    //         const projectId = selectedProjectId || undefined;
+    //         const response = await apiService.getDocuments(userData?.empid, projectId);
+
+    //         if (response.status && response.documents) {
+    //             // Filter by direction based on active tab
+    //             const filtered = response.documents.filter((d: Document) => {
+    //                 if (activeTab === 'received') {
+    //                     return d.direction === 'SUPERVISOR_TO_EMP';
+    //                 } else {
+    //                     return d.direction === 'EMP_TO_SUPERVISOR';
+    //                 }
+    //             });
+    //             setDocuments(filtered);
+    //         } else {
+    //             setDocuments([]);
+    //         }
+    //     } catch (error) {
+    //         console.log('Error loading documents:', error);
+    //         setDocuments([]);
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
+
     const loadDocuments = async () => {
         setLoading(true);
-        try {
-            const projectId = selectedProjectId || undefined;
-            const response = await apiService.getDocuments(userData?.empid, projectId);
 
-            if (response.status && response.documents) {
-                // Filter by direction based on active tab
-                const filtered = response.documents.filter((d: Document) => {
-                    if (activeTab === 'received') {
-                        return d.direction === 'SUPERVISOR_TO_EMP';
-                    } else {
-                        return d.direction === 'EMP_TO_SUPERVISOR';
-                    }
-                });
-                setDocuments(filtered);
+        try {
+            let allDocuments: Document[] = [];
+
+            if (selectedProjectId) {
+                const response = await apiService.getDocuments(userData?.empid, selectedProjectId);
+                allDocuments = response.documents || [];
             } else {
-                setDocuments([]);
+                const responses = await Promise.all(
+                    projects.map(p =>
+                        apiService.getDocuments(userData?.empid, String(p.project_id))
+                    )
+                );
+
+                allDocuments = responses.flatMap(res => res.documents || []);
             }
+
+            const filtered = allDocuments.filter((d: Document) => {
+                if (activeTab === 'received') {
+                    return d.direction === 'SUPERVISOR_TO_EMP';
+                }
+                return d.direction === 'EMP_TO_SUPERVISOR';
+            });
+
+            setDocuments(filtered);
         } catch (error) {
             console.log('Error loading documents:', error);
             setDocuments([]);
@@ -629,9 +664,12 @@ const styles = StyleSheet.create({
         borderColor: '#e9ecef',
         overflow: 'hidden',
     },
+
+
     projectPicker: {
-        height: 44,
+        height: 56,
         color: '#343a40',
+        width: '100%',
     },
 
     tabRow: {
