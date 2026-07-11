@@ -56,7 +56,15 @@ export const useNetworkSync = (onSyncComplete?: () => void) => {
         // also try on mount
         syncQueue();
 
-        return () => unsubscribe();
+        // retry periodically in case nothing ever triggers a connectivity-change event
+        const interval = setInterval(() => {
+            syncQueue();
+        }, 30000);
+
+        return () => {
+            unsubscribe();
+            clearInterval(interval);
+        };
     }, []);
 
     return { syncQueue };

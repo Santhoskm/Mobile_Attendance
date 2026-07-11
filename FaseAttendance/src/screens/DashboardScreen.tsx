@@ -308,7 +308,7 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
 
 
                     const timeoutPromise = new Promise((_, reject) =>
-                        setTimeout(() => reject(new Error('Request timeout')), 10000)
+                        setTimeout(() => reject(new Error('Request timeout')), 40000)
                     );
 
                     let response;
@@ -424,6 +424,7 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
                         action: cameraAction,
                     });
                     await refreshPendingCount();
+                    apiService.faceCheckIn // no-op reference to avoid unused import warnings
 
                     const currentTime = new Date().toLocaleTimeString();
                     if (cameraAction === 'checkin') {

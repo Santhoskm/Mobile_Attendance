@@ -8,7 +8,8 @@ import AppNavigator from './src/navigation/AppNavigator';
 import { useNetworkSync } from './src/hooks/useNetworkSync';
 
 export default function App() {
-  useNetworkSync();
+  const { syncQueue } = useNetworkSync();
+  (globalThis as any).triggerAttendanceSync = syncQueue;
 
   return (
     <>

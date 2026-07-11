@@ -280,7 +280,8 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
             if (!empid) return;
 
             const response = await apiService.getAttendanceStatus(empid);
-            if (response.isCheckedIn) {
+            if (response.is_checked_in) {
+
                 // Check if the active check-in is for THIS project
                 if (String(response.project_id) === String(projectId)) {
                     setIsCheckedIn(true);
