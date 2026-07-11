@@ -1,0 +1,413 @@
+{% load custom_filters %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}IET Smart Solution — Admin Portal{% endblock %}</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+.profile-container{
+    position:relative;
+    display:inline-block;
+}
+
+.u-av{
+    width:36px;
+    height:36px;
+    border-radius:8px;
+    background:#3B82F6;
+    color:#fff;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.profile-popup{
+    display:none;
+    position:absolute;
+    top:45px;
+    right:0;
+    width:180px;
+    background:#0b0f1a;
+    border:1px solid #ddd;
+    border-radius:10px;
+    box-shadow:0 5px 20px rgba(0,0,0,.15);
+    z-index:1000;
+}
+
+.popup-user{
+    padding:15px;
+    font-weight:600;
+}
+
+.logout-btn{
+    display:block;
+    padding:12px 15px;
+    text-decoration:none;
+    color: var(--text1);
+}
+
+.logout-btn:hover{
+    background:#f5f5f5;
+}
+:root{
+  --bg:#0B0F1A;--bg2:#111827;--bg3:#1C2333;--bg4:#242D3F;
+  --border:#2A3347;--border2:#364060;
+  --text1:#F0F4FF;--text2:#94A3B8;--text3:#64748B;
+  --accent:#3B82F6;--accent2:#60A5FA;--aglow:rgba(59,130,246,.15);
+  --green:#10B981;--gbg:rgba(16,185,129,.1);
+  --amber:#F59E0B;--abg:rgba(245,158,11,.1);
+  --red:#EF4444;--rbg:rgba(239,68,68,.1);
+  --purple:#8B5CF6;--pbg:rgba(139,92,246,.1);
+  --teal:#06B6D4;--tbg:rgba(6,182,212,.1);
+  --sw:240px;--font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+  --r:10px;--rl:14px;--sh:0 4px 24px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--text1);display:flex;min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* SIDEBAR */
+.sb{width:var(--sw);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow-y:auto}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.logo-m{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.logo-t{font-size:13px;font-weight:600;color:var(--text1);line-height:1.3}
+.logo-s{font-size:10px;color:var(--text3)}
+.sb-sec{padding:14px 10px 4px}
+.sb-lbl{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);padding:0 8px;margin-bottom:4px}
+.ni{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:all .15s;color:var(--text2);font-size:13px;font-weight:500;margin-bottom:1px;position:relative;text-decoration:none}
+.ni:hover{background:var(--bg3);color:var(--text1)}
+.ni.active{background:var(--aglow);color:var(--accent2);border:1px solid rgba(59,130,246,.2)}
+.ni.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--accent);border-radius:0 2px 2px 0}
+.ni-ico{font-size:15px;width:20px;text-align:center;flex-shrink:0}
+.ni-badge{margin-left:auto;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:99px}
+.sb-foot{margin-top:auto;padding:14px 10px;border-top:1px solid var(--border)}
+.u-card{display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border-radius:8px}
+.u-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#3B82F6,#8B5CF6);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#fff;flex-shrink:0}
+.u-nm{font-size:12px;font-weight:600;color:var(--text1)}
+.u-rl{font-size:10px;color:var(--text3)}
+
+/* MAIN */
+.main{margin-left:var(--sw);flex:1;display:flex;flex-direction:column}
+.topbar{height:60px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 26px;gap:14px;position:sticky;top:0;z-index:50}
+.tb-title{font-size:16px;font-weight:600;color:var(--text1)}
+.tb-sub{font-size:11px;color:var(--text3);margin-top:1px}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.srch{display:flex;align-items:center;gap:7px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 12px;width:220px}
+.srch input{background:none;border:none;outline:none;color:var(--text1);font-family:var(--font);font-size:12px;width:100%}
+.srch input::placeholder{color:var(--text3)}
+.ico-btn{width:36px;height:36px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;color:var(--text2);position:relative;transition:all .15s;text-decoration:none}
+.ico-btn:hover{border-color:var(--accent);color:var(--accent2)}
+.ndot{position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--red);border-radius:50%;border:1.5px solid var(--bg2)}
+.content{padding:26px;flex:1}
+
+/* SHARED COMPONENTS */
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.sg3{grid-template-columns:repeat(3,1fr)}
+.sg5{grid-template-columns:repeat(5,1fr)}
+.sc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:18px;position:relative;overflow:hidden;transition:border-color .2s}
+.sc:hover{border-color:var(--border2)}
+.sc::after{content:'';position:absolute;top:0;right:0;width:55px;height:55px;border-radius:0 var(--rl) 0 55px;opacity:.08}
+.sc.blue::after{background:var(--accent)}.sc.green::after{background:var(--green)}.sc.amber::after{background:var(--amber)}.sc.red::after{background:var(--red)}.sc.purple::after{background:var(--purple)}.sc.teal::after{background:var(--teal)}
+.sc-lbl{font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.sc-val{font-size:30px;font-weight:700;color:var(--text1);font-family:var(--mono);line-height:1}
+.sc-ch{font-size:11px;margin-top:7px;display:flex;align-items:center;gap:3px}
+.sc-ch.up{color:var(--green)}.sc-ch.dn{color:var(--red)}.sc-ico{position:absolute;top:16px;right:16px;font-size:19px;opacity:.35}
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.sh-title{font-size:18px;font-weight:600;color:var(--text1)}
+.sh-sub{font-size:12px;color:var(--text3);margin-top:2px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s}
+.btn-p{background:var(--accent);color:#fff}.btn-p:hover{background:#2563EB}
+.btn-s{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}.btn-s:hover{border-color:var(--border2);color:var(--text1)}
+.btn-sm{padding:6px 12px;font-size:12px}
+.tw{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden}
+.ttb{display:flex;align-items:center;gap:8px;padding:14px 18px;border-bottom:1px solid var(--border)}
+.ftabs{display:flex;gap:3px}
+.ft{padding:5px 11px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;color:var(--text3);transition:all .15s}
+.ft:hover{color:var(--text1)}.ft.active{background:var(--aglow);color:var(--accent2);border:1px solid rgba(59,130,246,.2)}
+.tsrch{display:flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:6px 10px}
+.tsrch input{background:none;border:none;outline:none;color:var(--text1);font-size:12px;font-family:var(--font);width:150px}
+.tsrch input::placeholder{color:var(--text3)}
+table{width:100%;border-collapse:collapse}
+thead th{padding:10px 14px;text-align:left;font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;background:var(--bg3);border-bottom:1px solid var(--border)}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--bg3)}
+tbody td{padding:11px 14px;font-size:13px;color:var(--text2)}
+.ec{display:flex;align-items:center;gap:9px}
+.av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;flex-shrink:0}
+.en{font-size:13px;font-weight:500;color:var(--text1)}
+.eid{font-size:11px;color:var(--text3);font-family:var(--mono)}
+.badge{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:99px;font-size:11px;font-weight:500}
+.badge::before{content:'';width:4px;height:4px;border-radius:50%;background:currentColor}
+.bg{background:var(--gbg);color:var(--green)}.br{background:var(--rbg);color:var(--red)}.ba{background:var(--abg);color:var(--amber)}.bb{background:var(--aglow);color:var(--accent2)}.bp{background:var(--pbg);color:var(--purple)}.bt{background:var(--tbg);color:var(--teal)}.bgr{background:var(--bg4);color:var(--text3)}
+.acts{display:flex;gap:5px}
+.ab{padding:4px 9px;border-radius:5px;font-size:11px;font-weight:500;cursor:pointer;border:none;font-family:var(--font);transition:all .15s}
+.av-b{background:var(--aglow);color:var(--accent2)}.ae{background:var(--abg);color:var(--amber)}.ad{background:var(--rbg);color:var(--red)}.aen{background:var(--gbg);color:var(--green)}.aas{background:var(--pbg);color:var(--purple)}
+.pag{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-top:1px solid var(--border)}
+.pi{font-size:12px;color:var(--text3)}
+.pbs{display:flex;gap:3px}
+.pb{width:28px;height:28px;border-radius:5px;background:var(--bg3);border:1px solid var(--border);color:var(--text2);font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+.pb:hover,.pb.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.fi{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text1);font-family:var(--font);font-size:13px;outline:none;transition:border-color .15s;width:100%}
+.fi:focus{border-color:var(--accent)}.fi::placeholder{color:var(--text3)}
+select.fi option{background:var(--bg3)}
+
+/* MODAL */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:200;display:none;align-items:center;justify-content:center}
+.mo.open{display:flex}
+.md{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);width:700px;max-height:85vh;overflow-y:auto;box-shadow:var(--sh)}
+.mh{padding:20px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg2);z-index:1}
+.mt{font-size:15px;font-weight:600;color:var(--text1)}
+.mc{width:30px;height:30px;border-radius:7px;background:var(--bg3);border:1px solid var(--border);color:var(--text2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px}
+.mb{padding:22px}
+.mf{padding:16px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;position:sticky;bottom:0;background:var(--bg2)}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fgrp{display:flex;flex-direction:column;gap:5px}.fgrp.full{grid-column:1/-1}
+.fl{font-size:12px;font-weight:500;color:var(--text2)}.fl span{color:var(--red)}
+.fsec{margin-top:18px;padding-top:18px;border-top:1px solid var(--border)}
+.fsec-t{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:12px}
+
+/* TOAST */
+.tw2{position:fixed;bottom:22px;right:22px;z-index:999;display:flex;flex-direction:column;gap:7px}
+.tst{background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:11px 15px;font-size:13px;color:var(--text1);display:flex;align-items:center;gap:9px;box-shadow:var(--sh);animation:si .3s ease;min-width:240px}
+@keyframes si{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+
+
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+}
+.section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+#suggestions{
+    border:1px solid #ccc;
+    width:300px;
+    max-height:200px;
+    overflow-y:auto;
+}
+
+.emp-item{
+    padding:10px;
+    cursor:pointer;
+}
+
+.emp-item:hover{
+    background:grey;
+}
+.sb-logo{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:12px 15px;
+}
+
+.logo-m img{
+    width:45px;
+    height:45px;
+    object-fit:contain;
+}
+
+.logo-text{
+    display:flex;
+    flex-direction:column;
+}
+
+.logo-t{
+    font-size:18px;
+    font-weight:700;
+    color:#fff;
+    line-height:1.2;
+}
+
+.logo-s{
+    font-size:12px;
+    color:#cbd5e1;
+}
+{% block extra_styles %}{% endblock %}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sb">
+  <div class="sb-logo">
+    <div class="logo-m"><img src="https://workforce.iet.com.sg//static/dist/img/logo.png" alt="AdminLTE Logo" style="height:100px" class="brand-image elevation-3"></div>
+    <div><div class="logo-t">Smart Solution</div><div class="logo-s">Admin Portal</div></div>
+  </div>
+{% if is_web_admin %}
+  <div class="sb-sec">
+    <div class="sb-lbl">Overview</div>
+    <a href="{% url 'dashboard' %}" class="ni {% block nav_dashboard %}{% endblock %}">
+      <span class="ni-ico">🏠</span>Dashboard
+    </a>
+  </div>
+
+  <div class="sb-sec">
+    <div class="sb-lbl">Workforce</div>
+    <a href="{% url 'employees' %}" class="ni {% block nav_employees %}{% endblock %}">
+      <span class="ni-ico">👤</span>Employees<span class="ni-badge">230</span>
+    </a>
+    <a href="{% url 'enrollment' %}" class="ni {% block nav_enrollment %}{% endblock %}">
+      <span class="ni-ico">📷</span>Face Enrollment
+    </a>
+    <a href="{% url 'employees' %}" class="ni {% block nav_profile %}{% endblock %}">
+      <span class="ni-ico">🪪</span>Employee Profile
+    </a>
+  </div>
+{% endif %}
+  <div class="sb-sec">
+    <div class="sb-lbl">Projects</div>
+    <a href="{% url 'projectsadmin' %}" class="ni {% block nav_projects %}{% endblock %}">
+      <span class="ni-ico">🏗️</span>Projects
+    </a>
+{% if is_web_admin %}
+    <a href="" class="ni {% block nav_assign %}{% endblock %}">
+      <span class="ni-ico">🔗</span>Assignments
+    </a>
+    <a href="{% url 'employee_role_history' %}" class="ni {% block nav_rolehistory %}{% endblock %}">
+      <span class="ni-ico">📊</span>Role History
+    </a>
+    <a href="{% url 'geofence' %}" class="ni {% block nav_geofence %}{% endblock %}">
+      <span class="ni-ico">📍</span>Geo-fence Zones
+    </a>
+{% endif %}
+  </div>
+
+  <div class="sb-sec">
+    <div class="sb-lbl">Attendance</div>
+    <a href="{% url 'attendance' %}" class="ni {% block nav_attendance %}{% endblock %}">
+      <span class="ni-ico">📋</span>Daily Attendance
+    </a>
+{% if is_web_admin %}
+    <a href="{% url 'reports' %}" class="ni {% block nav_reports %}{% endblock %}">
+      <span class="ni-ico">📊</span>Reports
+    </a>
+{% endif %}
+    <a href="{% url 'violationsadmin' %}" class="ni {% block nav_violations %}{% endblock %}">
+      <span class="ni-ico">⚠️</span>Violations<span class="ni-badge">3</span>
+    </a>
+  </div>
+{% if is_web_admin %}
+  <div class="sb-sec">
+    <div class="sb-lbl">Work</div>
+    <a href="{% url 'tasks' %}" class="ni {% block nav_tasks %}{% endblock %}">
+      <span class="ni-ico">✅</span>Tasks
+    </a>
+  </div>
+
+  <div class="sb-sec">
+    <div class="sb-lbl">System</div>
+    <a href="{% url 'settings' %}" class="ni {% block nav_settings %}{% endblock %}">
+      <span class="ni-ico">⚙️</span>Settings
+    </a>
+  </div>
+{% endif %}
+  <div class="sb-foot">
+    <div class="u-card">
+      <div class="u-av">{{ request.user.username|initials }}</div>
+      <div>
+        <div class="u-nm">{{ request.user.username }}</div>
+        <div class="u-rl">{% if is_web_admin %}Super Administrator{% else %}Supervisor{% endif %}</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div>
+      <div class="tb-title">{% block page_title %}Dashboard{% endblock %}</div>
+      <div class="tb-sub">{% block page_subtitle %}{% now "l, j N Y" %}{% endblock %}</div>
+    </div>
+    <div class="tb-right">
+      <div class="srch">
+        <span style="color:var(--text3)">🔍</span>
+        <input type="text" placeholder="Search IET No or name...">
+      </div>
+      <div class="ico-btn">📥</div>
+      <a href="{% url 'violationsadmin' %}" class="ico-btn">⚠️<div class="ndot"></div></a>
+      <!--<div class="u-av" style="width:36px;height:36px;font-size:13px;border-radius:8px;cursor:pointer">{{ request.user.username|slice:":2"|upper }}</div>-->
+      <div class="profile-container">
+    <div class="u-av" id="profileBtn">
+        {{ request.user.username|initials }}
+    </div>
+
+    <div class="profile-popup" id="profilePopup">
+        <div class="popup-user">
+            {{ request.user.username }}
+        </div>
+        <hr>
+        <a href="{% url 'logout_web' %}" class="logout-btn">
+            Logout
+        </a>
+    </div>
+</div>
+    </div>
+  </div>
+
+  <div class="content">
+    {% if messages %}
+      <div class="msg-wrap" style="margin-bottom:14px">
+        {% for message in messages %}
+          <div class="msg-{{ message.tags }}" style="padding:10px 14px;border-radius:8px;margin-bottom:8px;font-size:13px;
+              {% if message.tags == 'error' %}background:#3b1a1a;color:#ef4444;{% else %}background:#0f2f27;color:#22c55e;{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </div>
+  
+</main>
+
+<!-- MODALS -->
+{% block modals %}{% endblock %}
+
+<!-- TOAST CONTAINER -->
+<div class="tw2" id="toast-c"></div>
+
+<script>
+function om(id){document.getElementById(id).classList.add('open')}
+function cm(id){document.getElementById(id).classList.remove('open')}
+document.querySelectorAll('.mo').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')}));
+function toast(msg,icon){
+  const c=document.getElementById('toast-c');
+  const t=document.createElement('div');t.className='tst';
+  t.innerHTML=`<span>${icon||'ℹ️'}</span><span>${msg}</span>`;
+  c.appendChild(t);setTimeout(()=>t.remove(),3500);
+}
+</script>
+<script>
+const profileBtn = document.getElementById("profileBtn");
+const profilePopup = document.getElementById("profilePopup");
+
+profileBtn.addEventListener("click", function(e){
+    e.stopPropagation();
+    profilePopup.style.display =
+        profilePopup.style.display === "block" ? "none" : "block";
+});
+
+document.addEventListener("click", function(){
+    profilePopup.style.display = "none";
+});
+</script>
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

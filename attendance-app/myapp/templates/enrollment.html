@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Face Enrollment — IET Smart Solution{% endblock %}
+{% block nav_enrollment %}active{% endblock %}
+{% block page_title %}Face Enrollment{% endblock %}
+
+{% block extra_styles %}
+.ep{background:var(--bg3);border-radius:10px;height:180px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);margin-bottom:14px;flex-direction:column;gap:8px}
+{% endblock %}
+
+{% block content %}
+<div class="sh">
+  <div><div class="sh-title">Face Enrollment</div><div class="sh-sub">18 employees not yet enrolled</div></div>
+</div>
+<div class="sg sg3">
+  <div class="sc green"><div class="sc-lbl">Enrolled</div><div class="sc-val">212</div></div>
+  <div class="sc red"><div class="sc-lbl">Not Enrolled</div><div class="sc-val">18</div></div>
+  <div class="sc amber"><div class="sc-lbl">Re-enroll Due</div><div class="sc-val">4</div></div>
+</div>
+<div class="tw">
+  <div class="ttb">
+    <div class="ftabs">
+      <div class="ft active">Not Enrolled (18)</div>
+      <div class="ft">All Employees</div>
+    </div>
+  </div>
+  <table>
+    <thead>
+      <tr><th>Employee</th><th>IET No</th><th>Designation</th><th>Deployment Site</th><th>Status</th><th>Action</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><div class="ec"><div class="av" style="background:#8B5CF6">RK</div><div><div class="en">Rajesh Kumar</div><div class="eid">IET-044</div></div></div></td>
+        <td><span style="font-family:var(--mono);font-size:12px;color:var(--text3)">IET-044</span></td>
+        <td>Scaffolder</td><td>Tuas Link Phase 3</td>
+        <td><span class="badge br">Not Enrolled</span></td>
+        <td><button class="btn btn-p btn-sm" onclick="om('m-enroll')">📷 Enroll Now</button></td>
+      </tr>
+      <tr>
+        <td><div class="ec"><div class="av" style="background:#F59E0B">MS</div><div><div class="en">Muthu Selvam</div><div class="eid">IET-067</div></div></div></td>
+        <td><span style="font-family:var(--mono);font-size:12px;color:var(--text3)">IET-067</span></td>
+        <td>Welder</td><td>Jurong West Site</td>
+        <td><span class="badge br">Not Enrolled</span></td>
+        <td><button class="btn btn-p btn-sm" onclick="om('m-enroll')">📷 Enroll Now</button></td>
+      </tr>
+      <tr>
+        <td><div class="ec"><div class="av" style="background:#10B981">AP</div><div><div class="en">Arjunan Pillai</div><div class="eid">IET-089</div></div></div></td>
+        <td><span style="font-family:var(--mono);font-size:12px;color:var(--text3)">IET-089</span></td>
+        <td>General Worker</td><td>Marina Bay Site</td>
+        <td><span class="badge ba">Re-enroll Due</span></td>
+        <td><button class="btn btn-p btn-sm" onclick="om('m-enroll')">📷 Re-enroll</button></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block modals %}
+<div class="mo" id="m-enroll">
+  <div class="md" style="width:500px">
+    <div class="mh"><div class="mt">📷 Face Enrollment — Rajesh Kumar IET-044</div><div class="mc" onclick="cm('m-enroll')">✕</div></div>
+    <div class="mb">
+      <div class="ep"><div style="font-size:44px">📷</div><div style="font-size:13px;color:var(--text2)">Camera Preview</div><div style="font-size:11px;color:var(--text3)">Position face in the oval guide</div></div>
+      <div style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:9px">Capture Progress — 5 images required</div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-bottom:8px">
+        <div style="aspect-ratio:1;background:var(--gbg);border:1px solid var(--green);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px">✓</div>
+        <div style="aspect-ratio:1;background:var(--gbg);border:1px solid var(--green);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px">✓</div>
+        <div style="aspect-ratio:1;background:var(--aglow);border:1px dashed var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--accent2)">3/5</div>
+        <div style="aspect-ratio:1;background:var(--bg4);border:1px dashed var(--border2);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--text3)">○</div>
+        <div style="aspect-ratio:1;background:var(--bg4);border:1px dashed var(--border2);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--text3)">○</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;font-size:10px;color:var(--text3);text-align:center;margin-bottom:14px"><div>Front</div><div>Smile</div><div>Left</div><div>Right</div><div>Relax</div></div>
+      <div style="background:var(--abg);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--amber)">⚠️ Ensure face is well-lit. No sunglasses or mask during enrollment.</div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-s" onclick="cm('m-enroll')">Cancel</button>
+      <button class="btn btn-p" onclick="cm('m-enroll');toast('Enrollment complete — Rajesh Kumar can now check in','✅')">Complete Enrollment</button>
+    </div>
+  </div>
+</div>
+{% endblock %}

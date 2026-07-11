@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Registration</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:'Segoe UI',sans-serif;
+        }
+
+        body{
+            background:#0f172a;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            height:100vh;
+        }
+
+        .register-box{
+
+            width:420px;
+            background:#111827;
+            padding:40px;
+            border-radius:15px;
+            box-shadow:0 10px 30px rgba(0,0,0,.4);
+        }
+
+        .logo{
+
+            width:70px;
+            height:70px;
+            background:#3b82f6;
+            color:#fff;
+            font-size:28px;
+            font-weight:bold;
+            border-radius:15px;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            margin:auto;
+            margin-bottom:20px;
+        }
+
+        h2{
+
+            text-align:center;
+            color:#fff;
+            margin-bottom:8px;
+        }
+
+        .subtitle{
+
+            text-align:center;
+            color:#94a3b8;
+            margin-bottom:30px;
+            font-size:14px;
+        }
+
+        .form-group{
+
+            margin-bottom:18px;
+        }
+
+        label{
+
+            display:block;
+            color:#cbd5e1;
+            margin-bottom:8px;
+            font-size:14px;
+        }
+
+        input{
+
+            width:100%;
+            padding:14px;
+            background:#1e293b;
+            border:1px solid #334155;
+            border-radius:8px;
+            color:white;
+            font-size:15px;
+            outline:none;
+        }
+
+        input:focus{
+
+            border-color:#3b82f6;
+            box-shadow:0 0 8px rgba(59,130,246,.4);
+        }
+
+        button{
+
+            width:100%;
+            padding:14px;
+            background:#2563eb;
+            border:none;
+            border-radius:8px;
+            color:white;
+            font-size:16px;
+            cursor:pointer;
+            transition:.3s;
+            margin-top:10px;
+        }
+
+        button:hover{
+
+            background:#1d4ed8;
+        }
+
+        .error{
+
+            margin-top:20px;
+            background:#7f1d1d;
+            color:#fecaca;
+            padding:12px;
+            border-radius:8px;
+            text-align:center;
+        }
+
+        .login-link{
+
+            text-align:center;
+            margin-top:25px;
+            color:#94a3b8;
+        }
+
+        .login-link a{
+
+            color:#3b82f6;
+            text-decoration:none;
+            font-weight:bold;
+        }
+
+    </style>
+
+</head>
+<body>
+
+<div class="register-box">
+
+    <div class="logo">IET</div>
+
+    <h2>Create Account</h2>
+
+    <p class="subtitle">
+        Employee Registration Portal
+    </p>
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label>Employee ID</label>
+            <input type="text" name="empid" placeholder="Enter Employee ID" required>
+        </div>
+
+        <!--<div class="form-group">
+            <label>Username</label>
+            <input type="text" name="username" placeholder="Choose Username" required>
+        </div>-->
+
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" name="password" placeholder="Create Password" required>
+        </div>
+
+        <button type="submit">
+            Register
+        </button>
+
+        {% if error %}
+        <div class="error">
+            {{ error }}
+        </div>
+        {% endif %}
+
+    </form>
+
+    <div class="login-link">
+        Already have an account?
+        <a href="{% url 'login' %}">Login</a>
+    </div>
+
+</div>
+
+</body>
+</html>

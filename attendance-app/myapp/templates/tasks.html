@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Tasks — IET Smart Solution{% endblock %}
+{% block nav_tasks %}active{% endblock %}
+{% block page_title %}Task Management{% endblock %}
+
+{% block extra_styles %}
+.tb2{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.tc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:14px}
+.tch{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.tct{font-size:13px;font-weight:600;color:var(--text1)}
+.tcnt{background:var(--bg4);color:var(--text3);font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px}
+.ti{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:11px;margin-bottom:7px;cursor:pointer;transition:border-color .15s}
+.ti:hover{border-color:var(--border2)}.ti:last-child{margin-bottom:0}
+.ti-t{font-size:12px;font-weight:500;color:var(--text1);margin-bottom:5px;line-height:1.4}
+.ti-m{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.tp{font-size:10px;font-weight:600;padding:2px 7px;border-radius:99px}
+.ph{background:var(--rbg);color:var(--red)}.pm2{background:var(--abg);color:var(--amber)}.pl{background:var(--gbg);color:var(--green)}
+{% endblock %}
+
+{% block content %}
+<div class="sh">
+  <div><div class="sh-title">Task Management</div><div class="sh-sub">14 due today · 6 completed</div></div>
+  <div style="display:flex;gap:8px">
+    <select class="fi" style="width:180px;padding:7px 10px"><option>All Projects</option><option>Harbour Road Phase 2</option></select>
+    <button class="btn btn-p" onclick="om('m-task')">+ New Task</button>
+  </div>
+</div>
+<div class="tb2">
+  <div class="tc">
+    <div class="tch"><div class="tct">To Do</div><div class="tcnt">6</div></div>
+    <div class="ti"><div class="ti-t">Install scaffolding at Level 3 — Block B</div><div class="ti-m"><span class="tp ph">High</span><span style="font-size:10px;color:var(--text3)">IET-009</span><span style="font-size:10px;color:var(--text3)">Due today</span></div></div>
+    <div class="ti"><div class="ti-t">Safety inspection — Marina Bay Site</div><div class="ti-m"><span class="tp pm2">Med</span><span style="font-size:10px;color:var(--text3)">IET-017</span></div></div>
+    <div class="ti"><div class="ti-t">PPE distribution — new workers batch</div><div class="ti-m"><span class="tp pl">Low</span><span style="font-size:10px;color:var(--text3)">IET-031</span></div></div>
+  </div>
+  <div class="tc">
+    <div class="tch"><div class="tct">In Progress</div><div class="tcnt">5</div></div>
+    <div class="ti"><div class="ti-t">Concrete pour — Foundation Section 4</div><div class="ti-m"><span class="tp ph">High</span><span style="font-size:10px;color:var(--text3)">IET-015</span><span style="font-size:10px;color:var(--text3)">Due today</span></div></div>
+    <div class="ti"><div class="ti-t">Wiring installation — Level 2 East</div><div class="ti-m"><span class="tp pm2">Med</span><span style="font-size:10px;color:var(--text3)">IET-023</span></div></div>
+    <div class="ti"><div class="ti-t">Site cleanup — Sector C</div><div class="ti-m"><span class="tp pl">Low</span><span style="font-size:10px;color:var(--text3)">IET-042</span></div></div>
+  </div>
+  <div class="tc">
+    <div class="tch"><div class="tct">Done</div><div class="tcnt">6</div></div>
+    <div class="ti" style="opacity:.55"><div class="ti-t">Morning briefing — all team leads</div><div class="ti-m"><span class="tp ph">High</span><span style="font-size:10px;color:var(--green)">✓ Verified</span></div></div>
+    <div class="ti" style="opacity:.55"><div class="ti-t">Equipment check — crane and hoists</div><div class="ti-m"><span class="tp ph">High</span><span style="font-size:10px;color:var(--green)">✓ Verified</span></div></div>
+    <div class="ti" style="opacity:.55"><div class="ti-t">Formwork removal — Section 2</div><div class="ti-m"><span class="tp pm2">Med</span><span style="font-size:10px;color:var(--green)">✓ Verified</span></div></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block modals %}
+<div class="mo" id="m-task">
+  <div class="md" style="width:540px">
+    <div class="mh"><div class="mt">Create New Task</div><div class="mc" onclick="cm('m-task')">✕</div></div>
+    <div class="mb">
+      <div class="fg">
+        <div class="fgrp full"><label class="fl">Task Title <span>*</span></label><input class="fi" placeholder="e.g. Install scaffolding at Level 3"></div>
+        <div class="fgrp full"><label class="fl">Description <span>*</span></label><textarea class="fi" rows="3" placeholder="Full instructions for the employee..."></textarea></div>
+        <div class="fgrp"><label class="fl">Project <span>*</span></label><select class="fi"><option>Harbour Road Phase 2</option><option>Marina Bay Construction</option></select></div>
+        <div class="fgrp"><label class="fl">Assign To <span>*</span></label><select class="fi"><option>Veerappan IET-009</option><option>Chinniah IET-015</option><option>Rajan IET-023</option></select></div>
+        <div class="fgrp"><label class="fl">Priority <span>*</span></label><select class="fi"><option>High</option><option>Medium</option><option>Low</option></select></div>
+        <div class="fgrp"><label class="fl">Due Date <span>*</span></label><input class="fi" type="date"></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-s" onclick="cm('m-task')">Cancel</button>
+      <button class="btn btn-p" onclick="cm('m-task');toast('Task created and employee notified','✅')">Create Task</button>
+    </div>
+  </div>
+</div>
+{% endblock %}

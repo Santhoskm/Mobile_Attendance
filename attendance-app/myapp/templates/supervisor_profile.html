@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}Supervisor Profile — IET Smart Solution{% endblock %}
+{% block nav_profile %}active{% endblock %}
+{% block page_title %}Supervisor Profile{% endblock %}
+
+{% block extra_styles %}
+.ph2{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:26px;margin-bottom:18px;display:flex;gap:22px;align-items:flex-start}
+.pav{width:76px;height:76px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:#fff;flex-shrink:0;background:linear-gradient(135deg,#3B82F6,#06B6D4)}
+.pname{font-size:20px;font-weight:700;color:var(--text1)}
+.pdes{font-size:13px;color:var(--text3);margin-top:2px}
+.ptags{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.pfs{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.fr{display:flex;flex-direction:column;padding:12px 0;border-bottom:1px solid var(--border)}
+.fr:nth-child(odd){padding-right:22px;border-right:1px solid var(--border)}.fr:nth-child(even){padding-left:22px}
+.frl{font-size:10px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+.frv{font-size:13px;color:var(--text1);font-weight:500}
+.ct2{width:100%;border-collapse:collapse;margin-top:6px}
+.ct2 td{padding:9px 15px;border-bottom:1px solid var(--border);font-size:13px;color: var(--text1);}
+.ct2 td:first-child{color:var(--text1);font-weight:500;width:24%}.ct2 tr:last-child td{border-bottom:none}
+.ic{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:18px;margin-bottom:14px}
+.ic-t{font-size:13px;font-weight:600;color:var(--text1);margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.cg{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.str{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--border)}
+.str:last-child{border-bottom:none}
+.stl{font-size:13px;color:var(--text1)}
+.badge{
+    display:inline-block;
+    padding:4px 10px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:600;
+    color:#fff;
+}
+
+.bg-success{background:#28a745;}
+.bg-danger{background:#dc3545;}
+.bg-warning{background:#ffc107;color:#212529;}
+.bg-info{background:#17a2b8;}
+.bg-secondary{background:#6c757d;}
+.sno-col{
+    width:50px;
+    min-width:50px;
+    max-width:50px;
+    text-align:center;
+}
+{% endblock %}
+
+{% block content %}
+<div class="sh">
+  <div><div class="sh-title">Supervisor Profile — {{ employee.empno }}</div></div>
+  <div style="display:flex;gap:8px">
+    <a href="{% url 'employees' %}" class="btn btn-s btn-sm">← Back</a>
+    <button class="btn btn-s btn-sm" onclick="om('m-emp')">✏️ Edit</button>
+    <button class="btn btn-p btn-sm" onclick="om('m-enroll')">📷 Enroll Face</button>
+  </div>
+</div>
+<div class="ph2">
+  <div class="pav">{{ employee.empname|slice:":2"|upper }}</div>
+  <div style="flex:1">
+    <div class="pname">{{ employee.empname }}</div>
+    <div class="pdes">{{ employee.trade1stskill }}{% if employee.industry and employee.industry != 'NO' %} · {{ employee.industry }}{% endif %}</div>
+    <div class="ptags">
+      {% if employee.terminationstatus == 0 %}
+        <span class="badge bg">● Live</span>
+      {% else %}
+        <span class="badge bgr">● Inactive</span>
+      {% endif %}
+      <span class="badge bb">{{ employee.empno }}</span>
+      <span class="badge bt">{{ employee.type }}</span>
+      {% if face_enrolled %}
+        <span class="badge bg">Face Enrolled ✓</span>
+      {% else %}
+        <span class="badge bgr">Face Not Enrolled</span>
+      {% endif %}
+      <span class="badge bp">Supervisor Role</span>
+    </div>
+  </div>
+</div>
+<div class="cg">
+  <div class="ic">
+    <div class="ic-t">🪪 Identity & Contact</div>
+    <div class="pfs">
+      <div class="fr"><div class="frl">Employee No</div><div class="frv" style="font-family:var(--mono)">{{ employee.empno }}</div></div>
+      <div class="fr"><div class="frl">FIN No</div><div class="frv" style="font-family:var(--mono)">{{ employee.finno }}</div></div>
+      <div class="fr"><div class="frl">WP No</div><div class="frv" style="font-family:var(--mono)">{{ employee.wpno }}</div></div>
+      <div class="fr"><div class="frl">Contact</div><div class="frv">{{ employee.contact }}</div></div>
+      <div class="fr"><div class="frl">Email</div><div class="frv" style="font-size:11px">{{ employee.email }}</div></div>
+      <div class="fr"><div class="frl">Nationality</div><div class="frv">{{ employee.nationality }}</div></div>
+      <div class="fr"><div class="frl">Type of Worker</div><div class="frv">{{ employee.type }}</div></div>
+      <div class="fr"><div class="frl">Date Joined</div><div class="frv">{{ employee.joiningdate|date:"d M Y" }}</div></div>
+    </div>
+  </div>
+  <div>
+    <div class="ic">
+      <div class="ic-t">🏗️ Project Supervised</div>
+      {% if assignment %}
+        <div style="font-size:14px;font-weight:600;color:var(--text1)">{{ assignment.project.projectname }}</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:4px">{{ team_members|length }} team member{{ team_members|length|pluralize }} under supervision</div>
+        <div style="margin-top:10px;display:flex;gap:7px"><span class="badge bg">● Active</span><span class="badge bp">Supervisor</span></div>
+      {% else %}
+        <div style="font-size:13px;color:var(--text3)">Not currently supervising a project.</div>
+      {% endif %}
+    </div>
+    <div class="ic">
+      <div class="ic-t">📱 Mobile App Access</div>
+      <div class="str"><div><div class="stl" style="font-size:12px">App Role</div></div><span class="badge bp">Supervisor</span></div>
+      <div class="str" style="border-bottom:none"><div><div class="stl" style="font-size:12px">Face Enrolled</div></div>{% if face_enrolled %}<span class="badge bg">Yes ✓</span>{% else %}<span class="badge bgr">No</span>{% endif %}</div>
+    </div>
+  </div>
+</div>
+{% if team_members %}
+<div class="ic" style="margin-top:0">
+  <div class="ic-t">👷 Team Members</div>
+  <table class="ct2">
+    {% for tm in team_members %}
+    <tr>
+      <td>{{ tm.employee.empname }}</td>
+      <td>{{ tm.employee.empno }}</td>
+      <td><span class="badge bb">Employee</span></td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endif %}
+<div class="ic" style="margin-top:0">
+  <div class="ic-t">🎓 Certifications & Training</div>
+  <table class="ct2">
+    {% for cert in certifications %}
+    <tr>
+      <td>{{ cert.name }}</td>
+      <td>{% if cert.expiry %}{{ cert.expiry|date:"d M Y" }}{% else %}—{% endif %}</td>
+      <td>
+        {% if cert.status == 'Valid' %}
+          <span class="badge bg">Valid</span>
+        {% elif cert.status == 'Expired' %}
+          <span class="badge br">Expired</span>
+        {% else %}
+          <span class="badge bgr">None</span>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+
+
+
+
+<div class="ic" style="margin-top:0">
+    <div class="ic-t">📋 Attendance History</div>
+
+    <table class="ct2">
+        <thead>
+            <tr>
+                <th style="color: var(--text1);">Date</th>
+                <th style="color: var(--text1);">Project Name</th>
+                <th style="color: var(--text1);">Status</th>
+                <th style="color: var(--text1);">Check In</th>
+                <th style="color: var(--text1);">Check Out</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for attendance in attendance_history %}
+            <tr>
+                <td>{{ attendance.date }}</td>
+                <td>{{ attendance.project }}</td>
+                <td>
+                    {% if attendance.status == "Present" %}
+                        <span class="badge bg-success">Present</span>
+
+                    {% elif attendance.status == "Absent" %}
+                        <span class="badge bg-danger">Absent</span>
+
+                    {% elif attendance.status == "Leave" %}
+                        <span class="badge bg-warning text-dark">Leave</span>
+
+                    {% elif attendance.status == "Half Day" %}
+                        <span class="badge bg-info text-dark">Half Day</span>
+
+                    {% else %}
+                        <span class="badge bg-secondary">{{ attendance.status }}</span>
+                    {% endif %}
+                </td>
+                <td>{{ attendance.check_in|default:"-" }}</td>
+                <td>{{ attendance.check_out|default:"-" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align:center;">
+                    No attendance history found.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
+
+{% endblock %}
+
+{% block modals %}
+<div class="mo" id="m-emp">
+  <div class="md">
+    <div class="mh"><div class="mt">Edit Supervisor — {{ employee.empno }}</div><div class="mc" onclick="cm('m-emp')">✕</div></div>
+    <div class="mb">
+      <div class="fg">
+        <div class="fgrp"><label class="fl">Full Name <span>*</span></label><input class="fi" value="{{ employee.empname }}"></div>
+        <div class="fgrp"><label class="fl">Employee No <span>*</span></label><input class="fi" value="{{ employee.empno }}" style="font-family:var(--mono)"></div>
+        <div class="fgrp"><label class="fl">FIN No <span>*</span></label><input class="fi" value="{{ employee.finno }}" style="font-family:var(--mono)"></div>
+        <div class="fgrp"><label class="fl">WP No</label><input class="fi" value="{{ employee.wpno }}" style="font-family:var(--mono)"></div>
+        <div class="fgrp"><label class="fl">Email</label><input class="fi" type="email" value="{{ employee.email }}"></div>
+        <div class="fgrp"><label class="fl">Contact No</label><input class="fi" value="{{ employee.contact }}"></div>
+        <div class="fgrp"><label class="fl">Nationality</label><input class="fi" value="{{ employee.nationality }}"></div>
+        <div class="fgrp"><label class="fl">Type of Worker</label><input class="fi" value="{{ employee.type }}"></div>
+        <div class="fgrp"><label class="fl">Designation <span>*</span></label><input class="fi" value="{{ employee.trade1stskill }}"></div>
+        <div class="fgrp"><label class="fl">Date of Joining</label><input class="fi" type="date" value="{{ employee.joiningdate|date:'Y-m-d' }}"></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-s" onclick="cm('m-emp')">Cancel</button>
+      <button class="btn btn-p" onclick="cm('m-emp');toast('Supervisor updated','✅')">Save Changes</button>
+    </div>
+  </div>
+</div>
+<div class="mo" id="m-enroll">
+  <div class="md" style="width:500px">
+    <div class="mh"><div class="mt">📷 Re-enroll Face — {{ employee.empno }}</div><div class="mc" onclick="cm('m-enroll')">✕</div></div>
+    <div class="mb">
+      <div style="background:var(--bg3);border-radius:10px;height:180px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);margin-bottom:14px;flex-direction:column;gap:8px;color:var(--text3)"><div style="font-size:44px">📷</div><div style="font-size:13px;color:var(--text2)">Camera Preview</div></div>
+      <div style="background:var(--abg);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--amber)">⚠️ Ensure face is well-lit. No sunglasses or mask during enrollment.</div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-s" onclick="cm('m-enroll')">Cancel</button>
+      <button class="btn btn-p" onclick="cm('m-enroll');toast('Face re-enrolled successfully','✅')">Complete Enrollment</button>
+    </div>
+  </div>
+</div>
+{% endblock %}

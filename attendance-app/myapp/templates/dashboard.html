@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — IET Smart Solution{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block extra_styles %}
+.dg{display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-bottom:20px}
+.cc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:20px}
+.ct{font-size:13px;font-weight:600;color:var(--text1);margin-bottom:3px}
+.cs{font-size:11px;color:var(--text3);margin-bottom:16px}
+.bc{display:flex;align-items:flex-end;gap:5px;height:110px}
+.bg-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.bar{width:100%;border-radius:3px 3px 0 0;transition:opacity .2s;min-height:3px}
+.bar:hover{opacity:.75}
+.bl{font-size:9px;color:var(--text3);text-align:center}
+.dw{display:flex;align-items:center;justify-content:center;gap:20px}
+.dl{display:flex;flex-direction:column;gap:7px}
+.li{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text2)}
+.ld{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+.al{display:flex;flex-direction:column;gap:0}
+.ai{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border)}
+.ai:last-child{border-bottom:none}
+.adot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.at{font-size:12px;color:var(--text2);flex:1}
+.at strong{color:var(--text1);font-weight:500}
+.atm{font-size:11px;color:var(--text3);font-family:var(--mono)}
+{% endblock %}
+
+{% block content %}
+<div class="sg">
+  <div class="sc blue"><span class="sc-ico">👥</span><div class="sc-lbl">Total Employees</div><div class="sc-val">{{totalemployees}}</div><div class="sc-ch up">↑ 4 this month</div></div>
+  <div class="sc green"><span class="sc-ico">✅</span><div class="sc-lbl">Present Today</div><div class="sc-val"><a href="{% url 'presenttoday' %}" style="text-decoration:none;color:white;">{{presentcount}}</a></div><div class="sc-ch up">↑ 86% attendance</div></div>
+  <div class="sc red"><span class="sc-ico">❌</span><div class="sc-lbl">Absent Today</div><div class="sc-val"><a href="{% url 'absenttoday' %}" style="text-decoration:none;color:white;">{{absentcount}}</a></div><div class="sc-ch dn">14% absence rate</div></div>
+  <div class="sc amber"><span class="sc-ico">⏰</span><div class="sc-lbl">Late Check-ins</div><div class="sc-val">{{late_checkinscount}}</div><div class="sc-ch dn">↑ 4 vs yesterday</div></div>
+</div>
+<div class="sg">
+  <div class="sc teal"><span class="sc-ico">🏗️</span><div class="sc-lbl">Active Projects</div><div class="sc-val">8</div><div class="sc-ch up">↑ 2 new this week</div></div>
+  <div class="sc red"><span class="sc-ico">🚨</span><div class="sc-lbl">Violations Today</div><div class="sc-val">3</div><div class="sc-ch dn">2 unresolved</div></div>
+  <div class="sc purple"><span class="sc-ico">📋</span><div class="sc-lbl">Tasks Due Today</div><div class="sc-val">14</div><div class="sc-ch">6 completed</div></div>
+  <div class="sc amber"><span class="sc-ico">📄</span><div class="sc-lbl">WP Expiring (30d)</div><div class="sc-val">34</div><div class="sc-ch dn">Action required</div></div>
+</div>
+<div class="dg">
+  <div class="cc">
+    <div class="ct">Weekly Attendance Trend</div><div class="cs">Last 7 days</div>
+    <div class="bc">
+      <div class="bg-col"><div class="bar" style="height:75%;background:var(--accent)"></div><div class="bl">Mon</div></div>
+      <div class="bg-col"><div class="bar" style="height:88%;background:var(--accent)"></div><div class="bl">Tue</div></div>
+      <div class="bg-col"><div class="bar" style="height:82%;background:var(--accent)"></div><div class="bl">Wed</div></div>
+      <div class="bg-col"><div class="bar" style="height:91%;background:var(--accent)"></div><div class="bl">Thu</div></div>
+      <div class="bg-col"><div class="bar" style="height:86%;background:var(--accent)"></div><div class="bl">Fri</div></div>
+      <div class="bg-col"><div class="bar" style="height:60%;background:var(--bg4)"></div><div class="bl">Sat</div></div>
+      <div class="bg-col"><div class="bar" style="height:86%;background:var(--teal)"></div><div class="bl">Today</div></div>
+    </div>
+  </div>
+  <div class="cc">
+    <div class="ct">Deployment Type</div><div class="cs">446 total deployments</div>
+    <div class="dw" style="margin-top:10px">
+      <svg width="110" height="110" viewBox="0 0 42 42">
+        <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--bg4)" stroke-width="4"/>
+        <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--accent)" stroke-width="4" stroke-dasharray="52 100" stroke-dashoffset="25" transform="rotate(-90 21 21)"/>
+        <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--green)" stroke-width="4" stroke-dasharray="33 100" stroke-dashoffset="-27" transform="rotate(-90 21 21)"/>
+        <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--amber)" stroke-width="4" stroke-dasharray="15 100" stroke-dashoffset="-60" transform="rotate(-90 21 21)"/>
+      </svg>
+      <div class="dl">
+        <div class="li"><div class="ld" style="background:var(--accent)"></div>IET (233)</div>
+        <div class="li"><div class="ld" style="background:var(--green)"></div>Sub-Con (149)</div>
+        <div class="li"><div class="ld" style="background:var(--amber)"></div>BCA (64)</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="dg">
+  <div class="cc">
+    <div class="ct">Recent Check-ins</div><div class="cs">Live feed</div>
+    <div class="al">
+      <div class="ai"><div class="adot" style="background:var(--green)"></div><div class="at"><strong>Veerappan Kandhasamy</strong> IET-009 checked in at Harbour Road</div><div class="atm">09:02</div></div>
+      <div class="ai"><div class="adot" style="background:var(--green)"></div><div class="at"><strong>Chinniah Adaikkalam</strong> IET-015 checked in at Marina Bay</div><div class="atm">09:07</div></div>
+      <div class="ai"><div class="adot" style="background:var(--amber)"></div><div class="at"><strong>Subbiah Ravichandran</strong> IET-017 late check-in Jurong West</div><div class="atm">09:24</div></div>
+      <div class="ai"><div class="adot" style="background:var(--red)"></div><div class="at"><strong>Rajan Muthu</strong> IET-023 geo-fence violation at Tuas Link</div><div class="atm">09:31</div></div>
+      <div class="ai"><div class="adot" style="background:var(--green)"></div><div class="at"><strong>Palaniswamy K</strong> IET-031 checked in at Harbour Road</div><div class="atm">09:33</div></div>
+    </div>
+  </div>
+  <div class="cc">
+    <div class="ct">Alerts</div><div class="cs">Require action today</div>
+    <div class="al">
+      <div class="ai"><div class="adot" style="background:var(--red)"></div><div class="at"><strong>3</strong> geo-fence violations unresolved</div><a href="{% url 'violationsadmin' %}" class="ab av-b">View</a></div>
+      <div class="ai"><div class="adot" style="background:var(--amber)"></div><div class="at"><strong>12</strong> passports expiring in 30 days</div><button class="ab ae">Review</button></div>
+      <div class="ai"><div class="adot" style="background:var(--amber)"></div><div class="at"><strong>34</strong> work permits expiring soon</div><button class="ab ae">Review</button></div>
+      <div class="ai"><div class="adot" style="background:var(--purple)"></div><div class="at"><strong>18</strong> employees not face-enrolled</div><a href="{% url 'enrollment' %}" class="ab aen">Enroll</a></div>
+    </div>
+  </div>
+</div>
+{% endblock %}

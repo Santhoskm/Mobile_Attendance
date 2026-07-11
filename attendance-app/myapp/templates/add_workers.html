@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Projects — IET Smart Solution{% endblock %}
+{% block nav_projects %}active{% endblock %}
+{% block page_title %}Add Worker{% endblock %}
+
+{% block extra_styles %}
+.pg{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px}
+.pc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:18px;transition:border-color .2s;cursor:pointer}
+.pc:hover{border-color:var(--border2)}
+.pc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
+.pn{font-size:14px;font-weight:600;color:var(--text1)}
+.pc-code{font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:2px}
+.pm{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.pmr{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2)}
+.pbw{background:var(--bg4);border-radius:99px;height:4px;overflow:hidden;margin-top:12px}
+.pbf{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--teal))}
+.pft{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+.avs{display:flex}
+.avs .av{width:24px;height:24px;border:2px solid var(--bg2);margin-left:-7px;font-size:9px}
+.avs .av:first-child{margin-left:0}
+{% endblock %}
+
+{% block content %}
+<div class="ph">
+  <div class="ph-top">
+    <div>
+      <div class="ph-title">Worker List</div>
+      </div>
+
+ <div class="tw3">
+      <div style="display:flex; gap:30px;">
+
+    <!-- Available Workers -->
+    <div style="width:50%;">
+        <h3>Available Workers</h3>
+
+        <table border="1" width="100%">
+            <thead>
+                <tr>
+                    <th>Select</th>
+                    <th>Name</th>
+                    <th>Emp No</th>
+                    <th>Type</th>
+                </tr>
+            </thead>
+
+            <tbody id="availableTable">
+            {% for i in emplist %}
+                <tr>
+                    <td>
+                        <input type="checkbox"
+                               onchange="moveRow(this)"  value="{{ i.id }}">
+                    </td>
+                    <td>{{ i.empname }}</td>
+                    <td>{{ i.empno }}</td>
+                    <td>{{ i.workknown }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+
+    <!-- Selected Workers -->
+    <div style="width:50%;">
+        <h3>Selected Workers</h3>
+
+        <form method="POST">
+         {% csrf_token %}
+        <table border="1" width="100%">
+            <thead>
+                <tr>
+                    <th>Select</th>
+                    <th>Name</th>
+                    <th>Emp No</th>
+                    <th>Type</th>
+                </tr>
+            </thead>
+
+            <tbody id="selectedTable">
+
+            </tbody>
+        </table>
+
+           <br>
+
+ 
+                    <button type="submit" class="btn btn-primary">
+                Save Workers
+            </button>
+
+       
+</form>
+ 
+    </div>
+
+</div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+{% if messages %}
+    {% for message in messages %}
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: '{{ message }}',
+            confirmButtonText: 'OK'
+        });
+    </script>
+    {% endfor %}
+{% endif %}
+
+
+<script>
+
+function moveRow(checkbox){
+
+    let row = checkbox.closest("tr");
+
+    if(checkbox.checked){
+
+        checkbox.name = "workers";      // Submitted to Django
+        document.getElementById("selectedTable").appendChild(row);
+
+    }else{
+
+        checkbox.removeAttribute("name");
+        document.getElementById("availableTable").appendChild(row);
+
+    }
+
+}
+
+</script>
+
+
+{% endblock %}

@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Employees — IET Smart Solution{% endblock %}
+{% block nav_employees %}active{% endblock %}
+{% block page_title %}Employee Management{% endblock %}
+
+{% block content %}
+<div class="sh">
+  <div><div class="sh-title">Employee Management</div><div class="sh-sub">230 employees across all projects</div></div>
+  <div style="display:flex;gap:8px">
+    <button class="btn btn-s btn-sm">📥 Export CSV</button>
+    <button class="btn btn-p" onclick="om('m-emp')">+ Add Employee</button>
+  </div>
+</div>
+<div class="tw">
+  <div class="ttb">
+    <div class="ftabs">
+      <div class="ft active">All (230)</div>
+      <div class="ft">Live (212)</div>
+      <div class="ft">Inactive (18)</div>
+      <div class="ft">Not Enrolled (18)</div>
+    </div>
+    <div style="display:flex;gap:7px;margin-left:auto">
+      <select class="fi" style="width:140px;padding:6px 10px;font-size:12px">
+        <option>All Designations</option>
+        <option>Rigger Signalman</option>
+        <option>General Worker</option>
+        <option>Lifting Supervisor</option>
+      </select>
+      <div class="tsrch"><span style="color:var(--text3);font-size:13px">🔍</span>
+        <form method="GET">
+        <input type="text" name="search" placeholder="Search name or IET No...">
+      </form></div>
+    </div>
+  </div>
+  <table>
+    <thead>
+      <tr><th>Employee</th><th>IET No</th><th>Designation</th><th>Dept</th><th>WP Status</th><th>Face</th><th>Status</th><th>Actions</th></tr>
+    </thead>
+    <tbody id="emp-tbody">
+     <tbody>
+  {% for emp in employees %}
+  <tr>
+    <td>
+      <div class="ec">
+        <div class="av" style="background:#3B82F6">{{ emp.name|slice:":2"|upper }}</div>
+        <div>
+          <div class="en">{{ emp.empname }}</div>
+          <div class="eid">{{ emp.empno }}</div>
+        </div>
+      </div>
+    </td>
+    <td><span style="font-family:var(--mono);font-size:12px;color:var(--text3)">{{ emp.empno }}</span></td>
+    <td>{{ emp.workknown }}</td>
+    <td>{{ emp.department }}</td>
+    <td>
+      {% if emp.wp_status == "Expiring" %}
+        <span class="badge ba">Expiring</span>
+      {% else %}
+        <span class="badge bg">Valid</span>
+      {% endif %}
+    </td>
+    <td>
+      {% if emp.face_enrolled %}
+        <span class="badge bg">✓ Enrolled</span>
+      {% else %}
+        <span class="badge br">Not Enrolled</span>
+      {% endif %}
+    </td>
+    <td><span class="badge bg">● {{ emp.status }}</span></td>
+    <td>
+      <div class="acts">
+        <a href="/employee-profile/{{ emp.id }}/" class="ab av-b">View</a>
+        <button class="ab ae">Edit</button>
+        {% if not emp.face_enrolled %}
+          <button class="ab aen">Enroll</button>
+        {% endif %}
+        <button class="ab ad">Delete</button>
+       <!--<form action="{% url 'toggle_supervisor' emp.id %}" method="post">
+    {% csrf_token %}
+    <label>
+        <input type="checkbox"
+               name="supervisor"
+               {% if emp.supervisorstatus == 1 %}checked{% endif %}
+               onchange="this.form.submit()">
+        Supervisor
+    </label>
+</form>-->
+      </div>
+    </td>
+  </tr>
+  {% empty %}
+    <tr><td colspan="8" style="text-align:center;color:var(--text3)">No employees found.</td></tr>
+  {% endfor %}
+</tbody>
+
+    </tbody>
+  </table>
+  <div class="pag">
+    <div class="pi">Showing 1–10 of 230</div>
+    <div class="pbs">
+      <div class="pb">‹</div><div class="pb active">1</div><div class="pb">2</div><div class="pb">3</div><div class="pb">…</div><div class="pb">23</div><div class="pb">›</div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block modals %}
+<div class="mo" id="m-emp">
+  <div class="md">
+    <div class="mh"><div class="mt">Add New Employee</div><div class="mc" onclick="cm('m-emp')">✕</div></div>
+    <div class="mb">
+      <div class="fg">
+        <div class="fgrp"><label class="fl">Full Name <span>*</span></label><input class="fi" placeholder="e.g. Veerappan Kandhasamy"></div>
+        <div class="fgrp"><label class="fl">Employee No <span>*</span></label><input class="fi" placeholder="IET-231" style="font-family:var(--mono)"></div>
+        <div class="fgrp"><label class="fl">FIN No <span>*</span></label><input class="fi" placeholder="G8129937X" style="font-family:var(--mono)"></div>
+        <div class="fgrp"><label class="fl">WP No</label><input class="fi" placeholder="Work Permit Number" style="font-family:var(--mono)"></div>
+        <div class="fgrp"><label class="fl">Email</label><input class="fi" type="email" placeholder="employee@email.com"></div>
+        <div class="fgrp"><label class="fl">Contact No</label><input class="fi" placeholder="+65 XXXX XXXX"></div>
+        <div class="fgrp"><label class="fl">Nationality</label><select class="fi"><option>Indian</option><option>Bangladeshi</option><option>Malaysian</option><option>Chinese</option></select></div>
+        <div class="fgrp"><label class="fl">Type of Worker</label><select class="fi"><option>R1-CT</option><option>R2</option><option>S-Pass</option><option>EP</option></select></div>
+        <div class="fgrp"><label class="fl">Designation <span>*</span></label><select class="fi"><option>General Worker</option><option>Rigger Signalman</option><option>Lifting Supervisor</option><option>Scaffolder</option><option>Welder</option></select></div>
+        <div class="fgrp"><label class="fl">Date of Joining</label><input class="fi" type="date"></div>
+        <div class="fgrp"><label class="fl">Status</label><select class="fi"><option>Live</option><option>Inactive</option></select></div>
+        <div class="fgrp"><label class="fl">BCA Category</label><select class="fi"><option>IET Booking</option><option>Subcontract</option><option>Outsourcing</option></select></div>
+      </div>
+      <div class="fsec">
+        <div class="fsec-t">📱 Mobile App Access</div>
+        <div class="fg">
+          <div class="fgrp"><label class="fl">App Role <span>*</span></label><select class="fi"><option>Employee</option><option>Supervisor</option><option>Admin</option></select></div>
+          <div class="fgrp"><label class="fl">Mobile Password <span>*</span></label><input class="fi" type="password" placeholder="Set mobile login password"></div>
+          <div class="fgrp"><label class="fl">Mobile PIN (4 digits)</label><input class="fi" placeholder="0000" maxlength="4" style="font-family:var(--mono);letter-spacing:.2em"></div>
+          <div class="fgrp"><label class="fl">Assign Supervisor</label><select class="fi"><option>— Select —</option><option>Subbiah IET-017</option><option>Krishnan IET-024</option></select></div>
+        </div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-s" onclick="cm('m-emp')">Cancel</button>
+      <button class="btn btn-p" onclick="cm('m-emp');toast('Employee added successfully','✅')">Save Employee</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+
+{% endblock %}

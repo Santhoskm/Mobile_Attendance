@@ -1,0 +1,1395 @@
+{% extends "base.html" %}
+
+{% block title %}Marina Bay Complex — MBC-2024 | IET Smart Solution{% endblock %}
+
+{% block nav_projects %}active{% endblock %}
+
+{% block page_title %}{{ projectsname}}{% endblock %}
+{% block page_subtitle %}Project Code: {{ projectsname.project_code }} · Surbana Jurong Pte Ltd{% endblock %}
+
+{% block extra_styles %}
+/* ── PROJECT PAGE STYLES ── */
+.ph{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:22px 24px;margin-bottom:18px}
+.ph-top{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:18px}
+.ph-title{font-size:20px;font-weight:700;letter-spacing:-.4px;color:var(--text1);margin-bottom:5px}
+.ph-sub{font-size:13px;color:var(--text2);display:flex;flex-wrap:wrap;gap:12px}
+.ph-sub span{display:flex;align-items:center;gap:4px}
+.ph-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;padding-top:16px;border-top:1px solid var(--border)}
+.pm-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:3px}
+.pm-val{font-size:13px;font-weight:500;color:var(--text1)}
+.ph-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
+.phs{background:var(--bg3);border-radius:var(--r);padding:13px 14px;text-align:center}
+.phs-n{font-size:22px;font-weight:700;font-family:var(--mono)}
+.phs-l{font-size:10px;color:var(--text3);margin-top:2px}
+.ph-acts{display:flex;gap:7px;flex-wrap:wrap}
+
+/* SECTION CARDS */
+.sc2{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);margin-bottom:16px;overflow:hidden}
+.sc2-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);cursor:pointer;user-select:none}
+.sc2-title{font-size:13px;font-weight:600;color:var(--text1);display:flex;align-items:center;gap:8px}
+.sc2-title svg{width:15px;height:15px;stroke:var(--accent2);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.sc2-acts{display:flex;align-items:center;gap:7px}
+.sc2-body{padding:18px}
+.ca{width:15px;height:15px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+.coll .ca{transform:rotate(-90deg)}
+
+/* SUPERVISOR */
+.sup-c{display:flex;align-items:center;gap:14px;background:var(--bg3);border-radius:var(--r);padding:14px;border:1px solid var(--border)}
+.av2{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0}
+.sup-info{flex:1}
+.sup-nm{font-size:14px;font-weight:600;color:var(--text1)}
+.sup-sb{font-size:11px;color:var(--text2);margin-top:2px}
+.sup-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.sup-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.ss{background:var(--bg2);border-radius:8px;padding:10px;text-align:center;border:1px solid var(--border)}
+.ss-n{font-size:17px;font-weight:700;font-family:var(--mono)}
+.ss-l{font-size:10px;color:var(--text3);margin-top:2px}
+
+/* TIMELINE */
+.tl{margin-top:18px;padding-top:18px;border-top:1px solid var(--border)}
+.tl-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:10px}
+.tl-item{display:flex;gap:10px;margin-bottom:14px;position:relative}
+.tl-dot{width:9px;height:9px;border-radius:50%;background:var(--accent);margin-top:4px;flex-shrink:0}
+.tl-dot.old{background:var(--border2)}
+.tl-line{position:absolute;left:4px;top:13px;width:1px;height:calc(100% + 5px);background:var(--border)}
+.tl-item:last-child .tl-line{display:none}
+.tl-who{font-size:13px;font-weight:500;color:var(--text1)}
+.tl-when{font-size:11px;color:var(--text3);margin-top:2px}
+.diff{display:inline-flex;align-items:center;gap:5px;margin-top:5px;background:var(--bg3);border-radius:4px;padding:3px 7px;font-family:var(--mono);font-size:11px}
+.diff-o{color:var(--red);text-decoration:line-through}
+.diff-a{color:var(--text3)}
+.diff-n{color:var(--green)}
+
+/* TABLE WRAPPER */
+.tw3{overflow-x:auto}
+.ftabs2{display:flex;gap:3px;background:var(--bg3);border-radius:8px;padding:3px;margin-bottom:12px}
+.ft2{padding:5px 12px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;color:var(--text3);transition:all .15s}
+.ft2:hover{color:var(--text1)}
+.ft2.active{background:var(--bg2);color:var(--text1);box-shadow:0 0 0 1px var(--border)}
+.s-wrap{position:relative}
+.s-wrap input{background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:7px 12px 7px 30px;color:var(--text1);font-family:var(--font);font-size:12px;outline:none;width:100%}
+.s-wrap input:focus{border-color:var(--accent)}
+.s-wrap input::placeholder{color:var(--text3)}
+.s-ico{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:12px}
+
+/* TEMP CARDS */
+.tg{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.tc{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px;position:relative}
+.tc.warn{border-color:rgba(239,68,68,.4)}
+.tc.ended{opacity:.55}
+
+/* GEO */
+.gg{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.geo-map{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);display:flex;align-items:center;justify-content:center;min-height:150px;position:relative;overflow:hidden}
+.geo-ring{position:absolute;border-radius:50%;border:1.5px solid var(--accent);opacity:.25}
+
+/* MINI CHART */
+.mini-ch{display:flex;align-items:flex-end;gap:5px;height:55px}
+.mb2{border-radius:3px 3px 0 0}
+.mb2-w{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.mb2-l{font-size:10px;color:var(--text3)}
+
+/* VIOLATION ROWS */
+.vr{display:flex;gap:10px;padding:12px 0;border-bottom:1px solid var(--border)}
+.vr:last-child{border-bottom:none}
+.vs{width:3px;border-radius:2px;flex-shrink:0}
+.vr-c{flex:1}
+.vr-t{font-size:13px;font-weight:500;color:var(--text1)}
+.vr-d{font-size:12px;color:var(--text2);margin-top:3px}
+.vr-dt{font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:3px}
+
+/* ACTIVITY */
+.ai{display:flex;gap:10px;padding:11px 0;border-bottom:1px solid var(--border)}
+.ai:last-child{border-bottom:none}
+.ai-ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.ai-t{font-size:13px;color:var(--text1)}
+.ai-t strong{color:var(--accent2)}
+.ai-dt{font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:3px}
+
+/* COMPLIANCE ROWS */
+.cr{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border)}
+.cr:last-child{border-bottom:none}
+.cr-ico{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.cr-info{flex:1}
+.cr-nm{font-size:13px;font-weight:500;color:var(--text1)}
+.cr-dt{font-size:11px;color:var(--text2);margin-top:2px}
+
+/* SETTINGS */
+.sg2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.si{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--border)}
+.si:last-child{border-bottom:none}
+.si-lbl{font-size:13px;color:var(--text1)}
+.si-desc{font-size:10px;color:var(--text3);margin-top:2px}
+.tog{width:34px;height:19px;border-radius:10px;background:var(--border2);position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+.tog.on{background:var(--accent)}
+.tog::after{content:'';position:absolute;width:15px;height:15px;background:#fff;border-radius:50%;top:2px;left:2px;transition:left .2s}
+.tog.on::after{left:17px}
+.iv{cursor:pointer;border-bottom:1px dashed transparent;transition:border-color .15s;font-family:var(--mono);color:var(--accent2);font-size:13px}
+.iv:hover{border-color:var(--text3)}
+.ii{background:var(--bg3);border:1px solid var(--accent);border-radius:4px;padding:2px 7px;color:var(--text1);font-family:var(--mono);font-size:13px;outline:none;width:80px}
+
+/* TASK ROW */
+.tr2{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)}
+.tr2:last-child{border-bottom:none}
+.tk-chk{width:15px;height:15px;border-radius:3px;border:1.5px solid var(--border2);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px}
+.tk-chk.done{background:var(--green);border-color:var(--green);color:#fff}
+.tk-nm{flex:1;font-size:13px;color:var(--text1)}
+.tk-nm.done{text-decoration:line-through;color:var(--text3)}
+
+/* INFO / WARN BOXES */
+.ib{background:var(--aglow);border:1px solid rgba(59,130,246,.25);border-radius:8px;padding:10px 13px;font-size:12px;color:var(--accent2);margin-top:10px}
+.wb{background:var(--abg);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:10px 13px;font-size:12px;color:var(--amber);margin-top:10px}
+
+@media(max-width:768px){
+  .ph-stats{grid-template-columns:repeat(2,1fr)}
+  .gg{grid-template-columns:1fr}
+  .sg2{grid-template-columns:1fr}
+}
+{% endblock %}
+
+{% block content %}
+
+<!-- PROJECT HERO -->
+ {% for i in projects%}
+<div class="ph">
+  <div class="ph-top">
+    <div>
+      <div class="ph-title">{{i.projectname}}</div>
+      <div class="ph-sub">
+        <span>📄 {{i.projectcode }}</span>
+        <span>🏢 {{i.clientname }}</span>
+        <span>📍 {{i.siteaddress}}</span>
+        <span id="proj-status"><span class="badge bg">Active</span></span>
+      </div>
+    </div>
+    <div class="ph-acts">
+      <button class="btn btn-s btn-sm" onclick="om('alterRosterModal')">⇄ Alter Roster</button>
+      <button class="btn btn-s btn-sm" onclick="om('bulkAddModal')">⬆ Bulk Add</button>
+      <!--<button class="btn btn-p btn-sm" onclick="om('addWorkerModal')">+ Add Worker</button>-->
+       <button class="btn btn-p btn-sm"><a href="{% url 'add_workers' i.id %}">+ Add Worker</a></button>
+    </div>
+  </div>
+  <div class="ph-meta">
+    <div><div class="pm-lbl">Start Date</div><div class="pm-val">{{i.projectstartdate}}</div></div>
+    <div><div class="pm-lbl">End Date</div><div class="pm-val">{{i.projectenddate}}</div></div>
+    <div><div class="pm-lbl">Shift Hours</div><div class="pm-val" style="font-family:var(--mono)">{{i.shiftstarttime }} – {{i.shiftendtime}}</div></div>
+    <div><div class="pm-lbl">Late Threshold</div><div class="pm-val">{{i.threshold}}</div></div>
+    <div><div class="pm-lbl">Geo-fence Zone</div><div class="pm-val">{{i.geozone}} — 150m</div></div>
+    <div><div class="pm-lbl">Duration</div><div class="pm-val">352 days</div></div>
+  </div>
+  <div class="ph-stats">
+    <div class="phs"><div class="phs-n" style="color:var(--green)" id="st-present">18</div><div class="phs-l">Present Today</div></div>
+    <div class="phs"><div class="phs-n" style="color:var(--red)" id="st-absent">4</div><div class="phs-l">Absent Today</div></div>
+    <div class="phs"><div class="phs-n" style="color:var(--amber)" id="st-tasks">7</div><div class="phs-l">Open Tasks</div></div>
+    <div class="phs"><div class="phs-n" style="color:var(--red)" id="st-vio">2</div><div class="phs-l">Open Violations</div></div>
+  </div>
+</div>
+
+{% for i in projects %}
+<!-- SECTION 2: SUPERVISOR -->
+<div class="sc2" id="sec-supervisor">
+  <div class="sc2-hd" onclick="toggleSec('supervisor')">
+    <div class="sc2-title">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 00-16 0"/></svg>
+      Supervisor Panel
+    </div>
+    <div class="sc2-acts" onclick="event.stopPropagation()">
+      <button class="btn btn-s btn-sm" onclick="om('changeSuperModal')">⬇ Add Supervisor</button>
+      <svg class="ca" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </div>
+  <div class="sc2-body" id="supervisor-content">
+    <div class="sup-c">
+      <div class="av2" style="background:var(--aglow);color:var(--accent2)">SR</div>
+      <div class="sup-info">
+        <div class="sup-nm">{{i.supervisor}}</div>
+        <div class="sup-sb">IET-017 &nbsp;·&nbsp; Lifting Supervisor &nbsp;·&nbsp; +65 9123 4567</div>
+        <div class="sup-tags">
+          <span class="badge bg">Face Enrolled</span>
+          <span class="badge bb">WP Valid</span>
+          <span class="badge bp">Supervisor Role</span>
+          <span class="badge bt">CSOC Certified</span>
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:10px;color:var(--text3)">Today's check-in</div>
+        <div style="font-family:var(--mono);font-size:14px;color:var(--green);font-weight:600;margin-top:3px">07:02</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:3px">On time</div>
+      </div>
+    </div>
+    <div class="sup-stats">
+      <div class="ss"><div class="ss-n" style="color:var(--green)">22</div><div class="ss-l">Days Present (May)</div></div>
+      <div class="ss"><div class="ss-n" style="color:var(--amber)">1</div><div class="ss-l">Late Count (May)</div></div>
+      <div class="ss"><div class="ss-n" style="color:var(--accent2)">148</div><div class="ss-l">Days on Project</div></div>
+    </div>
+
+    <div class="tl">
+      <div class="tl-lbl">Project Team</div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead>
+          <tr style="text-align:left;color:var(--text3)">
+            <th style="padding:6px">Employee</th>
+            <th style="padding:6px">Current Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for pw in team %}
+          {% if pw.role == '1' %}
+          <tr style="border-top:1px solid var(--border)">
+            <td style="padding:6px">
+              {% if pw.role == '1' %}
+                <a href="{% url 'supervisor_profile' pw.empname.id %}" style="color:var(--accent2);text-decoration:none">{{ pw.empname.empname }} ({{ pw.empname.empno }})</a>
+              {% else %}
+                <a href="{% url 'employee_profile' pw.empname.id %}" style="color:var(--accent2);text-decoration:none">{{ pw.empname.empname }} ({{ pw.empname.empno }})</a>
+              {% endif %}
+            </td>
+            <td style="padding:6px"><span class="badge bp">Supervisor</span></td>
+          </tr>
+          {% endif %}
+          {% empty %}
+          <tr><td colspan="2" style="padding:6px;color:var(--text3)">No team members yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tl">
+      <div class="tl-lbl">Supervisor History</div>
+      {% for i in projecthandover %}
+      <div class="tl-item">
+        <div><div class="tl-dot"></div><div class="tl-line"></div></div>
+        <div>
+          <div class="tl-who">{{i.newsupervisor }}-Current</div>
+          <div class="tl-when">Assigned {{i.handoverdate}} &nbsp;·&nbsp; Changed by Admin (Prem)</div>
+          <!-- <div class="diff"><span class="diff-o">Rajan Muthu</span><span class="diff-a">→</span><span class="diff-n">Subbiah Ravichandran</span></div> -->
+        </div>
+      </div>
+      {% endfor %}
+      {% for i in projects %}
+      <div class="tl-item">
+        <div><div class="tl-dot"></div><div class="tl-line"></div></div>
+        <div>
+          <div class="tl-who">{{i.supervisor}}</div>
+          <!-- <div class="tl-when">Assigned {{i.handoverdate}} &nbsp;·&nbsp; Changed by Admin (Prem)</div> -->
+          <!-- <div class="diff"><span class="diff-o">Rajan Muthu</span><span class="diff-a">→</span><span class="diff-n">Subbiah Ravichandran</span></div> -->
+        </div>
+      </div>
+      {% endfor %}
+      <!-- <div class="tl-item">
+        <div><div class="tl-dot old"></div><div class="tl-line"></div></div>
+        <div>
+          <div class="tl-who">Rajan Muthu (IET-023) — Transferred Out</div>
+          <div class="tl-when">15 Jan 2024 – 01 Mar 2024 &nbsp;·&nbsp; Transferred to Tuas Project</div>
+        </div>
+      </div> -->
+      <!-- <div class="tl-item">
+        <div><div class="tl-dot old"></div></div>
+        <div>
+          <div class="tl-who">Palaniswamy K (IET-031) — Initial Assignment</div>
+          <div class="tl-when">15 Jan 2024 &nbsp;·&nbsp; Project Start</div>
+        </div>
+      </div> -->
+    </div>
+
+    <div class="tl">
+      <div class="tl-lbl">Role Duration per Employee</div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead>
+          <tr style="text-align:left;color:var(--text3)">
+            <th style="padding:6px">Employee</th>
+            <th style="padding:6px">Days as Worker</th>
+            <th style="padding:6px">Days as Supervisor</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in role_summary %}
+          <tr style="border-top:1px solid var(--border)">
+            <td style="padding:6px">{{ r.empname }}</td>
+            <td style="padding:6px">{{ r.worker_days }}</td>
+            <td style="padding:6px">{{ r.supervisor_days }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3" style="padding:6px;color:var(--text3)">No role history yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+{% endfor %}
+<!-- SECTION 3: WORKER ROSTER -->
+<div class="sc2" id="sec-roster">
+  <div class="sc2-hd" onclick="toggleSec('roster')">
+    <div class="sc2-title">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      Worker Roster
+      <span class="badge bb" id="roster-count">22 Workers</span>
+    </div>
+    <div class="sc2-acts" onclick="event.stopPropagation()">
+      <button class="btn btn-p btn-sm" onclick="om('addWorkerModal')">+ Add Worker</button>
+      <svg class="ca" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </div>
+  <div class="sc2-body" id="roster-content">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
+      <div class="ftabs2" id="rosterTabs">
+        <div class="ft2 active" onclick="filterRoster('all',this)">All (22)</div>
+        <div class="ft2" onclick="filterRoster('active',this)">Active (18)</div>
+        <div class="ft2" onclick="filterRoster('temp',this)">Temporary (3)</div>
+        <div class="ft2" onclick="filterRoster('removed',this)">Removed (1)</div>
+      </div>
+      <div class="s-wrap" style="flex:1;min-width:180px">
+        <span class="s-ico">🔍</span>
+        <input type="text" placeholder="Search name or IET No..." oninput="searchRoster(this.value)">
+      </div>
+    </div>
+
+
+ <!-- ✅ ADD THIS -->
+  <button class="btn btn-p btn-sm" id="moveToProjectBtn" style="display:none" onclick="openMoveModal()">
+    ↗ Move to Project (<span id="moveCount">0</span>)
+  </button>
+</div>
+
+<!-- ✅ ADD THIS: selection banner -->
+<div id="rosterSelBanner" style="display:none;align-items:center;gap:10px;background:var(--bg-accent,#E6F1FB);border:0.5px solid var(--accent,#185FA5);border-radius:8px;padding:9px 14px;margin-bottom:12px;font-size:13px;color:var(--accent,#185FA5)">
+  <span id="rosterSelText" style="font-weight:500"></span> selected — will be added as temporary to target project
+  <button onclick="clearRosterSel()" style="margin-left:auto;background:none;border:none;font-size:12px;text-decoration:underline;color:inherit;cursor:pointer">Clear</button>
+</div>
+
+
+
+    <div class="tw3">
+      <table>
+        <thead><tr>
+          <th>Worker</th><th>Designation</th><th>Type</th><th>Period</th><th>Today</th><th>Face</th><th>WP</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="rosterBody">
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 4: TEMPORARY ASSIGNMENTS -->
+<div class="sc2" id="sec-temp">
+  <div class="sc2-hd" onclick="toggleSec('temp')">
+    <div class="sc2-title">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Temporary &amp; Rotating Assignments
+      <span class="badge ba">3 Active</span>
+    </div>
+    <div class="sc2-acts" onclick="event.stopPropagation()">
+      <button class="btn btn-s btn-sm" onclick="om('tempAssignModal')">+ Temporary Assign</button>
+      <svg class="ca" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </div>
+  <div class="sc2-body" id="temp-content">
+    <div class="tg" id="tempGrid"></div>
+    <div class="ib">ℹ️ Temporary assignments auto-remove on the end date at midnight. A notification is sent to the supervisor and admin 2 days before expiry.</div>
+  </div>
+</div>
+
+<!-- SECTION 5: GEO-FENCE -->
+<div class="sc2" id="sec-geo">
+  <div class="sc2-hd" onclick="toggleSec('geo')">
+    <div class="sc2-title">
+      <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      Geo-fence Zone
+    </div>
+    <div class="sc2-acts" onclick="event.stopPropagation()">
+      <button class="btn btn-s btn-sm" onclick="om('editZoneModal')">✎ Edit Zone</button>
+      <svg class="ca" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </div>
+  <div class="sc2-body" id="geo-content">
+    <div class="gg">
+      <div>
+        <div style="margin-bottom:10px"><div class="pm-lbl">Zone Name</div><div class="pm-val">Zone Alpha — Marina Bay</div></div>
+        <div style="margin-bottom:10px"><div class="pm-lbl">Coordinates</div><div class="pm-val" style="font-family:var(--mono);font-size:12px">1.2834° N, 103.8607° E</div></div>
+        <div style="margin-bottom:10px"><div class="pm-lbl">Radius</div><div class="pm-val">150 m</div></div>
+        <div style="margin-bottom:10px"><div class="pm-lbl">Active Hours</div><div class="pm-val" style="font-family:var(--mono)">06:30 – 18:00</div></div>
+        <div><div class="pm-lbl">Last Modified</div><div class="pm-val">Prem · 3 Jun 2024</div></div>
+        <div class="wb" style="margin-top:12px">⚠️ Radius changed from 100m → 150m on 3 Jun 2024. Review violation logs for affected check-ins.</div>
+      </div>
+      <div class="geo-map">
+        <div style="position:relative;width:150px;height:150px">
+          <div class="geo-ring" style="width:150px;height:150px;top:0;left:0"></div>
+          <div class="geo-ring" style="width:100px;height:100px;top:25px;left:25px;opacity:.45"></div>
+          <div class="geo-ring" style="width:55px;height:55px;top:47px;left:47px;opacity:.65"></div>
+          <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:20px">📍</div>
+        </div>
+        <div style="position:absolute;bottom:8px;font-size:10px;color:var(--text3)">150m radius</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 6: ATTENDANCE SUMMARY -->
+<div class="sc2" id="sec-att">
+  <div class="sc2-hd" onclick="toggleSec('att')">
+    <div class="sc2-title">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Attendance Summary
+    </div>
+    <div class="sc2-acts" onclick="event.stopPropagation()">
+      <button class="btn btn-s btn-sm">Full Report →</button>
+      <svg class="ca" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </div>
+  <div class="sc2-body" id="att-content">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px">
+      <div class="phs"><div class="phs-n" style="color:var(--green)">86%</div><div class="phs-l">Avg Attendance (May)</div></div>
+      <div class="phs"><div class="phs-n" style="color:var(--accent2)">2,847</div><div class="phs-l">Total Hours Logged</div></div>
+      <div class="phs"><div class="phs-n" style="color:var(--amber)">12</div><div class="phs-l">Late Count (May)</div></div>
+      <div class="phs"><div class="phs-n" style="color:var(--red)">3</div><div class="phs-l">Geo Violations</div></div>
+    </div>
+    <div style="display:flex;gap:20px;flex-wrap:wrap">
+      <div style="flex:1;min-width:180px">
+        <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">This Week</div>
+        <div class="mini-ch">
+          <div class="mb2-w"><div class="mb2" style="height:48px;background:var(--green);width:100%"></div><div class="mb2-l">Mon</div></div>
+          <div class="mb2-w"><div class="mb2" style="height:44px;background:var(--green);width:100%"></div><div class="mb2-l">Tue</div></div>
+          <div class="mb2-w"><div class="mb2" style="height:40px;background:var(--amber);width:100%"></div><div class="mb2-l">Wed</div></div>
+          <div class="mb2-w"><div class="mb2" style="height:50px;background:var(--green);width:100%"></div><div class="mb2-l">Thu</div></div>
+          <div class="mb2-w"><div class="mb2" style="height:34px;background:var(--accent);width:100%;opacity:.5"></div><div class="mb2-l">Fri</div></div>
+        </div>
+      </div>
+      <div style="flex:1;min-width:200px">
+        <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Alerts</div>
+        <div class="cr" style="padding:8px 0"><div class="cr-ico" style="background:var(--rbg);color:var(--red)">!</div><div class="cr-info"><div class="cr-nm">Karuppaiah Selvam (IET-056)</div><div class="cr-dt" style="color:var(--red)">Absent 3 consecutive days</div></div></div>
+        <div class="cr" style="padding:8px 0"><div class="cr-ico" style="background:var(--abg);color:var(--amber)">!</div><div class="cr-info"><div class="cr-nm">Muthu Selvam (IET-067)</div><div class="cr-dt" style="color:var(--amber)">Late 4× this month</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 7: TASKS -->
+<div class="sc2" id="sec-tasks">
+  <div class="sc2-hd" onclick="toggleSec('tasks')">
+    <div class="sc2-title">
+      <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      Tasks Summary
+      <span class="badge br">2 Overdue</span>
+    </div>
+    <div class="sc2-acts" onclick="event.stopPropagation()">
+      <button class="btn btn-s btn-sm" onclick="om('addTaskModal')">+ Add Task</button>
+      <svg class="ca" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </div>
+  <div class="sc2-body" id="tasks-content">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">
+      <div class="phs"><div class="phs-n" style="color:var(--text2)">5</div><div class="phs-l">To Do</div></div>
+      <div class="phs"><div class="phs-n" style="color:var(--accent2)">4</div><div class="phs-l">In Progress</div></div>
+      <div class="phs"><div class="phs-n" style="color:var(--green)">18</div><div class="phs-l">Done</div></div>
+      <div class="phs"><div class="phs-n" style="color:var(--red)">2</div><div class="phs-l">Overdue</div></div>
+    </div>
+    <div id="taskList">
+      <div class="tr2"><div class="tk-chk" onclick="toggleTask(this)"></div><div class="tk-nm">Conduct daily toolbox meeting with crew</div><span class="badge bb">In Progress</span></div>
+      <div class="tr2"><div class="tk-chk" onclick="toggleTask(this)"></div><div class="tk-nm">Submit weekly safety report to Surbana</div><span class="badge br">Overdue</span></div>
+      <div class="tr2"><div class="tk-chk" onclick="toggleTask(this)"></div><div class="tk-nm">Inspect lifting equipment — Tower B crane</div><span class="badge br">Overdue</span></div>
+      <div class="tr2"><div class="tk-chk done" onclick="toggleTask(this)">✓</div><div class="tk-nm done">Update face enrollment for new hires</div><span class="badge bg">Done</span></div>
+      <div class="tr2"><div class="tk-chk" onclick="toggleTask(this)"></div><div class="tk-nm">Prepare June roster adjustment plan</div><span class="badge bgr">To Do</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 8: VIOLATIONS -->
+<div class="sc2" id="sec-vio">
+  <div class="sc2-hd" onclick="toggleSec('vio')">
+    <div class="sc2-title">
+      <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Violations
+      <span class="badge br" id="vio-count">2 Open</span>
+    </div>
+    <div class="sc2-acts" onclick="event.stopPropagation()">
+      <button class="btn btn-s btn-sm">View All →</button>
+      <svg class="ca" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </div>
+  <div class="sc2-body" id="vio-content">
+    <div id="violationList">
+      <div class="vr"><div class="vs" style="background:var(--red)"></div><div class="vr-c"><div style="display:flex;justify-content:space-between;align-items:center"><div class="vr-t">Geo-fence Violation — Check-in outside zone</div><span class="badge br">Unresolved</span></div><div class="vr-d">Muthu Selvam (IET-067) checked in 340m outside Zone Alpha.</div><div class="vr-dt">10 Jun 2024 · 07:18 AM</div></div><button class="ab aen btn-xs" onclick="resolveVio(this)" style="margin-left:10px;flex-shrink:0">Resolve</button></div>
+      <div class="vr"><div class="vs" style="background:var(--amber)"></div><div class="vr-c"><div style="display:flex;justify-content:space-between;align-items:center"><div class="vr-t">Late Arrival Threshold Exceeded</div><span class="badge ba">Unresolved</span></div><div class="vr-d">Chinniah Adaikkalam (IET-015) — 28 minutes late. Threshold: 15 min.</div><div class="vr-dt">09 Jun 2024 · 07:43 AM</div></div><button class="ab aen btn-xs" onclick="resolveVio(this)" style="margin-left:10px;flex-shrink:0">Resolve</button></div>
+      <div class="vr"><div class="vs" style="background:var(--green)"></div><div class="vr-c"><div style="display:flex;justify-content:space-between;align-items:center"><div class="vr-t">PIN Fallback Used</div><span class="badge bg">Resolved</span></div><div class="vr-d">Rajesh Kumar (IET-044) used PIN instead of face scan.</div><div class="vr-dt">08 Jun 2024 · 07:04 AM</div></div><span style="margin-left:10px;font-size:10px;color:var(--text3);flex-shrink:0">Resolved by Prem</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 9: ACTIVITY LOG -->
+<div class="sc2" id="sec-act">
+  <div class="sc2-hd" onclick="toggleSec('act')">
+    <div class="sc2-title">
+      <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Project Activity Log
+    </div>
+    <div class="sc2-acts" onclick="event.stopPropagation()">
+      <button class="btn btn-s btn-sm">Full Log →</button>
+      <svg class="ca" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </div>
+  <div class="sc2-body" id="act-content">
+    <div id="actFeed">
+      <div class="ai"><div class="ai-ico" style="background:var(--aglow);color:var(--accent2)">+</div><div><div class="ai-t">Worker <strong>Selvakumar Arumugam (IET-042)</strong> added — Permanent assignment</div><div class="ai-dt">10 Jun 2024 · 09:14 AM · by Admin (Prem)</div></div></div>
+      <div class="ai"><div class="ai-ico" style="background:var(--rbg);color:var(--red)">⚠</div><div><div class="ai-t">Geo-fence violation — <strong>Muthu Selvam (IET-067)</strong> checked in 340m outside zone</div><div class="ai-dt">10 Jun 2024 · 07:18 AM · Auto-generated</div></div></div>
+      <div class="ai"><div class="ai-ico" style="background:var(--abg);color:var(--amber)">⇄</div><div><div class="ai-t">Roster altered — <strong>Karuppaiah Selvam (IET-056)</strong> removed, <strong>Selvakumar Arumugam (IET-042)</strong> added from 10 Jun</div><div class="ai-dt">09 Jun 2024 · 05:30 PM · by Admin (Prem)</div><div class="diff"><span class="diff-o">IET-056 Active</span><span class="diff-a">→</span><span class="diff-n">IET-042 Active</span></div></div></div>
+      <div class="ai"><div class="ai-ico" style="background:var(--gbg);color:var(--green)">●</div><div><div class="ai-t">Zone radius updated — Zone Alpha</div><div class="ai-dt">03 Jun 2024 · 02:15 PM · by Admin (Prem)</div><div class="diff"><span class="diff-o">100m</span><span class="diff-a">→</span><span class="diff-n">150m</span></div></div></div>
+      <div class="ai"><div class="ai-ico" style="background:var(--pbg);color:var(--purple)">↑</div><div><div class="ai-t">Supervisor changed — handover from <strong>Rajan Muthu</strong> to <strong>Subbiah Ravichandran</strong></div><div class="ai-dt">01 Mar 2024 · 08:00 AM · by Admin (Prem)</div><div class="diff"><span class="diff-o">Rajan Muthu (IET-023)</span><span class="diff-a">→</span><span class="diff-n">Subbiah Ravichandran (IET-017)</span></div></div></div>
+      <div class="ai"><div class="ai-ico" style="background:var(--tbg);color:var(--teal)">▶</div><div><div class="ai-t">Temporary assignment — <strong>Rajesh Kumar (IET-044)</strong> assigned for 5 days (1–5 Jun 2024)</div><div class="ai-dt">01 Jun 2024 · 08:30 AM · by Admin (Prem)</div></div></div>
+      <div class="ai"><div class="ai-ico" style="background:var(--rbg);color:var(--red)">−</div><div><div class="ai-t">2 workers auto-removed — temporary assignment period ended</div><div class="ai-dt">05 Jun 2024 · 11:59 PM · Auto-removed</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 10: COMPLIANCE -->
+<div class="sc2" id="sec-comp">
+  <div class="sc2-hd" onclick="toggleSec('comp')">
+    <div class="sc2-title">
+      <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      Compliance &amp; Expiry Alerts
+      <span class="badge br">6 Issues</span>
+    </div>
+    <div class="sc2-acts" onclick="event.stopPropagation()">
+      <svg class="ca" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </div>
+  <div class="sc2-body" id="comp-content">
+    <div class="cr"><div class="cr-ico" style="background:var(--rbg);color:var(--red)">WP</div><div class="cr-info"><div class="cr-nm">Veerappan Kandhasamy (IET-009)</div><div class="cr-dt" style="color:var(--red)">Work Permit expiring in 3 days — Exp: 13 Jun 2024</div></div><button class="ab ad">Action</button></div>
+    <div class="cr"><div class="cr-ico" style="background:var(--rbg);color:var(--red)">CE</div><div class="cr-info"><div class="cr-nm">Chinniah Adaikkalam (IET-015)</div><div class="cr-dt" style="color:var(--red)">CSOC Certificate expired — Exp: 01 Jun 2024</div></div><button class="ab ad">Renew</button></div>
+    <div class="cr"><div class="cr-ico" style="background:var(--abg);color:var(--amber)">WP</div><div class="cr-info"><div class="cr-nm">Rajesh Kumar (IET-044)</div><div class="cr-dt" style="color:var(--amber)">Work Permit expiring in 18 days — Exp: 28 Jun 2024</div></div><button class="ab ae">Review</button></div>
+    <div class="cr"><div class="cr-ico" style="background:var(--abg);color:var(--amber)">PP</div><div class="cr-info"><div class="cr-nm">Muthu Selvam (IET-067)</div><div class="cr-dt" style="color:var(--amber)">Passport expiring in 22 days — Exp: 02 Jul 2024</div></div><button class="ab ae">Notify</button></div>
+    <div class="cr"><div class="cr-ico" style="background:var(--pbg);color:var(--purple)">FE</div><div class="cr-info"><div class="cr-nm">Selvakumar Arumugam (IET-042)</div><div class="cr-dt" style="color:var(--purple)">Not face-enrolled — cannot use face check-in</div></div><button class="ab aas">Enroll</button></div>
+    <div class="cr"><div class="cr-ico" style="background:var(--aglow);color:var(--accent2)">FE</div><div class="cr-info"><div class="cr-nm">Palaniswamy K (IET-031)</div><div class="cr-dt" style="color:var(--accent2)">Face re-enrollment due — last enrolled 11 months ago</div></div><button class="ab av-b">Re-enroll</button></div>
+  </div>
+</div>
+
+<!-- SECTION 11: PROJECT SETTINGS -->
+<div class="sc2" id="sec-set">
+  <div class="sc2-hd" onclick="toggleSec('set')">
+    <div class="sc2-title">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      Project Settings
+    </div>
+    <div class="sc2-acts" onclick="event.stopPropagation()">
+      <svg class="ca" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </div>
+  <div class="sc2-body" id="set-content" style="display:none">
+    <div class="sg2">
+      <div>
+        <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">Shift &amp; Timing</div>
+        <div class="si"><div><div class="si-lbl">Shift Start</div><div class="si-desc">Check-in window opens 30 min before</div></div><span class="iv" onclick="makeEditable(this)">07:00</span></div>
+        <div class="si"><div><div class="si-lbl">Shift End / Auto-checkout</div><div class="si-desc">Workers auto-checked out at this time</div></div><span class="iv" onclick="makeEditable(this)">17:00</span></div>
+        <div class="si"><div><div class="si-lbl">Late Threshold</div><div class="si-desc">Violation logged after this delay</div></div><span class="iv" onclick="makeEditable(this)">15 min</span></div>
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">Alerts &amp; Automation</div>
+        <div class="si"><div><div class="si-lbl">Auto-checkout</div><div class="si-desc">Auto check-out at shift end</div></div><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="si"><div><div class="si-lbl">Violation Alerts</div><div class="si-desc">Notify supervisor on violation</div></div><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="si"><div><div class="si-lbl">Low Attendance Alert</div><div class="si-desc">Alert if attendance &lt; 80%</div></div><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="si"><div><div class="si-lbl">Task Overdue Alerts</div><div class="si-desc">Notify when task passes due date</div></div><div class="tog" onclick="this.classList.toggle('on')"></div></div>
+      </div>
+    </div>
+    <div style="border-top:1px solid var(--border);margin-top:14px;padding-top:14px;display:flex;justify-content:space-between">
+      <button class="btn btn-p btn-sm" onclick="toast('Settings saved','✅')">Save Settings</button>
+      <button class="btn btn-s btn-sm" style="color:var(--red);border-color:rgba(239,68,68,.3)" onclick="toast('Archive requires CEO confirmation','⚠️')">🗑 Archive Project</button>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+{% endblock %}
+
+
+{% block modals %}
+
+<!-- ADD WORKER MODAL -->
+<div class="mo" id="addWorkerModal">
+  <div class="md">
+    <div class="mh"><div class="mt">Add Worker to Project</div><div class="mc" onclick="cm('addWorkerModal')">✕</div></div>
+    <div class="mb">
+      <div class="fg">
+        <div class="fgrp full">
+          <label class="fl">Select Worker</label>
+          <select class="fi" id="addWorkerSelect">
+            <option value="">— Search or select worker —</option>
+            <option value="IET-009">IET-009 — Veerappan Kandhasamy (Rigger Signalman)</option>
+            <option value="IET-015">IET-015 — Chinniah Adaikkalam (Rigger)</option>
+            <option value="IET-023">IET-023 — Rajan Muthu (Lifting Supervisor)</option>
+            <option value="IET-031">IET-031 — Palaniswamy K (Signalman)</option>
+            <option value="IET-044">IET-044 — Rajesh Kumar (Safety Officer)</option>
+            <option value="IET-056">IET-056 — Karuppaiah Selvam (Rigger)</option>
+            <option value="IET-067">IET-067 — Muthu Selvam (Rigger Signalman)</option>
+            <option value="IET-042">IET-042 — Selvakumar Arumugam (Banksman)</option>
+          </select>
+        </div>
+        <div class="fgrp full">
+          <label class="fl">Assignment Type</label>
+          <select class="fi" id="assignType" onchange="toggleTempDates(this.value)">
+            <option value="permanent">Permanent</option>
+            <option value="temporary">Temporary (set date range)</option>
+          </select>
+        </div>
+        <div class="fgrp full" id="tempDateFields" style="display:none">
+          <div class="fg">
+            <div class="fgrp"><label class="fl">Start Date</label><input type="date" class="fi" id="tempStart"></div>
+            <div class="fgrp"><label class="fl">End Date</label><input type="date" class="fi" id="tempEnd"></div>
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-top:4px">Worker will be auto-removed on the end date.</div>
+        </div>
+        <div class="fgrp full">
+          <label class="fl">Designation on this Project</label>
+          <input type="text" class="fi" placeholder="e.g. Rigger, Safety Officer">
+        </div>
+        <div class="fgrp full">
+          <label class="fl">Notes (optional)</label>
+          <textarea class="fi" rows="2" placeholder="Any special notes..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-s btn-sm" onclick="cm('addWorkerModal')">Cancel</button>
+      <button class="btn btn-p btn-sm" onclick="addWorkerToRoster()">Add to Roster</button>
+    </div>
+  </div>
+</div>
+
+<!-- ALTER ROSTER MODAL -->
+<div class="mo" id="alterRosterModal">
+  <div class="md">
+    <div class="mh"><div class="mt">Alter Roster</div><div class="mc" onclick="cm('alterRosterModal')">✕</div></div>
+    <div class="mb">
+      <div class="ib" style="margin-top:0;margin-bottom:14px">ℹ️ Roster alteration schedules a swap on a future date. The old worker is marked Removed and the new worker activates from the chosen date.</div>
+      <div class="fg">
+        <div class="fgrp full"><label class="fl">Effective Date</label><input type="date" class="fi"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:start;margin-top:14px">
+        <div>
+          <div style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;margin-bottom:7px">Remove from project</div>
+          <select class="fi"><option>IET-056 — Karuppaiah Selvam</option><option>IET-067 — Muthu Selvam</option><option>IET-009 — Veerappan Kandhasamy</option></select>
+          <div style="font-size:10px;color:var(--text3);margin-top:4px">Set to Removed from effective date.</div>
+        </div>
+        <div style="padding-top:26px;text-align:center;font-size:18px;color:var(--text3)">⇄</div>
+        <div>
+          <div style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;margin-bottom:7px">Add to project</div>
+          <select class="fi"><option>IET-042 — Selvakumar Arumugam</option><option>IET-031 — Palaniswamy K</option><option>IET-023 — Rajan Muthu</option></select>
+          <div style="font-size:10px;color:var(--text3);margin-top:4px">Activated from effective date.</div>
+        </div>
+      </div>
+      <div class="fgrp" style="margin-top:14px"><label class="fl">Reason for Alteration</label><textarea class="fi" rows="2" placeholder="e.g. Transfer to Tuas project..."></textarea></div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-s btn-sm" onclick="cm('alterRosterModal')">Cancel</button>
+      <button class="btn btn-p btn-sm" onclick="submitAlter()">Schedule Alteration</button>
+    </div>
+  </div>
+</div>
+
+{% for i in projects%}
+<!-- CHANGE SUPERVISOR MODAL -->
+<!-- <form method="POST" action="{% url 'change_supervisor' %}">
+  {% csrf_token %}
+<div class="mo" id="changeSuperModal">
+  <div class="md">
+    <div class="mh"><div class="mt">Change Supervisor</div><div class="mc" onclick="cm('changeSuperModal')">✕</div></div>
+    <div class="mb">
+      <div class="wb" style="margin-top:0;margin-bottom:14px">⚠️ Changing supervisor will immediately revoke app access from Subbiah Ravichandran and grant it to the new supervisor.</div>
+      <div class="fg">
+        <input type="hidden" class="fi"  value="{{i.id}}" name="project_id"/>
+        <div class="fgrp full"><label class="fl">Current Supervisor</label><input class="fi" value="{{ i.supervisor }}" disabled style="opacity:.5" name="currentsupervisor"></div>
+        <div class="fgrp full"><label class="fl">New Supervisor</label>
+          <!-- <select class="fi"><option>— Select supervisor —</option><option>IET-023 — Rajan Muthu (Lifting Supervisor)</option><option>IET-031 — Palaniswamy K (Supervisor)</option>
+          </select>
+          <input class="fi" style="opacity:.5" id="emp_search" name="newsupervisor">
+          <div id="suggestions"></div>
+        </div>
+        <div class="fgrp"><label class="fl">Handover Date</label><input type="date" class="fi" name="handoverdate"></div>
+        <div class="fgrp"><label class="fl">Handover Period (days)</label><input type="number" class="fi" value="3" min="0" max="14" name="handoverperiod"></div>
+        <div class="fgrp full"><label class="fl">Reason</label><textarea class="fi" rows="2" placeholder="e.g. Transfer, resignation, promotion..." name="handoverreason"></textarea></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-s btn-sm" onclick="cm('changeSuperModal')">Cancel</button>
+      <!-- <button class="btn btn-p btn-sm" onclick="changeSupervisor()">Confirm Change</button>
+       <button class="btn btn-p btn-sm" type="submit">Confirm Change</button>
+    </div>
+  </div>
+</div>
+</form>-->
+
+<!-- ADD SUPERVISOR MODAL -->
+<div class="mo" id="changeSuperModal">
+<div class="md">
+<form method="POST" action="{% url 'change_supervisor' %}" id="superForm">
+  {% csrf_token %}
+  <input type="hidden" name="project_id" value="{{ i.id }}">
+  <div class="mh"><div class="mt">Add Supervisor</div><div class="mc" onclick="cm('changeSuperModal')">✕</div></div>
+  <div class="mb">
+    <div class="wb" style="margin-top:0;margin-bottom:14px">⚠️ Selected employee will become supervisor for this project.</div>
+    <div style="display:flex;gap:12px">
+      <div style="flex:1">
+        <label class="fl">Available Employees</label>
+        <input class="fi" id="supSearchAvail" placeholder="Search..." style="margin-bottom:6px">
+        <div id="availList" style="border:1px solid var(--border);border-radius:8px;max-height:260px;overflow-y:auto;padding:6px">
+          {% for emp in available_employees %}
+          <label class="emp-row" data-id="{{ emp.id }}" data-name="{{ emp.empname }} ({{ emp.empno }})"
+                 style="display:flex;align-items:center;gap:8px;padding:6px;cursor:pointer">
+            <input type="checkbox" class="avail-cb" value="{{ emp.id }}">
+            <span>{{ emp.empname }} ({{ emp.empno }})</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;justify-content:center;gap:6px">
+        <button type="button" class="btn btn-s btn-sm" onclick="moveSelected('right')">→</button>
+        <button type="button" class="btn btn-s btn-sm" onclick="moveSelected('left')">←</button>
+      </div>
+      <div style="flex:1">
+        <label class="fl">Selected (New Supervisor)</label>
+        <div id="selList" style="border:1px solid var(--border);border-radius:8px;max-height:260px;overflow-y:auto;padding:6px"></div>
+      </div>
+    </div>
+    <input type="hidden" name="newsupervisor" id="newsupervisor_input">
+  </div>
+  <div class="mf">
+    <button type="button" class="btn btn-s" onclick="cm('changeSuperModal')">Cancel</button>
+    <button type="submit" class="btn btn-p">Save</button>
+  </div>
+</form>
+</div>
+</div>
+
+
+
+
+{% endfor %}
+<!-- TEMPORARY ASSIGN MODAL -->
+<div class="mo" id="tempAssignModal">
+  <div class="md">
+    <div class="mh"><div class="mt">Temporary Assignment</div><div class="mc" onclick="cm('tempAssignModal')">✕</div></div>
+    <div class="mb">
+      <div class="fg">
+        <div class="fgrp full"><label class="fl">Select Worker</label><select class="fi"><option>— Select worker —</option><option>IET-009 — Veerappan Kandhasamy</option><option>IET-044 — Rajesh Kumar</option><option>IET-031 — Palaniswamy K</option></select></div>
+        <div class="fgrp"><label class="fl">Start Date</label><input type="date" class="fi"></div>
+        <div class="fgrp"><label class="fl">End Date</label><input type="date" class="fi"></div>
+        <div class="fgrp full"><label class="fl">Replacement Worker (Optional)</label><select class="fi"><option>— No replacement needed —</option><option>IET-042 — Selvakumar Arumugam</option><option>IET-023 — Rajan Muthu</option></select><div style="font-size:10px;color:var(--text3);margin-top:4px">If specified, replacement auto-assigned when this ends.</div></div>
+        <div class="fgrp full"><label class="fl">Auto-remove on end date?</label><select class="fi"><option>Yes — auto-remove at midnight</option><option>No — require manual removal</option></select></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-s btn-sm" onclick="cm('tempAssignModal')">Cancel</button>
+      <button class="btn btn-p btn-sm" onclick="addTempAssign()">Create Assignment</button>
+    </div>
+  </div>
+</div>
+
+<!-- BULK ADD MODAL -->
+<div class="mo" id="bulkAddModal">
+  <div class="md">
+    <div class="mh"><div class="mt">Bulk Add Workers</div><div class="mc" onclick="cm('bulkAddModal')">✕</div></div>
+    <div class="mb">
+      <div class="fg">
+        <div class="fgrp full">
+          <label class="fl">Select Multiple Workers</label>
+          <select class="fi" multiple size="6">
+            <option>IET-009 — Veerappan Kandhasamy (Rigger Signalman)</option>
+            <option>IET-015 — Chinniah Adaikkalam (Rigger)</option>
+            <option>IET-031 — Palaniswamy K (Signalman)</option>
+            <option>IET-044 — Rajesh Kumar (Safety Officer)</option>
+            <option>IET-056 — Karuppaiah Selvam (Rigger)</option>
+            <option>IET-067 — Muthu Selvam (Rigger Signalman)</option>
+          </select>
+          <div style="font-size:10px;color:var(--text3);margin-top:4px">Hold Ctrl / Cmd to select multiple workers.</div>
+        </div>
+        <div class="fgrp full"><label class="fl">Assignment Type for All</label><select class="fi"><option>Permanent</option><option>Temporary</option></select></div>
+      </div>
+      <div style="text-align:center;padding:16px 0">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:8px">Or upload CSV</div>
+        <div style="border:1.5px dashed var(--border2);border-radius:var(--r);padding:20px;cursor:pointer" onclick="toast('CSV upload coming soon','ℹ️')">
+          <div style="font-size:20px;margin-bottom:6px">⬆</div>
+          <div style="font-size:12px;color:var(--text2)">Click to upload workers.csv</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:3px">IET No, Name, Designation format</div>
+        </div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-s btn-sm" onclick="cm('bulkAddModal')">Cancel</button>
+      <button class="btn btn-p btn-sm" onclick="toast('Workers added to roster','✅');cm('bulkAddModal')">Add Selected</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD TASK MODAL -->
+<div class="mo" id="addTaskModal">
+  <div class="md">
+    <div class="mh"><div class="mt">Add Task</div><div class="mc" onclick="cm('addTaskModal')">✕</div></div>
+    <div class="mb">
+      <div class="fg">
+        <div class="fgrp full"><label class="fl">Task Title</label><input type="text" class="fi" placeholder="e.g. Conduct weekly safety briefing"></div>
+        <div class="fgrp"><label class="fl">Assigned To</label><select class="fi"><option>Subbiah Ravichandran (IET-017)</option><option>Rajan Muthu (IET-023)</option></select></div>
+        <div class="fgrp"><label class="fl">Due Date</label><input type="date" class="fi"></div>
+        <div class="fgrp full"><label class="fl">Priority</label><select class="fi"><option>Normal</option><option>High</option><option>Critical</option></select></div>
+        <div class="fgrp full"><label class="fl">Description (optional)</label><textarea class="fi" rows="2" placeholder="Task details..."></textarea></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-s btn-sm" onclick="cm('addTaskModal')">Cancel</button>
+      <button class="btn btn-p btn-sm" onclick="addTask()">Add Task</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT ZONE MODAL -->
+<div class="mo" id="editZoneModal">
+  <div class="md">
+    <div class="mh"><div class="mt">Edit Geo-fence Zone</div><div class="mc" onclick="cm('editZoneModal')">✕</div></div>
+    <div class="mb">
+      <div class="fg">
+        <div class="fgrp full"><label class="fl">Zone Name</label><input type="text" class="fi" value="Zone Alpha — Marina Bay"></div>
+        <div class="fgrp"><label class="fl">Latitude</label><input type="text" class="fi" value="1.2834"></div>
+        <div class="fgrp"><label class="fl">Longitude</label><input type="text" class="fi" value="103.8607"></div>
+        <div class="fgrp"><label class="fl">Radius (meters)</label><input type="number" class="fi" value="150" min="30" max="1000"></div>
+        <div class="fgrp"><label class="fl">Buffer (meters)</label><input type="number" class="fi" value="30"></div>
+        <div class="fgrp"><label class="fl">Active From</label><input type="time" class="fi" value="06:30"></div>
+        <div class="fgrp"><label class="fl">Active Until</label><input type="time" class="fi" value="18:00"></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-s btn-sm" onclick="cm('editZoneModal')">Cancel</button>
+      <button class="btn btn-p btn-sm" onclick="saveZone()">Save Zone</button>
+    </div>
+  </div>
+</div>
+
+
+<div id="moveToProjectModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:999;align-items:center;justify-content:center">
+  <div style="background:black;border-radius:12px;border:0.5px solid var(--border,#ddd);width:440px;max-width:95vw;padding:1.5rem">
+    <div style="font-size:16px;font-weight:500;color:var(--text1);margin-bottom:4px">Move to another project</div>
+    <div style="font-size:13px;color:var(--text3);margin-bottom:1rem">Selected workers stay in this project and are <strong>also added as Temporary</strong> in the target project.</div>
+
+    <div id="moveWorkerChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem"></div>
+
+    <div style="margin-bottom:1rem">
+      <div style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:6px">Target project</div>
+      <select id="moveProjectSelect" style="width:100%;padding:8px 12px;border-radius:8px;border:0.5px solid var(--border);background:var(--card);color:var(--text1);font-size:13px;outline:none">
+        <option value="">— Select a project —</option>
+      </select>
+    </div>
+
+    <div style="margin-bottom:1rem">
+      <div style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:6px">Temporary assignment period</div>
+      <div style="display:flex;gap:8px">
+        <input type="date" id="moveDateStart" style="flex:1;padding:8px 10px;border-radius:8px;border:0.5px solid var(--border);background:var(--card);color:var(--text1);font-size:13px;outline:none">
+        <input type="date" id="moveDateEnd" style="flex:1;padding:8px 10px;border-radius:8px;border:0.5px solid var(--border);background:var(--card);color:var(--text1);font-size:13px;outline:none">
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button onclick="closeMoveModal()" style="padding:8px 16px;border-radius:8px;border:0.5px solid var(--border);background:transparent;color:var(--text1);font-size:13px;cursor:pointer">Cancel</button>
+      <button onclick="confirmMoveWorkers()" style="padding:8px 16px;border-radius:8px;border:none;background:var(--accent,#185FA5);color:#fff;font-size:13px;font-weight:500;cursor:pointer">Confirm move</button>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}
+
+
+{% block extra_scripts %}
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+
+    if (document.cookie && document.cookie !== "") {
+
+        const cookies = document.cookie.split(";");
+
+        for (let i = 0; i < cookies.length; i++) {
+
+            const cookie = cookies[i].trim();
+
+            if (cookie.substring(0, name.length + 1) === (name + "=")) {
+
+                cookieValue = decodeURIComponent(
+                    cookie.substring(name.length + 1)
+                );
+
+                break;
+            }
+        }
+    }
+
+    return cookieValue;
+}
+function openMoveModal() {
+  // populate worker chips
+  const chips = document.getElementById('moveWorkerChips');
+  chips.innerHTML = [...rosterSelected].map(id => {
+    const w = workers.find(x => x.id === id);
+    if (!w) return '';
+    return `<div style="display:flex;align-items:center;gap:6px;background:var(--surface1,#f5f5f5);border:0.5px solid var(--border);border-radius:20px;padding:4px 10px;font-size:12px">
+      <div style="width:20px;height:20px;border-radius:50%;background:${w.col};color:${w.tc};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:500">${w.av}</div>
+      ${w.name}
+    </div>`;
+  }).join('');
+
+  // populate project dropdown — replace with your real PROJECT_LIST
+  const sel = document.getElementById('moveProjectSelect');
+  sel.innerHTML = '<option value="">— Select a project —</option>';
+  // 👇 Replace this with your real projects array e.g. PROJECT_LIST.forEach(...)
+  const sampleProjects = [
+    {% for p in projectslist %}
+{
+    id: "{{ p.id }}",
+    code: "{{ p.projectcode }}",
+    name: "{{ p.projectname }}"
+},
+{% endfor %}
+  ];
+  sampleProjects.forEach(p => {
+    sel.innerHTML += `<option value="${p.id}">${p.name}</option>`;
+  });
+
+  // set today as default start date
+  document.getElementById('moveDateStart').value = new Date().toISOString().split('T')[0];
+  document.getElementById('moveDateEnd').value = '';
+
+  document.getElementById('moveToProjectModal').style.display = 'flex';
+}
+
+function closeMoveModal() {
+  document.getElementById('moveToProjectModal').style.display = 'none';
+}
+
+function confirmMoveWorkers() {
+  const projectId = document.getElementById('moveProjectSelect').value;
+  const startDate = document.getElementById('moveDateStart').value;
+  const endDate = document.getElementById('moveDateEnd').value;
+
+  if (!projectId) { alert('Please select a target project.'); return; }
+  if (!startDate || !endDate) { alert('Please set assignment start and end dates.'); return; }
+
+   const payload = {
+    worker_ids: [...rosterSelected],
+    target_project_id: projectId,
+    start_date: startDate,
+    end_date: endDate,
+    type: 'temporary'
+  };
+
+  console.log(payload);
+
+  fetch('/api/move-workers/', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken')
+    },
+    body: JSON.stringify({
+        worker_ids: [...rosterSelected],
+        target_project_id: projectId,
+        start_date: startDate,
+        end_date: endDate,
+        type: 'temporary'
+    })
+})
+.then(async response => {
+    console.log("Status:", response.status);
+
+    const text = await response.text();
+    console.log("Response:", text);
+
+    return text;
+})
+.catch(error => {
+    console.error(error);
+});
+}
+// ── ROSTER SELECTION STATE ──
+let rosterSelected = new Set();
+
+function updateRosterSelUI() {
+  const count = rosterSelected.size;
+  const btn = document.getElementById('moveToProjectBtn');
+  const banner = document.getElementById('rosterSelBanner');
+  const moveCount = document.getElementById('moveCount');
+  const selText = document.getElementById('rosterSelText');
+
+  if (count > 0) {
+    btn.style.display = 'inline-flex';
+    banner.style.display = 'flex';
+    moveCount.textContent = count;
+    selText.textContent = count + ' worker' + (count > 1 ? 's' : '');
+  } else {
+    btn.style.display = 'none';
+    banner.style.display = 'none';
+  }
+
+  const allCb = document.getElementById('rosterSelectAll');
+  if (allCb) {
+    allCb.indeterminate = count > 0 && count < workers.filter(w => w.status !== 'removed').length;
+    allCb.checked = count > 0 && count === workers.filter(w => w.status !== 'removed').length;
+  }
+}
+
+function toggleRosterRow(id) {
+  if (rosterSelected.has(id)) rosterSelected.delete(id);
+  else rosterSelected.add(id);
+  updateRosterSelUI();
+  // re-render just this row's checkbox without full re-render
+  const cb = document.querySelector(`#rosterBody tr[data-id="${id}"] input[type=checkbox]`);
+  if (cb) cb.checked = rosterSelected.has(id);
+  const row = document.querySelector(`#rosterBody tr[data-id="${id}"]`);
+  if (row) row.style.background = rosterSelected.has(id) ? 'var(--bg-accent,#E6F1FB)' : '';
+}
+
+function toggleAllRoster(cb) {
+  workers.filter(w => w.status !== 'removed').forEach(w => {
+    if (cb.checked) rosterSelected.add(w.id);
+    else rosterSelected.delete(w.id);
+  });
+  renderRoster();
+  updateRosterSelUI();
+}
+
+function clearRosterSel() {
+  rosterSelected.clear();
+  renderRoster();
+  updateRosterSelUI();
+}
+function renderRoster(){
+  const tb = document.getElementById('rosterBody');
+  const list = workers.filter(w => {
+    const mf = rFilter==='all' || (rFilter==='active'&&w.status==='active') || (rFilter==='temp'&&w.status==='temp') || (rFilter==='removed'&&w.status==='removed');
+    const ms = rSearch==='' || w.name.toLowerCase().includes(rSearch.toLowerCase()) || w.id.toLowerCase().includes(rSearch.toLowerCase());
+    return mf && ms;
+  });
+  tb.innerHTML = list.map(w => {
+    const todayHtml = w.today==='present'?`<span style="color:var(--green)">● Present</span>`:w.today==='late'?`<span style="color:var(--amber)">● Late</span>`:`<span style="color:var(--red)">● Absent</span>`;
+    const typeBadge = w.type==='permanent'?`<span class="badge bb">Permanent</span>`:`<span class="badge ba">Temporary</span>`;
+    const wp = w.wp==='valid'?`<span style="color:var(--green)">✓</span>`:w.wp==='expiring'?`<span style="color:var(--amber)">⚠</span>`:`<span style="color:var(--red)">✗</span>`;
+    const dim = w.status==='removed'?'opacity:.45;':'';
+    const acts = w.status!=='removed'
+      ? `<div class="acts"><button class="ab av-b" onclick="editW('${w.id}')">Edit</button><button class="ab ad" onclick="removeW('${w.id}')">Remove</button></div>`
+      : `<span style="font-size:11px;color:var(--text3)">Removed</span>`;
+
+    // ✅ CHANGE 1: row highlight if selected
+    const rowBg = rosterSelected.has(w.id) ? 'background:var(--bg-accent,#E6F1FB);' : '';
+
+    // ✅ CHANGE 2: checkbox td — disabled for removed workers
+    const checkTd = w.status !== 'removed'
+      ? `<td><input type="checkbox" ${rosterSelected.has(w.id)?'checked':''} onchange="toggleRosterRow('${w.id}')"></td>`
+      : `<td></td>`;
+
+    return `<tr style="${dim}${rowBg}" data-id="${w.id}">
+      ${checkTd}
+      <td><div class="ec"><div class="av" style="background:${w.col};color:${w.tc}">${w.av}</div><div><div class="en">${w.name}</div><div class="eid">${w.id}</div></div></div></td>
+      <td>${w.desig}</td>
+      <td>${typeBadge}</td>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--text3)">${w.period}</td>
+      <td>${todayHtml}</td>
+      <td style="text-align:center">${w.face?'<span style="color:var(--green)">✓</span>':'<span style="color:var(--red)">✗</span>'}</td>
+      <td style="text-align:center">${wp}</td>
+      <td>${acts}</td>
+    </tr>`;
+  }).join('');
+}
+// ── DATA ──
+const workers = [
+  {id:'IET-009',name:'Veerappan Kandhasamy',desig:'Rigger Signalman',type:'permanent',period:'15 Jan 2024 – Ongoing',today:'present',face:true,wp:'valid',status:'active',av:'VK',col:'var(--aglow)',tc:'var(--accent2)'},
+  {id:'IET-015',name:'Chinniah Adaikkalam',desig:'Rigger',type:'permanent',period:'15 Jan 2024 – Ongoing',today:'late',face:true,wp:'valid',status:'active',av:'CA',col:'var(--gbg)',tc:'var(--green)'},
+  {id:'IET-017',name:'Subbiah Ravichandran',desig:'Lifting Supervisor',type:'permanent',period:'15 Jan 2024 – Ongoing',today:'present',face:true,wp:'valid',status:'active',av:'SR',col:'var(--pbg)',tc:'var(--purple)'},
+  {id:'IET-023',name:'Rajan Muthu',desig:'Lifting Supervisor',type:'temporary',period:'01 Jun – 05 Jun 2024',today:'absent',face:true,wp:'valid',status:'temp',av:'RM',col:'var(--tbg)',tc:'var(--teal)'},
+  {id:'IET-031',name:'Palaniswamy K',desig:'Signalman',type:'temporary',period:'01 Jun – 10 Jun 2024',today:'present',face:false,wp:'valid',status:'temp',av:'PK',col:'var(--abg)',tc:'var(--amber)'},
+  {id:'IET-044',name:'Rajesh Kumar',desig:'Safety Officer',type:'permanent',period:'15 Jan 2024 – Ongoing',today:'present',face:true,wp:'expiring',status:'active',av:'RK',col:'var(--aglow)',tc:'var(--accent2)'},
+  {id:'IET-056',name:'Karuppaiah Selvam',desig:'Rigger',type:'permanent',period:'15 Jan 2024 – Ongoing',today:'absent',face:true,wp:'valid',status:'removed',av:'KS',col:'var(--rbg)',tc:'var(--red)'},
+  {id:'IET-067',name:'Muthu Selvam',desig:'Rigger Signalman',type:'temporary',period:'10 Jun – 14 Jun 2024',today:'present',face:true,wp:'valid',status:'temp',av:'MS',col:'var(--tbg)',tc:'var(--teal)'},
+  {id:'IET-042',name:'Selvakumar Arumugam',desig:'Banksman',type:'permanent',period:'10 Jun 2024 – Ongoing',today:'present',face:false,wp:'valid',status:'active',av:'SA',col:'var(--gbg)',tc:'var(--green)'},
+];
+const tempData = [
+  {name:'Rajan Muthu',id:'IET-023',period:'01 Jun – 05 Jun 2024',days:0,st:'ended',desig:'Lifting Supervisor',av:'RM',col:'var(--tbg)',tc:'var(--teal)'},
+  {name:'Palaniswamy K',id:'IET-031',period:'01 Jun – 10 Jun 2024',days:0,st:'ending',desig:'Signalman',av:'PK',col:'var(--abg)',tc:'var(--amber)'},
+  {name:'Muthu Selvam',id:'IET-067',period:'10 Jun – 14 Jun 2024',days:4,st:'ok',desig:'Rigger Signalman',av:'MS',col:'var(--tbg)',tc:'var(--teal)'},
+];
+let rFilter='all', rSearch='';
+
+// ── RENDER ROSTER ──
+function renderRoster(){
+  const tb = document.getElementById('rosterBody');
+  const list = workers.filter(w => {
+    const mf = rFilter==='all' || (rFilter==='active'&&w.status==='active') || (rFilter==='temp'&&w.status==='temp') || (rFilter==='removed'&&w.status==='removed');
+    const ms = rSearch==='' || w.name.toLowerCase().includes(rSearch.toLowerCase()) || w.id.toLowerCase().includes(rSearch.toLowerCase());
+    return mf && ms;
+  });
+  tb.innerHTML = list.map(w => {
+    const todayHtml = w.today==='present'?`<span style="color:var(--green)">● Present</span>`:w.today==='late'?`<span style="color:var(--amber)">● Late</span>`:`<span style="color:var(--red)">● Absent</span>`;
+    const typeBadge = w.type==='permanent'?`<span class="badge bb">Permanent</span>`:`<span class="badge ba">Temporary</span>`;
+    const wp = w.wp==='valid'?`<span style="color:var(--green)">✓</span>`:w.wp==='expiring'?`<span style="color:var(--amber)">⚠</span>`:`<span style="color:var(--red)">✗</span>`;
+    const dim = w.status==='removed'?'opacity:.45;':'';
+    const acts = w.status!=='removed'
+      ? `<div class="acts"><button class="ab av-b" onclick="editW('${w.id}')">Edit</button><button class="ab ad" onclick="removeW('${w.id}')">Remove</button></div>`
+      : `<span style="font-size:11px;color:var(--text3)">Removed</span>`;
+
+    // ✅ CHANGE 1: row highlight if selected
+    const rowBg = rosterSelected.has(w.id) ? 'background:var(--bg-accent,#E6F1FB);' : '';
+
+    // ✅ CHANGE 2: checkbox td — disabled for removed workers
+    const checkTd = w.status !== 'removed'
+      ? `<td><input type="checkbox" ${rosterSelected.has(w.id)?'checked':''} onchange="toggleRosterRow('${w.id}')"></td>`
+      : `<td></td>`;
+
+    return `<tr style="${dim}${rowBg}" data-id="${w.id}">
+      ${checkTd}
+      <td><div class="ec"><div class="av" style="background:${w.col};color:${w.tc}">${w.av}</div><div><div class="en">${w.name}</div><div class="eid">${w.id}</div></div></div></td>
+      <td>${w.desig}</td>
+      <td>${typeBadge}</td>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--text3)">${w.period}</td>
+      <td>${todayHtml}</td>
+      <td style="text-align:center">${w.face?'<span style="color:var(--green)">✓</span>':'<span style="color:var(--red)">✗</span>'}</td>
+      <td style="text-align:center">${wp}</td>
+      <td>${acts}</td>
+    </tr>`;
+  }).join('');
+}
+
+function filterRoster(type,el){
+  rFilter=type;
+  document.querySelectorAll('#rosterTabs .ft2').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderRoster();
+}
+
+function searchRoster(v){ rSearch=v; renderRoster(); }
+
+function removeW(id){
+  const w=workers.find(x=>x.id===id);
+  if(!w||w.status==='removed') return;
+  w.status='removed'; w.today='absent';
+  renderRoster(); updateCount();
+  addAct(`Worker <strong>${w.name} (${w.id})</strong> removed from roster`,'−','var(--rbg)','var(--red)');
+  toast(`${w.name} removed from roster`,'✅');
+}
+
+function editW(id){ const w=workers.find(x=>x.id===id); toast(`Edit panel for ${w.name}','ℹ️`); }
+
+function addWorkerToRoster(){
+  const sel=document.getElementById('addWorkerSelect').value;
+  if(!sel){ toast('Please select a worker','⚠️'); return; }
+  const type=document.getElementById('assignType').value;
+  const id=sel.split(' — ')[0];
+  const ex=workers.find(w=>w.id===id);
+  if(ex&&ex.status!=='removed'){ toast('Worker already in roster','⚠️'); return; }
+  if(ex){ ex.status=type==='temporary'?'temp':'active'; ex.type=type; ex.today='absent'; }
+  renderRoster(); updateCount();
+  addAct(`Worker <strong>${ex?ex.name:sel}</strong> added — ${type==='temporary'?'Temporary':'Permanent'} assignment`,'+','var(--aglow)','var(--accent2)');
+  cm('addWorkerModal'); toast('Worker added to roster','✅');
+}
+
+function updateCount(){
+  const n=workers.filter(w=>w.status!=='removed').length;
+  document.getElementById('roster-count').textContent=n+' Workers';
+}
+
+// ── RENDER TEMP ──
+function renderTemp(){
+  const g=document.getElementById('tempGrid');
+  g.innerHTML=tempData.map((t,i)=>{
+    const badge=t.st==='ended'?`<span class="badge bgr">Ended</span>`:t.st==='ending'?`<span class="badge br">Ends today</span>`:`<span class="badge bg">${t.days} days left</span>`;
+    const cls=t.st==='ended'?'ended':t.st==='ending'?'warn':'';
+    return `<div class="tc ${cls}">
+      <div style="position:absolute;top:10px;right:10px">${badge}</div>
+      <div class="ec" style="margin-bottom:10px"><div class="av" style="background:${t.col};color:${t.tc}">${t.av}</div><div><div class="en">${t.name}</div><div class="eid">${t.id} · ${t.desig}</div></div></div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:10px">${t.period}</div>
+      <div style="display:flex;gap:5px">
+        ${t.st!=='ended'?`<button class="ab aen" onclick="toast('Assignment extended +5 days','✅')">Extend +5 days</button>`:''}
+        <button class="ab ad" onclick="removeTmp(${i})">Remove</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function removeTmp(i){ tempData.splice(i,1); renderTemp(); toast('Temporary assignment removed','✅'); }
+function addTempAssign(){ toast('Temporary assignment created','✅'); cm('tempAssignModal'); }
+
+// ── SECTION COLLAPSE ──
+function toggleSec(name){
+  const body=document.getElementById(name+'-content');
+  const card=document.getElementById('sec-'+name);
+  const arrow=card.querySelector('.ca');
+  const hidden=body.style.display==='none';
+  body.style.display=hidden?'':'none';
+  if(hidden){ card.classList.remove('coll'); }
+  else { card.classList.add('coll'); }
+}
+// Settings start collapsed
+document.getElementById('sec-set').classList.add('coll');
+
+// ── VIOLATIONS ──
+function resolveVio(btn){
+  const row=btn.closest('.vr');
+  const badge=row.querySelector('.badge');
+  const stripe=row.querySelector('.vs');
+  badge.className='badge bg'; badge.textContent='Resolved';
+  stripe.style.background='var(--green)';
+  btn.replaceWith(Object.assign(document.createElement('span'),{style:'margin-left:10px;font-size:10px;color:var(--text3);flex-shrink:0',textContent:'Resolved by Prem'}));
+  toast('Violation resolved','✅');
+  const el=document.getElementById('st-vio');
+  el.textContent=Math.max(0,parseInt(el.textContent)-1);
+}
+
+// ── TASKS ──
+function toggleTask(el){
+  el.classList.toggle('done');
+  if(el.classList.contains('done')) el.textContent='✓'; else el.textContent='';
+  const nm=el.nextElementSibling; nm.classList.toggle('done');
+  const badge=nm.nextElementSibling;
+  if(el.classList.contains('done')){ badge.className='badge bg'; badge.textContent='Done'; toast('Task marked complete','✅'); }
+  else{ badge.className='badge bb'; badge.textContent='In Progress'; }
+}
+
+function addTask(){
+  const list=document.getElementById('taskList');
+  const row=document.createElement('div'); row.className='tr2';
+  row.innerHTML=`<div class="tk-chk" onclick="toggleTask(this)"></div><div class="tk-nm">New task added</div><span class="badge bgr">To Do</span>`;
+  list.appendChild(row); cm('addTaskModal'); toast('Task added','✅');
+}
+
+// ── ACTIVITY LOG ──
+function addAct(text,icon,bg,col){
+  const feed=document.getElementById('actFeed');
+  const d=new Date();
+  const t=`${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+  const el=document.createElement('div'); el.className='ai';
+  el.innerHTML=`<div class="ai-ico" style="background:${bg};color:${col}">${icon}</div><div><div class="ai-t">${text}</div><div class="ai-dt">10 Jun 2024 · ${t} · by Admin (Prem)</div></div>`;
+  feed.insertBefore(el,feed.firstChild);
+}
+
+// ── OTHER ACTIONS ──
+function submitAlter(){ cm('alterRosterModal'); addAct('Roster alteration scheduled — swap effective from chosen date','⇄','var(--abg)','var(--amber)'); toast('Roster alteration scheduled','✅'); }
+function changeSupervisor(){ cm('changeSuperModal'); addAct('Supervisor change initiated — handover period set','↑','var(--pbg)','var(--purple)'); toast('Supervisor change scheduled','✅'); }
+function saveZone(){ cm('editZoneModal'); addAct('Geo-fence zone updated','📍','var(--gbg)','var(--green)'); toast('Zone saved','✅'); }
+function toggleTempDates(v){ document.getElementById('tempDateFields').style.display=v==='temporary'?'':'none'; }
+
+function makeEditable(el){
+  const val=el.textContent;
+  const inp=document.createElement('input'); inp.type='text'; inp.value=val; inp.className='ii';
+  el.replaceWith(inp); inp.focus(); inp.select();
+  inp.addEventListener('blur',()=>{ const sp=document.createElement('span'); sp.className='iv'; sp.textContent=inp.value; sp.onclick=function(){makeEditable(this);}; inp.replaceWith(sp); toast('Setting updated','✅'); });
+  inp.addEventListener('keydown',e=>{ if(e.key==='Enter') inp.blur(); });
+}
+
+// ── INIT ──
+renderRoster();
+renderTemp();
+</script>
+<!--<script>
+document.getElementById("emp_search").addEventListener("keyup", function() {
+
+    let query = this.value;
+
+    if(query.length > 0){
+
+        fetch(`/employee-search/?q=${query}`)
+        .then(response => response.json())
+        .then(data => {
+
+            let html = "";
+
+            data.forEach(emp => {
+                html += `
+                    <div class="emp-item"
+                         data-id="${emp.id}"
+                         data-name="${emp.empname}">
+                        ${emp.empname} (${emp.empno})
+                    </div>
+                `;
+            });
+
+            document.getElementById("suggestions").innerHTML = html;
+        });
+
+    } else {
+        document.getElementById("suggestions").innerHTML = "";
+    }
+
+});
+
+
+// When user clicks a suggestion
+document.getElementById("suggestions").addEventListener("click", function(e){
+
+    if(e.target.classList.contains("emp-item")){
+
+        // Put selected name in input box
+        document.getElementById("emp_search").value =
+            e.target.getAttribute("data-name");
+
+        // Hide suggestions
+        document.getElementById("suggestions").innerHTML = "";
+    }
+
+});
+</script>-->
+
+<script>
+function moveSelected(direction){
+  if(direction === 'right'){
+    document.querySelectorAll('#availList .avail-cb:checked').forEach(cb => {
+      document.getElementById('selList').innerHTML = '';
+      const row = cb.closest('.emp-row');
+      const item = document.createElement('div');
+      item.className = 'sel-row';
+      item.dataset.id = row.dataset.id;
+      item.style = "display:flex;align-items:center;justify-content:space-between;padding:6px";
+      item.innerHTML = `<span>${row.dataset.name}</span><button type="button" class="btn btn-s btn-sm" onclick="moveBack(this,'${row.dataset.id}')">✕</button>`;
+      document.getElementById('selList').appendChild(item);
+      row.style.display = 'none';
+    });
+  } else {
+    document.querySelectorAll('#selList .sel-row').forEach(item => {
+      const row = document.querySelector(`#availList .emp-row[data-id="${item.dataset.id}"]`);
+      if(row){ row.style.display = 'flex'; row.querySelector('.avail-cb').checked = false; }
+    });
+    document.getElementById('selList').innerHTML = '';
+  }
+}
+function moveBack(btn, id){
+  const row = document.querySelector(`#availList .emp-row[data-id="${id}"]`);
+  if(row){ row.style.display = 'flex'; row.querySelector('.avail-cb').checked = false; }
+  btn.closest('.sel-row').remove();
+}
+
+
+document.getElementById('superForm').addEventListener('submit', function(e){
+  let sel = document.querySelector('#selList .sel-row');
+
+  // fallback: if user checked a box but never clicked the arrow, move it now
+  if(!sel){
+    const checked = document.querySelector('#availList .avail-cb:checked');
+    if(checked){
+      moveSelected('right');
+      sel = document.querySelector('#selList .sel-row');
+    }
+  }
+
+  if(!sel){
+    e.preventDefault();
+    alert('Please select an employee to assign as supervisor.');
+    return;
+  }
+
+  document.getElementById('newsupervisor_input').value = sel.dataset.id;
+});
+
+
+
+document.getElementById('supSearchAvail').addEventListener('keyup', function(){
+  const q = this.value.toLowerCase();
+  document.querySelectorAll('#availList .emp-row').forEach(row => {
+    row.style.display = row.dataset.name.toLowerCase().includes(q) ? 'flex' : 'none';
+  });
+});
+</script>
+{% endblock %}
+

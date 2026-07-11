@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Role History — IET Smart Solution{% endblock %}
+{% block page_title %}Employee Role History{% endblock %}
+
+{% block extra_styles %}
+.rh-search{width:280px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text1);font-size:13px;margin-bottom:18px}
+.rh-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);margin-bottom:14px;overflow:hidden}
+.rh-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;cursor:pointer;user-select:none}
+.rh-name{font-size:14px;font-weight:600;color:var(--text1)}
+.rh-no{font-size:11px;color:var(--text3);margin-top:2px;font-family:var(--mono)}
+.rh-stats{display:flex;gap:18px;align-items:center}
+.rh-stat{text-align:center}
+.rh-stat-n{font-size:16px;font-weight:700;font-family:var(--mono)}
+.rh-stat-l{font-size:10px;color:var(--text3);margin-top:2px}
+.rh-body{display:none;padding:0 18px 16px;border-top:1px solid var(--border)}
+.rh-body.open{display:block}
+.rh-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:12px}
+.rh-table th{text-align:left;color:var(--text3);padding:6px;font-weight:600}
+.rh-table td{padding:6px;border-top:1px solid var(--border)}
+.rh-ca{width:15px;height:15px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+.rh-hd.open .rh-ca{transform:rotate(180deg)}
+{% endblock %}
+
+{% block content %}
+<div class="sh">
+  <div>
+    <div class="sh-title">Employee Role History</div>
+    <div class="sh-sub">Days spent as Employee vs Supervisor, per project</div>
+  </div>
+</div>
+
+<form method="get">
+  <input class="rh-search" type="text" name="search" placeholder="Search by name or emp no..." value="{{ search }}">
+</form>
+
+{% for d in data %}
+<div class="rh-card">
+  <div class="rh-hd" onclick="this.classList.toggle('open'); this.nextElementSibling.classList.toggle('open')">
+    <div>
+      <div class="rh-name">{{ d.employee.empname }}</div>
+      <div class="rh-no">{{ d.employee.empno }}</div>
+    </div>
+    <div class="rh-stats">
+      <div class="rh-stat">
+        <div class="rh-stat-n" style="color:var(--accent2)">{{ d.worker_days }}</div>
+        <div class="rh-stat-l">Days as Employee</div>
+      </div>
+      <div class="rh-stat">
+        <div class="rh-stat-n" style="color:var(--purple)">{{ d.supervisor_days }}</div>
+        <div class="rh-stat-l">Days as Supervisor</div>
+      </div>
+      <div class="rh-stat">
+        <div class="rh-stat-n">{{ d.total_days }}</div>
+        <div class="rh-stat-l">Total Days</div>
+      </div>
+      <svg class="rh-ca" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </div>
+  <div class="rh-body">
+    <table class="rh-table">
+      <thead>
+        <tr>
+          <th>Project</th>
+          <th>Role</th>
+          <th>From</th>
+          <th>To</th>
+          <th>Days</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in d.periods %}
+        <tr>
+          <td>{{ p.project }}</td>
+          <td>
+            {% if p.role == 'Supervisor' %}
+              <span class="badge bp">Supervisor</span>
+            {% else %}
+              <span class="badge bb">Employee</span>
+            {% endif %}
+          </td>
+          <td>{{ p.start_date }}</td>
+          <td>{% if p.end_date %}{{ p.end_date }}{% else %}Present{% endif %}</td>
+          <td>{{ p.days }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% empty %}
+<p style="color:var(--text3);text-align:center;padding:40px 0;">No role history found.</p>
+{% endfor %}
+{% endblock %}

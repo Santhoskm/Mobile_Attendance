@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Assignments — IET Smart Solution{% endblock %}
+{% block nav_assign %}active{% endblock %}
+{% block page_title %}Project Assignments{% endblock %}
+
+{% block extra_styles %}
+.asl{display:flex;flex-direction:column;gap:5px;max-height:280px;overflow-y:auto}
+.asi{display:flex;align-items:center;gap:9px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .15s}
+.asi:hover{border-color:var(--border2)}.asi.sel{border-color:var(--accent);background:var(--aglow)}
+.achk{width:17px;height:17px;border-radius:4px;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;color:var(--accent2)}
+.asi.sel .achk{background:var(--accent);border-color:var(--accent);color:#fff}
+.cg{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+{% endblock %}
+
+{% block content %}
+<div class="sh">
+  <div><div class="sh-title">Project Assignments</div><div class="sh-sub">Assign supervisors and employees to projects</div></div>
+</div>
+<div class="cg">
+  <div>
+    <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">Select Project</div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      {% for project in projects %}
+      <div class="asi sel" onclick="selProj(this)">
+        <div class="achk">✓</div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:500;color:var(--text1)">{{ project.projectname }}</div>
+          <div style="font-size:11px;color:var(--text3)">{{ project.projectcode }} · {{ project.employee_count|default:0 }} employees</div>
+        </div>
+        <span class="badge bg">Active</span>
+      </div>
+      {% empty %}
+      <div class="asi sel" onclick="selProj(this)"><div class="achk">✓</div><div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text1)">Harbour Road Phase 2</div><div style="font-size:11px;color:var(--text3)">HR-P2 · 24 employees</div></div><span class="badge bg">Active</span></div>
+      <div class="asi" onclick="selProj(this)"><div class="achk"></div><div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text1)">Marina Bay Construction</div><div style="font-size:11px;color:var(--text3)">MBC-1 · 18 employees</div></div><span class="badge bg">Active</span></div>
+      <div class="asi" onclick="selProj(this)"><div class="achk"></div><div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text1)">Tuas Link Phase 3</div><div style="font-size:11px;color:var(--text3)">TL-P3 · 31 employees</div></div><span class="badge bg">Active</span></div>
+      {% endfor %}
+    </div>
+  </div>
+  <div>
+    <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">Harbour Road Phase 2 — Team</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:7px;font-weight:500">Supervisor</div>
+    <div class="asi sel" style="margin-bottom:12px"><div class="achk">✓</div><div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text1)">Subbiah Ravichandran</div><div style="font-size:11px;color:var(--text3)">IET-017 · Lifting Supervisor</div></div><span class="badge bp">Supervisor</span></div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:7px;font-weight:500">Employees (24)</div>
+    <div class="asl">
+      <div class="asi sel" onclick="togAsi(this)"><div class="achk">✓</div><div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text1)">Veerappan Kandhasamy</div><div style="font-size:11px;color:var(--text3)">IET-009</div></div></div>
+      <div class="asi sel" onclick="togAsi(this)"><div class="achk">✓</div><div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text1)">Chinniah Adaikkalam</div><div style="font-size:11px;color:var(--text3)">IET-015</div></div></div>
+      <div class="asi" onclick="togAsi(this)"><div class="achk"></div><div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text1)">Palaniswamy K</div><div style="font-size:11px;color:var(--text3)">IET-031</div></div></div>
+      <div class="asi" onclick="togAsi(this)"><div class="achk"></div><div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text1)">Rajan Muthu</div><div style="font-size:11px;color:var(--text3)">IET-023</div></div></div>
+      <div class="asi sel" onclick="togAsi(this)"><div class="achk">✓</div><div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text1)">Selvakumar Arumugam</div><div style="font-size:11px;color:var(--text3)">IET-042</div></div></div>
+    </div>
+    <div style="display:flex;gap:9px;margin-top:13px">
+      <button class="btn btn-p" style="flex:1" onclick="toast('Assignments saved','✅')">Save Assignments</button>
+      <button class="btn btn-s">Cancel</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function togAsi(el){
+  el.classList.toggle('sel');
+  el.querySelector('.achk').textContent=el.classList.contains('sel')?'✓':'';
+}
+function selProj(el){
+  el.closest('div').querySelectorAll('.asi').forEach(i=>{i.classList.remove('sel');i.querySelector('.achk').textContent='';});
+  el.classList.add('sel');el.querySelector('.achk').textContent='✓';
+}
+</script>
+{% endblock %}

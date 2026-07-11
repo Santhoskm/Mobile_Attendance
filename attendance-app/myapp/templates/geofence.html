@@ -1,0 +1,390 @@
+{% extends "base.html" %}
+
+{% block title %}Geo-fence Zones — IET Smart Solution{% endblock %}
+{% block nav_geofence %}active{% endblock %}
+{% block page_title %}Geo-fence Zones{% endblock %}
+
+<style>
+  .view-item{
+    padding:10px 0;
+    border-bottom:1px solid #e5e7eb;
+    font-size:14px;
+}
+
+.view-item strong{
+    display:inline-block;
+    width:140px;
+    color:#374151;
+}
+</style>
+
+{% block content %}
+<div class="sh">
+  <div><div class="sh-title">Geo-fence Zones</div><div class="sh-sub">8 active zones</div></div>
+  <button class="btn btn-p" onclick="om('m-zone')">+ Add Zone</button>
+</div>
+<div class="tw">
+  <div class="ttb">
+    <div class="ftabs"><div class="ft active">All Zones (8)</div><div class="ft">Active (8)</div></div>
+  </div>
+  <table>
+    <thead>
+      <tr><th>Zone Name</th><th>Linked Project</th><th>Coordinates</th><th>Radius</th><th>Active Hours</th><th>Status</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for zone in geofencezones %}
+      <tr>
+        <td><strong style="color:var(--text1)">{{ zone.geofence_name }}</strong></td>
+        <td>{{ zone.linkedproject }}</td>
+        <td><span style="font-family:var(--mono);font-size:11px;color:var(--text3)">{{ zone.centre_latitude }}°N {{ zone.centre_longitude }}°E</span></td>
+        <td>{{ zone.radius }}m</td>
+        <td>{{ zone.active_hours }} hrs</td>
+        <td><span class="badge bg">Active</span></td>
+        <td><div class="acts"><button class="ab av-b"  onclick="openViewModal(this)"
+    data-name="{{ zone.geofence_name }}"
+    data-project="{{ zone.linkedproject }}"
+    data-radius="{{ zone.radius }}"
+    data-lat="{{ zone.centre_latitude }}"
+    data-lng="{{ zone.centre_longitude }}"
+    data-from="{{ zone.activefromtime|time:'H:i' }}"
+    data-until="{{ zone.activeuntiltime|time:'H:i' }}">View</button><button class="ab ae"  onclick="openEditModal(this)"
+    data-id="{{ zone.id }}"
+    data-name="{{ zone.geofence_name }}"
+    data-project="{{ zone.linkedproject}}"
+    data-radius="{{ zone.radius }}"
+    data-lat="{{ zone.centre_latitude }}"
+    data-lng="{{ zone.centre_longitude }}"
+    data-from="{{ zone.activefromtime|time:'H:i' }}"
+    data-until="{{ zone.activeuntiltime|time:'H:i' }}">Edit</button>
+          <button class="ab ad"><a class="ab ad" style="text-decoration: none;" href="{% url 'delete_geofence' id=zone.id %}">Delete</a></button></div></td>
+      </tr>
+      {% endfor %}
+      <!-- <tr>
+        <td><strong style="color:var(--text1)">Marina Bay Site A</strong></td>
+        <td>Marina Bay Construction</td>
+        <td><span style="font-family:var(--mono);font-size:11px;color:var(--text3)">1.2818°N 103.8636°E</span></td>
+        <td>150m</td><td>07:00–19:00</td>
+        <td><span class="badge bg">Active</span></td>
+        <td><div class="acts"><button class="ab av-b">View</button><button class="ab ae">Edit</button><button class="ab ad">Delete</button></div></td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--text1)">Tuas Link Zone B</strong></td>
+        <td>Tuas Link Phase 3</td>
+        <td><span style="font-family:var(--mono);font-size:11px;color:var(--text3)">1.3273°N 103.6364°E</span></td>
+        <td>300m</td><td>07:00–18:00</td>
+        <td><span class="badge bg">Active</span></td>
+        <td><div class="acts"><button class="ab av-b">View</button><button class="ab ae">Edit</button><button class="ab ad">Delete</button></div></td>
+      </tr> -->
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block modals %}
+<div class="mo" id="m-zone">
+  <div class="md" style="width:580px">
+    <div class="mh"><div class="mt">Add Geo-fence Zone</div><div class="mc" onclick="cm('m-zone')">✕</div></div>
+    <form action="{% url 'create_geofence' %}" method="post">
+      {% csrf_token %}
+      <div class="mb">
+        <div style="background:var(--bg3);border-radius:10px;height:180px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);margin-bottom:14px;flex-direction:column;gap:8px;color:var(--text3)">
+          <span style="font-size:36px">🗺️</span>
+          <span style="font-size:13px">Map view — set zone centre</span>
+          <span style="font-size:11px">(Google Maps API integration)</span>
+        </div>
+        <div class="fg">
+          <div class="fgrp"><label class="fl">Zone Name <span>*</span></label><input name="geofence_name" class="fi" placeholder="e.g. Harbour Road Main Gate"></div>
+          <div class="fgrp"><label class="fl">Linked Project <span>*</span></label>
+            <select name="project_id" class="fi">
+              {% for project in projectsnew %}
+              <option value="{{ project.id }}">{{ project.projectname }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="fgrp"><label class="fl">Zone Type</label><select name="zonetype" class="fi"><option>Radius (Circle)</option><option>Polygon</option></select></div>
+          <div class="fgrp"><label class="fl">Radius (metres)</label><input name="radius" class="fi" value="200" style="font-family:var(--mono)"></div>
+          <div class="fgrp"><label class="fl">Centre Latitude <span>*</span></label><input name="latitude" class="fi" placeholder="1.2897" style="font-family:var(--mono)"></div>
+          <div class="fgrp"><label class="fl">Centre Longitude <span>*</span></label><input name="longitude" class="fi" placeholder="103.8501" style="font-family:var(--mono)"></div>
+          <div class="fgrp"><label class="fl">Active From</label><input name="activefromtime" class="fi" type="time" value="06:00"></div>
+          <div class="fgrp"><label class="fl">Active Until</label><input name="activeuntiltime" class="fi" type="time" value="20:00"></div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:11px 14px;margin-top:12px;font-size:12px;color:var(--text3)">ℹ️ 30m GPS buffer added automatically. Effective radius: <strong style="color:var(--text1)">230m</strong></div>
+      </div>
+      <div class="mf">
+        <button type="button" class="btn btn-s" onclick="cm('m-zone')">Cancel</button>
+        <button type="submit" class="btn btn-p">Create Zone</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!--edit--->
+
+<div class="mo" id="m-edit-zone">
+  <div class="md" style="width:580px">
+    <div class="mh">
+      <div class="mt">Edit Geo-fence Zone</div>
+      <div class="mc" onclick="cm('m-edit-zone')">✕</div>
+    </div>
+
+    <form id="editForm" method="post">
+      {% csrf_token %}
+
+      <div class="mb">
+        <div class="fg">
+
+          <input type="hidden" name="zone_id" id="e-id">
+
+          <div class="fgrp">
+            <label class="fl">Zone Name</label>
+            <input name="geofence_name" id="e-name" class="fi">
+          </div>
+
+          <div class="fgrp">
+            <label class="fl">Linked Project</label>
+            <select name="project_id" id="e-project" class="fi">
+              {% for project in projectsnew %}
+              <option value="{{ project.projectname }}">
+                {{ project.projectname }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="fgrp">
+            <label class="fl">Radius</label>
+            <input name="radius" id="e-radius" class="fi">
+          </div>
+
+          <div class="fgrp">
+            <label class="fl">Latitude</label>
+            <input name="latitude" id="e-lat" class="fi">
+          </div>
+
+          <div class="fgrp">
+            <label class="fl">Longitude</label>
+            <input name="longitude" id="e-lng" class="fi">
+          </div>
+
+          <div class="fgrp">
+            <label class="fl">Active From</label>
+            <input type="time" name="activefromtime" id="e-from" class="fi">
+          </div>
+
+          <div class="fgrp">
+            <label class="fl">Active Until</label>
+            <input type="time" name="activeuntiltime" id="e-until" class="fi">
+          </div>
+
+        </div>
+      </div>
+
+      <div class="mf">
+        <button type="button" class="btn btn-s" onclick="cm('m-edit-zone')">
+          Cancel
+        </button>
+        <button type="submit" class="btn btn-p">
+          Update Zone
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!---------->
+
+<!-- <div class="mo" id="m-view-zone">
+  <div class="md" style="width:580px">
+
+    <div class="mh">
+      <div class="mt">View Geo-fence Zone</div>
+      <div class="mc" onclick="cm('m-view-zone')">✕</div>
+    </div>
+
+    <div class="mb">
+      <div class="fg">
+
+        <div class="fgrp">
+          <label class="fl">Zone Name</label>
+          <input id="v-name" class="fi" readonly>
+        </div>
+
+        <div class="fgrp">
+          <label class="fl">Linked Project</label>
+          <input id="v-project" class="fi" readonly>
+        </div>
+
+        <div class="fgrp">
+          <label class="fl">Radius</label>
+          <input id="v-radius" class="fi" readonly>
+        </div>
+
+        <div class="fgrp">
+          <label class="fl">Latitude</label>
+          <input id="v-lat" class="fi" readonly>
+        </div>
+
+        <div class="fgrp">
+          <label class="fl">Longitude</label>
+          <input id="v-lng" class="fi" readonly>
+        </div>
+
+        <div class="fgrp">
+          <label class="fl">Active From</label>
+          <input id="v-from" class="fi" readonly>
+        </div>
+
+        <div class="fgrp">
+          <label class="fl">Active Until</label>
+          <input id="v-until" class="fi" readonly>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="mf">
+      <button type="button" class="btn btn-p"
+              onclick="cm('m-view-zone')">
+        Close
+      </button>
+    </div>
+
+  </div>
+</div> -->
+<div class="mo" id="m-view-zone">
+  <div class="md" style="width:580px">
+
+    <div class="mh">
+      <div class="mt">View Geo-fence Zone</div>
+      <div class="mc" onclick="cm('m-view-zone')">✕</div>
+    </div>
+
+    <div class="mb">
+
+      <div class="view-item">
+        <strong>Zone Name :</strong>
+        <span id="v-name"></span>
+      </div>
+
+      <div class="view-item">
+        <strong>Linked Project :</strong>
+        <span id="v-project"></span>
+      </div>
+
+      <div class="view-item">
+        <strong>Radius :</strong>
+        <span id="v-radius"></span>
+      </div>
+
+      <div class="view-item">
+        <strong>Latitude :</strong>
+        <span id="v-lat"></span>
+      </div>
+
+      <div class="view-item">
+        <strong>Longitude :</strong>
+        <span id="v-lng"></span>
+      </div>
+
+      <div class="view-item">
+        <strong>Active From :</strong>
+        <span id="v-from"></span>
+      </div>
+
+      <div class="view-item">
+        <strong>Active Until :</strong>
+        <span id="v-until"></span>
+      </div>
+
+    </div>
+
+    <div class="mf">
+      <button type="button" class="btn btn-p"
+              onclick="cm('m-view-zone')">
+        Close
+      </button>
+    </div>
+
+  </div>
+</div>
+<!-------->
+<script>
+function openViewModall(btn){
+
+    document.getElementById("v-name").value =
+        btn.dataset.name;
+
+    document.getElementById("v-project").value =
+        btn.dataset.project;
+
+    document.getElementById("v-radius").value =
+        btn.dataset.radius + " m";
+
+    document.getElementById("v-lat").value =
+        btn.dataset.lat;
+
+    document.getElementById("v-lng").value =
+        btn.dataset.lng;
+
+    document.getElementById("v-from").value =
+        btn.dataset.from;
+
+    document.getElementById("v-until").value =
+        btn.dataset.until;
+
+    om('m-view-zone');
+}
+</script>
+<!--------->
+<script>
+function openEditModal(btn){
+
+     console.log("Project ID:", btn.dataset.project);
+
+
+    document.getElementById("e-id").value =
+        btn.dataset.id;
+
+    document.getElementById("e-name").value =
+        btn.dataset.name;
+
+    document.getElementById("e-project").value =
+        btn.dataset.project;
+
+    document.getElementById("e-radius").value =
+        btn.dataset.radius;
+
+    document.getElementById("e-lat").value =
+        btn.dataset.lat;
+
+    document.getElementById("e-lng").value =
+        btn.dataset.lng;
+
+    document.getElementById("e-from").value =
+        btn.dataset.from;
+
+    document.getElementById("e-until").value =
+        btn.dataset.until;
+
+    // Set update URL
+    document.getElementById("editForm").action =
+        "/update_geofence/" + btn.dataset.id + "/";
+
+    om('m-edit-zone');
+}
+</script>
+<script>
+  function openViewModal(btn){
+
+    document.getElementById("v-name").textContent = btn.dataset.name;
+    document.getElementById("v-project").textContent = btn.dataset.project;
+    document.getElementById("v-radius").textContent = btn.dataset.radius + " m";
+    document.getElementById("v-lat").textContent = btn.dataset.lat;
+    document.getElementById("v-lng").textContent = btn.dataset.lng;
+    document.getElementById("v-from").textContent = btn.dataset.from;
+    document.getElementById("v-until").textContent = btn.dataset.until;
+
+    om('m-view-zone');
+}
+</script>
+{% endblock %}

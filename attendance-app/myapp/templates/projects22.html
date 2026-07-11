@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Projects — IET Smart Solution{% endblock %}
+{% block nav_projects %}active{% endblock %}
+{% block page_title %}Project Management{% endblock %}
+
+{% block extra_styles %}
+.pg{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px}
+.pc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:18px;transition:border-color .2s;cursor:pointer}
+.pc:hover{border-color:var(--border2)}
+.pc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
+.pn{font-size:14px;font-weight:600;color:var(--text1)}
+.pc-code{font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:2px}
+.pm{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.pmr{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2)}
+.pbw{background:var(--bg4);border-radius:99px;height:4px;overflow:hidden;margin-top:12px}
+.pbf{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--teal))}
+.pft{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+.avs{display:flex}
+.avs .av{width:24px;height:24px;border:2px solid var(--bg2);margin-left:-7px;font-size:9px}
+.avs .av:first-child{margin-left:0}
+{% endblock %}
+
+{% block content %}
+<div class="sh">
+  <div><div class="sh-title">Project Management</div><div class="sh-sub">8 active · 2 pending approval</div></div>
+  <div style="display:flex;gap:8px">
+    <div class="ftabs">
+      <div class="ft active">Active (8)</div>
+      <div class="ft">Pending (2)</div>
+      <div class="ft">Archived (5)</div>
+    </div>
+    <button class="btn btn-p" onclick="om('m-proj')">+ New Project</button>
+  </div>
+</div>
+<div class="pg" id="proj-grid"></div>
+{% endblock %}
+
+{% block modals %}
+<div class="mo" id="m-proj">
+  <div class="md">
+    <div class="mh"><div class="mt">Create New Project</div><div class="mc" onclick="cm('m-proj')">✕</div></div>
+    <form action="{% url 'create_project' %}" method="post">
+      {% csrf_token %}
+      <div class="mb">
+        <div class="fg">
+          <div class="fgrp"><label class="fl">Project Name <span>*</span></label><input name="projectname" class="fi" placeholder="e.g. Harbour Road Phase 2"></div>
+          <div class="fgrp"><label class="fl">Project Code <span>*</span></label><input name="projectcode" class="fi" placeholder="HR-P2" style="font-family:var(--mono)"></div>
+          <div class="fgrp"><label class="fl">Client Name</label><input name="clientname" class="fi" placeholder="Client company"></div>
+          <div class="fgrp"><label class="fl">Supervisor <span>*</span></label>
+            <select name="supervisor" class="fi">
+              {% for employee in supervisors %}
+              <option value="{{ employee.id }}">{{ employee.empname }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="fgrp"><label class="fl">Start Date <span>*</span></label><input name="projectstartdate" class="fi" type="date"></div>
+          <div class="fgrp"><label class="fl">End Date</label><input name="projectenddate" class="fi" type="date"></div>
+          <div class="fgrp"><label class="fl">Shift Start</label><input name="shiftstarttime" class="fi" type="time" value="08:00"></div>
+          <div class="fgrp"><label class="fl">Shift End</label><input name="shiftendtime" class="fi" type="time" value="17:00"></div>
+          <div class="fgrp"><label class="fl">Late Threshold (min)</label><input name="threshold" class="fi" value="15"></div>
+          <div class="fgrp"><label class="fl">Geo-fence Zone <span>*</span></label><select name="geozone" class="fi"><option>— Select Zone —</option><option>Harbour Road Main Gate</option><option>Marina Bay Site A</option></select></div>
+          <div class="fgrp full"><label class="fl">Site Address</label><input name="siteaddress" class="fi" placeholder="Full site address"></div>
+          <div class="fgrp full"><label class="fl">Description</label><textarea name="description" class="fi" rows="2" placeholder="Project notes..."></textarea></div>
+        </div>
+      </div>
+      <div class="mf">
+        <button type="button" class="btn btn-s" onclick="cm('m-proj')">Cancel</button>
+        <button type="submit" class="btn btn-p">Create Project</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const projs = [
+  {% for project in projects %}
+  {
+    n: '{{ project.projectname|escapejs }}',
+    code: '{{ project.projectcode|escapejs }}',
+    sup: '{{ project.supervisor|escapejs }}',
+    cnt: {{ project.employee_count|default:0 }},
+    st: '{{ project.status|escapejs }}',
+    prog: {{ project.progress|default:0 }},
+    c: '#3B82F6'
+  }{% if not forloop.last %},{% endif %}
+  {% empty %}
+  {n:'Harbour Road Phase 2',code:'HR-P2',sup:'Subbiah IET-017',cnt:24,st:'Active',prog:62,c:'#3B82F6'},
+  {n:'Marina Bay Construction',code:'MBC-1',sup:'Krishnan IET-024',cnt:18,st:'Active',prog:38,c:'#10B981'},
+  {n:'Tuas Link Phase 3',code:'TL-P3',sup:'Murugan IET-033',cnt:31,st:'Active',prog:81,c:'#F59E0B'},
+  {n:'Jurong West Site',code:'JW-01',sup:'Ravi IET-041',cnt:15,st:'Pending',prog:0,c:'#8B5CF6'},
+  {n:'Buona Vista Works',code:'BV-02',sup:'Arun IET-052',cnt:22,st:'Active',prog:55,c:'#06B6D4'},
+  {n:'Clementi Ave 6',code:'CA-06',sup:'Kumar IET-061',cnt:11,st:'Active',prog:29,c:'#EC4899'}
+  {% endfor %}
+];
+document.getElementById('proj-grid').innerHTML=projs.map(p=>`<div class="pc">
+  <div class="pc-top"><div><div class="pn">${p.n}</div><div class="pc-code">${p.code}</div></div><span class="badge ${p.st==='Active'?'bg':'ba'}">${p.st==='Active'?'● ':''}${p.st}</span></div>
+  <div class="pm"><div class="pmr">👷 <span>${p.sup}</span></div><div class="pmr">👥 <span>${p.cnt} employees</span></div></div>
+  ${p.st==='Active'?`<div class="pbw"><div class="pbf" style="width:${p.prog}%"></div></div><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-top:3px"><span>Tasks</span><span>${p.prog}%</span></div>`:''}
+  <div class="pft">
+    <div class="avs"><div class="av" style="background:${p.c}">A</div><div class="av" style="background:#8B5CF6">B</div><div class="av" style="background:#10B981">C</div><div class="av" style="background:var(--bg4);color:var(--text3);font-size:9px">+${p.cnt-3}</div></div>
+    <div style="display:flex;gap:5px"><a href="/assignments/" class="ab aas">Assign</a><button class="ab ae" onclick="om('m-proj')">Edit</button></div>
+  </div>
+</div>`).join('');
+</script>
+{% endblock %}

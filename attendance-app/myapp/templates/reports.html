@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}Reports — IET Smart Solution{% endblock %}
+{% block nav_reports %}active{% endblock %}
+{% block page_title %}Attendance Reports{% endblock %}
+
+{% block extra_styles %}
+.rfc{display:flex;gap:9px;margin-bottom:18px;flex-wrap:wrap}
+.rc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:18px;margin-bottom:18px}
+.trnd{display:flex;align-items:flex-end;gap:2px;height:70px;margin-top:14px}
+.trb{flex:1;border-radius:2px 2px 0 0;min-height:3px;transition:opacity .2s}.trb:hover{opacity:.7}
+.sgc
+{
+display:flex;
+justify-content:space-around;
+}
+{% endblock %}
+
+{% block content %}
+<div class="sh">
+  <div><div class="sh-title">Attendance Reports</div><div class="sh-sub">Generate and export detailed reports</div></div>
+  <button class="btn btn-p">📥 Export CSV</button>
+</div>
+<!--<div class="rfc">
+  <select class="fi" style="width:140px;padding:7px 10px"><option>This Month</option><option>Last 7 Days</option><option>Last Month</option></select>
+  <select class="fi" style="width:190px;padding:7px 10px"><option>All Projects</option><option>Harbour Road Phase 2</option></select>
+  <select class="fi" style="width:150px;padding:7px 10px"><option>All Employees</option><option>IET Direct</option><option>Sub-Con</option></select>
+  <button class="btn btn-p">Generate</button>
+</div>-->
+<!--<div class="rfc">
+<form method="GET" class="rfc">
+    <input type="month" name="month" class="fi"
+           value="{{ selected_month }}">
+
+    <button type="submit" class="btn btn-p">
+        Generate
+    </button>
+</form>
+</div>-->
+<div class="sg">
+  <div class="sc green"><div class="sc-lbl">Avg Attendance</div><div class="sc-val">{{ avg_attendance }}%</div><div class="sc-ch up">↑ 2% vs last month</div></div>
+  <div class="sc blue"><div class="sc-lbl">Total Hours</div><div class="sc-val" style="font-size:22px">12,840</div></div>
+  <div class="sc red"><div class="sc-lbl">This Month Violations</div><div class="sc-val">{{current_month_violations}}</div><div class="sc-ch dn"></div></div>
+  <div class="sc amber"><div class="sc-lbl">Late Check-ins</div><div class="sc-val">143</div></div>
+</div>
+<form method="GET" class="rfc">
+   <div class="sgc">
+    <input type="month" name="month" class="fi"
+           value="{{ selected_month }}">
+
+    <button type="submit" class="btn btn-p">
+        Generate
+    </button>
+  </div>
+</form>
+<div class="rc">
+  <div style="font-size:14px;font-weight:600;color:var(--text1);margin-bottom:3px">Daily Attendance — {{ month_title }}</div>
+  <div style="font-size:12px;color:var(--text3)">Present count per day</div>
+  <!--<div class="trnd">
+    <div class="trb" style="height:75%;background:var(--accent)"></div><div class="trb" style="height:82%;background:var(--accent)"></div><div class="trb" style="height:88%;background:var(--accent)"></div><div class="trb" style="height:91%;background:var(--accent)"></div><div class="trb" style="height:79%;background:var(--accent)"></div><div class="trb" style="height:45%;background:var(--bg4)"></div><div class="trb" style="height:30%;background:var(--bg4)"></div><div class="trb" style="height:88%;background:var(--accent)"></div><div class="trb" style="height:84%;background:var(--accent)"></div><div class="trb" style="height:92%;background:var(--accent)"></div><div class="trb" style="height:87%;background:var(--accent)"></div><div class="trb" style="height:83%;background:var(--accent)"></div><div class="trb" style="height:40%;background:var(--bg4)"></div><div class="trb" style="height:35%;background:var(--bg4)"></div><div class="trb" style="height:90%;background:var(--accent)"></div><div class="trb" style="height:86%;background:var(--accent)"></div><div class="trb" style="height:88%;background:var(--accent)"></div><div class="trb" style="height:93%;background:var(--accent)"></div><div class="trb" style="height:85%;background:var(--accent)"></div><div class="trb" style="height:86%;background:var(--teal)"></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;margin-top:5px"><span style="font-size:10px;color:var(--text3)">May 1</span><span style="font-size:10px;color:var(--text3)">May 10</span><span style="font-size:10px;color:var(--text3)">May 20</span></div>
+</div>-->
+
+
+<div class="trnd">
+
+{% for bar in daily_data %}
+
+<div
+    class="trb"
+    style="height:{{ bar.height }}%;
+           background:var(--accent);"
+    title="{{ bar.day }} : {{ bar.count }}">
+</div>
+
+{% endfor %}
+
+</div>
+<div style="display:flex">
+
+{% for bar in daily_data %}
+    <div style="flex:1;text-align:center;font-size:10px">
+        {{ bar.day }}
+    </div>
+{% endfor %}
+
+</div>
+<div class="tw">
+  <!--<table>
+    <thead>
+      <tr><th>Employee</th><th>Days Present</th><th>Days Absent</th><th>Days Late</th><th>Total Hours</th><th>Violations</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><div class="ec"><div class="av" style="background:#3B82F6">VK</div><div><div class="en">Veerappan Kandhasamy</div><div class="eid">IET-009</div></div></div></td>
+        <td style="font-family:var(--mono);color:var(--green)">18</td>
+        <td style="font-family:var(--mono);color:var(--red)">2</td>
+        <td style="font-family:var(--mono);color:var(--amber)">1</td>
+        <td style="font-family:var(--mono)">162h</td>
+        <td style="font-family:var(--mono)">0</td>
+      </tr>
+      <tr>
+        <td><div class="ec"><div class="av" style="background:#10B981">CA</div><div><div class="en">Chinniah Adaikkalam</div><div class="eid">IET-015</div></div></div></td>
+        <td style="font-family:var(--mono);color:var(--green)">20</td>
+        <td style="font-family:var(--mono);color:var(--red)">0</td>
+        <td style="font-family:var(--mono);color:var(--amber)">0</td>
+        <td style="font-family:var(--mono)">180h</td>
+        <td style="font-family:var(--mono)">0</td>
+      </tr>
+    </tbody>
+  </table>-->
+<table class="table">
+    <thead>
+        <tr>
+            <th>Employee No</th>
+            <th>Employee</th>
+            <th>Present</th>
+            <th>Absent</th>
+            <th>Leave</th>
+            <th>Half Day</th>
+            <th>Total Hours</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for emp in employees %}
+        <tr>
+            <td>{{ emp.empno }}</td>
+            <td> <span class="av" style="background:#3B82F6">{{emp.initials }}</span>{{ emp.empname }}</td>
+            <td>{{ emp.days_present }}</td>
+            <td>{{ emp.days_absent }}</td>
+            <td>{{ emp.days_leave }}</td>
+            <td>{{ emp.half_days }}</td>
+            <td>{{ emp.total_active_hours }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% endblock %}

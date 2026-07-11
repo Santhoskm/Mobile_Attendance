@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block title %}Projects — IET Smart Solution{% endblock %}
+{% block nav_projects %}active{% endblock %}
+{% block page_title %}Project Management{% endblock %}
+
+{% block extra_styles %}
+.pg{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px}
+.pc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:18px;transition:border-color .2s;cursor:pointer}
+.pc:hover{border-color:var(--border2)}
+.pc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
+.pn{font-size:14px;font-weight:600;color:var(--text1)}
+.pc-code{font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:2px}
+.pm{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.pmr{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2)}
+.pbw{background:var(--bg4);border-radius:99px;height:4px;overflow:hidden;margin-top:12px}
+.pbf{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--teal))}
+.pft{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+.avs{display:flex}
+.avs .av{width:24px;height:24px;border:2px solid var(--bg2);margin-left:-7px;font-size:9px}
+.avs .av:first-child{margin-left:0}
+{% endblock %}
+
+{% block content %}
+<div class="sh">
+  <div>
+    <div class="sh-title">Project Management</div>
+    <div class="sh-sub">{{ projects.count }} project(s)</div>
+  </div>
+  <div style="display:flex;gap:8px">
+    <div class="ftabs">
+      <div class="ft active" onclick="filterProjects(this,'Active')">Active ({{ active_count }})</div>
+      <div class="ft" onclick="filterProjects(this,'Inactive')">Inactive ({{ inactive_count }})</div>
+    </div>
+{% if is_web_admin %}
+    <button class="btn btn-p" onclick="om('m-proj')">+ New Project</button>
+{% endif %}
+  </div>
+</div>
+
+<div class="pg">
+  {% for project in projects %}
+  <div class="pc" data-status="{{ project.status }}">
+    {# ── Top row: name + badge ── #}
+    <div class="pc-top">
+      <div>
+        <div class="pn">{{ project.projectname }}</div>
+        <div class="pc-code">{{ project.projectcode }}</div>
+      </div>
+      <span class="badge {% if project.status == 'Active' %}bg{% else %}ba{% endif %}">
+        {% if project.status == 'Active' %} {% endif %}{{ project.status }}
+      </span>
+    </div>
+
+    {# ── Meta: supervisor + employee count ── #}
+    <div class="pm">
+      <div class="pmr">👷 <span>{{ project.supervisor }}</span></div>
+      <div class="pmr">👥 <span>{{ project.employee_count|default:0 }} employees</span></div>
+    </div>
+
+    {# ── Footer: avatars + action buttons ── #}
+    <div class="pft">
+      <div class="avs">
+        <div class="av" style="background:#3B82F6">A</div>
+        <div class="av" style="background:#8B5CF6">B</div>
+        <div class="av" style="background:#10B981">C</div>
+        <div class="av" style="background:var(--bg4);color:var(--text3);font-size:9px">
+          +{{ project.employee_count|default:0 }}
+        </div>
+      </div>
+      <div style="display:flex;gap:5px">
+        <a href="{% url 'assignments' project.id %}" class="ab aas">Assign</a>
+{% if is_web_admin %}
+        <button class="ab ae" 
+          data-id="{{ project.id }}"
+          data-name="{{ project.projectname }}"
+          data-code="{{ project.projectcode }}"
+          data-client="{{ project.clientname|default_if_none:'' }}"
+          data-start="{{ project.projectstartdate|date:'Y-m-d' }}"
+          data-end="{{ project.projectenddate|date:'Y-m-d' }}"
+          data-sstart="{{ project.shiftstarttime|time:'H:i' }}"
+          data-send="{{ project.shiftendtime|time:'H:i' }}"
+          data-thresh="{{ project.threshold|default_if_none:'' }}"
+          data-lat="{{ project.site_latitude|default_if_none:'' }}"
+          data-lng="{{ project.site_longitude|default_if_none:'' }}"
+          data-addr="{{ project.siteaddress|default_if_none:'' }}"
+          data-desc="{{ project.description|default_if_none:'' }}"
+          onclick="openEditProjectModal(this)">Edit</button>
+{% endif %}
+      </div>
+    </div>
+
+  </div>
+  {% empty %}
+  <p style="color:var(--text3);grid-column:1/-1;text-align:center;padding:40px 0;">
+    No projects found. Click <strong>+ New Project</strong> to get started.
+  </p>
+  {% endfor %}
+</div>
+<script>
+function filterProjects(el, status){
+  document.querySelectorAll('.ft').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.pc').forEach(card => {
+    card.style.display = (card.dataset.status === status) ? '' : 'none';
+  });
+}
+</script>
+
+{% endblock %}
+
+{% block modals %}
+<div class="mo" id="m-edit-proj">
+  <div class="md">
+    <div class="mh"><div class="mt">Edit Project</div><div class="mc" onclick="cm('m-edit-proj')">✕</div></div>
+    <form id="edit-project-form" method="post">
+      {% csrf_token %}
+      <div class="mb">
+        <div class="fg">
+          <div class="fgrp"><label class="fl">Project Name <span>*</span></label><input name="projectname" id="ep_name" class="fi" required></div>
+          <div class="fgrp"><label class="fl">Project Code <span>*</span></label><input name="projectcode" id="ep_code" class="fi" required></div>
+          <div class="fgrp"><label class="fl">Client Name</label><input name="clientname" id="ep_client" class="fi"></div>
+          <div class="fgrp"><label class="fl">Start Date <span>*</span></label><input name="projectstartdate" id="ep_start" class="fi" type="date" required></div>
+          <div class="fgrp"><label class="fl">End Date</label><input name="projectenddate" id="ep_end" class="fi" type="date"></div>
+          <div class="fgrp"><label class="fl">Shift Start</label><input name="shiftstarttime" id="ep_sstart" class="fi" type="time"></div>
+          <div class="fgrp"><label class="fl">Shift End</label><input name="shiftendtime" id="ep_send" class="fi" type="time"></div>
+          <div class="fgrp"><label class="fl">Late Threshold (min)</label><input name="threshold" id="ep_thresh" class="fi" type="time" step="60"></div>
+          <div class="fgrp"><label class="fl">Site Latitude</label><input name="site_latitude" id="ep_lat" class="fi" type="number" step="any"></div>
+          <div class="fgrp"><label class="fl">Site Longitude</label><input name="site_longitude" id="ep_lng" class="fi" type="number" step="any"></div>
+          <div class="fgrp full"><label class="fl">Site Address</label><input name="siteaddress" id="ep_addr" class="fi"></div>
+          <div class="fgrp full"><label class="fl">Description</label><textarea name="description" id="ep_desc" class="fi" rows="2"></textarea></div>
+        </div>
+      </div>
+      <div class="mf">
+        <button type="button" class="btn btn-s" onclick="cm('m-edit-proj')">Cancel</button>
+        <button type="submit" class="btn btn-p">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="mo" id="m-proj">
+  <div class="md">
+    <div class="mh"><div class="mt">Create New Project</div><div class="mc" onclick="cm('m-proj')">✕</div></div>
+    <form action="{% url 'create_project' %}" method="post">
+      {% csrf_token %}
+      <div class="mb">
+        <div class="fg">
+          <div class="fgrp"><label class="fl">Project Name <span>*</span></label><input name="projectname" class="fi" placeholder="e.g. Harbour Road Phase 2" required></div>
+          <div class="fgrp"><label class="fl">Project Code <span>*</span></label><input name="projectcode" class="fi" placeholder="HR-P2" style="font-family:var(--mono)" required></div>
+          <div class="fgrp"><label class="fl">Client Name <span>*</span></label><input name="clientname" class="fi" placeholder="Client company" required></div>
+          <div class="fgrp"><label class="fl">Start Date <span>*</span></label><input name="projectstartdate" class="fi" type="date" required></div>
+          <div class="fgrp"><label class="fl">End Date</label><input name="projectenddate" class="fi" type="date"></div>
+          <div class="fgrp"><label class="fl">Shift Start</label><input name="shiftstarttime" class="fi" type="time" value="08:00"></div>
+          <div class="fgrp"><label class="fl">Shift End</label><input name="shiftendtime" class="fi" type="time" value="17:00"></div>
+          <div class="fgrp"><label class="fl">Late Threshold (min)</label><input name="threshold" class="fi" type="time" step="60"></div>
+          <div class="fgrp"><label class="fl">Site Latitude</label><input name="site_latitude" class="fi" type="number" step="any" placeholder="e.g. 1.3521"></div>
+          <div class="fgrp"><label class="fl">Site Longitude</label><input name="site_longitude" class="fi" type="number" step="any" placeholder="e.g. 103.8198"></div>
+          <div class="fgrp full"><label class="fl">Site Address</label><input name="siteaddress" class="fi" placeholder="Full site address"></div>
+          <div class="fgrp full"><label class="fl">Description</label><textarea name="description" class="fi" rows="2" placeholder="Project notes..."></textarea></div>
+        </div>
+      </div>
+      <div class="mf">
+        <button type="button" class="btn btn-s" onclick="cm('m-proj')">Cancel</button>
+        <button type="submit" class="btn btn-p">Create Project</button>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+document.getElementById("emp_search").addEventListener("keyup", function() {
+
+    let query = this.value;
+
+    if(query.length > 0){
+
+        fetch(`/api/employee-search/?q=${query}`)
+        .then(response => response.json())
+        .then(data => {
+
+            let html = "";
+
+            data.forEach(emp => {
+                html += `
+                    <div class="emp-item"
+                         data-id="${emp.id}"
+                         data-name="${emp.empname}">
+                        ${emp.empname} (${emp.empno})
+                    </div>
+                `;
+            });
+
+            document.getElementById("suggestions").innerHTML = html;
+        });
+
+    } else {
+        document.getElementById("suggestions").innerHTML = "";
+    }
+
+});
+
+
+// When user clicks a suggestion
+document.getElementById("suggestions").addEventListener("click", function(e){
+
+    if(e.target.classList.contains("emp-item")){
+
+        // Put selected name in input box
+        document.getElementById("emp_search").value =
+            e.target.getAttribute("data-name");
+
+        // Hide suggestions
+        document.getElementById("suggestions").innerHTML = "";
+    }
+
+});
+</script>
+
+<script>
+function openEditProjectModal(btn) {
+    document.getElementById('ep_name').value = btn.dataset.name;
+    document.getElementById('ep_code').value = btn.dataset.code;
+    document.getElementById('ep_client').value = btn.dataset.client;
+    document.getElementById('ep_start').value = btn.dataset.start;
+    document.getElementById('ep_end').value = btn.dataset.end;
+    document.getElementById('ep_sstart').value = btn.dataset.sstart;
+    document.getElementById('ep_send').value = btn.dataset.send;
+    document.getElementById('ep_thresh').value = btn.dataset.thresh;
+    document.getElementById('ep_lat').value = btn.dataset.lat;
+    document.getElementById('ep_lng').value = btn.dataset.lng;
+    document.getElementById('ep_addr').value = btn.dataset.addr;
+    document.getElementById('ep_desc').value = btn.dataset.desc;
+
+    let form = document.getElementById('edit-project-form');
+    form.action = `/api/edit-project/${btn.dataset.id}/`;
+
+    om('m-edit-proj');
+}
+</script>
+
+
+{% endblock %}

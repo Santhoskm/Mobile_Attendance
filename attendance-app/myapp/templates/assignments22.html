@@ -1,0 +1,1116 @@
+{% extends "base.html" %}
+
+{% block title %}{{ project.name }} — IET Smart Solution{% endblock %}
+{% block nav_projects %}active{% endblock %}
+
+{% block extra_styles %}
+/* PROJECT HERO */
+.project-hero{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:24px 28px;margin-bottom:20px}
+.hero-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:16px}
+.hero-title{font-size:22px;font-weight:700;letter-spacing:-0.4px;color:var(--text1);margin-bottom:4px}
+.hero-sub{font-size:13px;color:var(--text2);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.hero-sub span{display:flex;align-items:center;gap:5px}
+.hero-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;padding-top:20px;border-top:1px solid var(--border)}
+.meta-label{font-size:11px;color:var(--text3);font-weight:600;letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px}
+.meta-val{font-size:14px;color:var(--text1);font-weight:500}
+.hero-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
+.hero-stat{background:var(--bg3);border-radius:var(--r);padding:14px 16px;text-align:center}
+.hero-stat-num{font-size:24px;font-weight:700;font-family:var(--mono)}
+.hero-stat-label{font-size:11px;color:var(--text3);margin-top:2px}
+.hero-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+/* SUPERVISOR */
+.sup-card{display:flex;align-items:center;gap:16px;background:var(--bg3);border-radius:var(--r);padding:16px;border:1px solid var(--border)}
+.avatar{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex-shrink:0}
+.av-blue{background:var(--aglow);color:var(--accent2)}
+.av-green{background:var(--gbg);color:var(--green)}
+.av-amber{background:var(--abg);color:var(--amber)}
+.av-purple{background:var(--pbg);color:var(--purple)}
+.av-teal{background:var(--tbg);color:var(--teal)}
+.av-red{background:var(--rbg);color:var(--red)}
+.sup-info{flex:1}
+.sup-name{font-weight:600;font-size:15px;color:var(--text1)}
+.sup-sub{font-size:12px;color:var(--text2);margin-top:2px}
+.sup-tags{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.sup-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+.sup-stat{background:var(--bg2);border-radius:6px;padding:10px 12px;text-align:center;border:1px solid var(--border)}
+.sup-stat-num{font-size:18px;font-weight:700;font-family:var(--mono)}
+.sup-stat-lbl{font-size:10px;color:var(--text3);margin-top:2px}
+
+/* TIMELINE */
+.timeline{margin-top:20px;padding-top:20px;border-top:1px solid var(--border)}
+.timeline-label{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:12px}
+.timeline-item{display:flex;gap:12px;margin-bottom:16px;position:relative}
+.timeline-dot{width:10px;height:10px;border-radius:50%;background:var(--accent);margin-top:4px;flex-shrink:0}
+.timeline-dot.old{background:var(--border2)}
+.timeline-line{position:absolute;left:4px;top:14px;width:2px;height:calc(100% + 6px);background:var(--border)}
+.timeline-item:last-child .timeline-line{display:none}
+.timeline-who{font-size:13px;font-weight:500;color:var(--text1)}
+.timeline-when{font-size:11px;color:var(--text3);margin-top:2px}
+.diff-block{display:inline-flex;align-items:center;gap:6px;margin-top:6px;background:var(--bg3);border-radius:4px;padding:4px 8px;font-family:var(--mono);font-size:11px}
+.diff-old{color:var(--red);text-decoration:line-through}
+.diff-arrow{color:var(--text3)}
+.diff-new{color:var(--green)}
+
+/* ROSTER TABLE */
+.table-wrap{overflow-x:auto}
+.filter-tabs{display:flex;gap:4px;background:var(--bg3);border-radius:8px;padding:4px}
+.filter-tab{padding:6px 14px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;color:var(--text2);transition:all .15s}
+.filter-tab.active{background:var(--bg2);color:var(--text1);box-shadow:0 0 0 1px var(--border)}
+.filter-tab:hover:not(.active){color:var(--text1)}
+.search-wrap{position:relative;flex:1;min-width:180px}
+.search-wrap input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 12px 8px 34px;color:var(--text1);font-family:var(--font);font-size:13px;outline:none}
+.search-wrap input:focus{border-color:var(--accent)}
+.search-wrap input::placeholder{color:var(--text3)}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3)}
+.worker-cell{display:flex;align-items:center;gap:10px}
+.worker-info .name{font-weight:500;color:var(--text1)}
+.worker-info .iet{font-size:11px;color:var(--text3);font-family:var(--mono)}
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px}
+.sd-green{background:var(--green)}.sd-red{background:var(--red)}.sd-amber{background:var(--amber)}
+
+/* TEMP CARDS */
+.temp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.temp-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:16px;position:relative}
+.temp-card.ending-soon{border-color:#7F1D1D}
+.temp-card.ended{border-color:var(--border);opacity:.6}
+.countdown{position:absolute;top:12px;right:12px}
+
+/* GEO ZONE */
+.geo-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.geo-map{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);display:flex;align-items:center;justify-content:center;min-height:160px;position:relative;overflow:hidden}
+.geo-map-inner{position:relative;width:160px;height:160px}
+.geo-ring{position:absolute;border-radius:50%;border:1.5px solid;opacity:.3}
+.geo-pin{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
+
+/* MINI CHART */
+.mini-chart{display:flex;align-items:flex-end;gap:6px;height:60px}
+.mini-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.mini-bar{border-radius:3px 3px 0 0;transition:all .3s}
+.mini-bar-label{font-size:10px;color:var(--text3)}
+
+/* VIOLATIONS */
+.vio-item{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--border)}
+.vio-item:last-child{border-bottom:none}
+.vio-stripe{width:3px;border-radius:2px;flex-shrink:0}
+.vio-content{flex:1}
+.vio-title{font-size:13px;font-weight:500;color:var(--text1)}
+.vio-detail{font-size:12px;color:var(--text2);margin-top:3px}
+.vio-time{font-size:11px;color:var(--text3);margin-top:4px;font-family:var(--mono)}
+
+/* ACTIVITY LOG */
+.activity-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.activity-item:last-child{border-bottom:none}
+.act-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px}
+.act-body{flex:1}
+.act-text{font-size:13px;color:var(--text1)}
+.act-text strong{color:var(--accent2)}
+.act-time{font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:3px}
+
+/* COMPLIANCE */
+.compliance-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.compliance-item:last-child{border-bottom:none}
+.comp-icon{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.comp-info{flex:1}
+.comp-name{font-size:13px;font-weight:500;color:var(--text1)}
+.comp-detail{font-size:12px;color:var(--text2)}
+
+/* SETTINGS */
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.setting-item{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)}
+.setting-item:last-child{border-bottom:none}
+.setting-label{font-size:13px;color:var(--text1)}
+.setting-desc{font-size:11px;color:var(--text3);margin-top:2px}
+.inline-val{cursor:pointer;border-bottom:1px dashed transparent;transition:border-color .15s}
+.inline-val:hover{border-color:var(--text3)}
+.inline-input{background:var(--bg3);border:1px solid var(--accent);border-radius:4px;padding:3px 8px;color:var(--text1);font-family:var(--font);font-size:13px;outline:none}
+
+/* TASK ROW */
+.task-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.task-row:last-child{border-bottom:none}
+.task-check{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border2);background:transparent;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.task-check.done{background:var(--green);border-color:var(--green)}
+.task-name{flex:1;font-size:13px;color:var(--text1)}
+.task-name.done{text-decoration:line-through;color:var(--text3)}
+
+@media(max-width:768px){
+  .hero-stats{grid-template-columns:repeat(2,1fr)}
+  .geo-grid{grid-template-columns:1fr}
+  .settings-grid{grid-template-columns:1fr}
+}
+{% endblock %}
+
+{% block content %}
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb">
+  <a href="{% url 'projects' %}" class="bc-link">Projects</a>
+  <span class="bc-sep">/</span>
+  <span class="bc-current">Marina Bay Complex — MBC-2024</span>
+</div>
+
+<!-- TOP ACTION BAR -->
+<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+  <button class="btn btn-s btn-sm" onclick="om('editProjectModal')">✏️ Edit Project</button>
+  <button class="btn btn-s btn-sm" onclick="toast('Report exported successfully','success')">⬇️ Export Report</button>
+  <button class="btn btn-d btn-sm" onclick="toast('Archive action requires confirmation','error')">Archive</button>
+</div>
+
+<!-- SECTION 1: PROJECT HERO -->
+<div class="project-hero">
+  <div class="hero-top">
+    <div>
+      <div class="hero-title">Marina Bay Complex — Tower B</div>
+      <div class="hero-sub">
+        <span>📄 MBC-2024</span>
+        <span>🏢 Surbana Jurong Pte Ltd</span>
+        <span>📍 18 Marina Gardens Dr, Singapore 018953</span>
+        <span id="project-status-badge"><span class="badge bg">Active</span></span>
+      </div>
+    </div>
+    <div class="hero-actions">
+      <button class="btn btn-s btn-sm" onclick="om('alterRosterModal')">⇄ Alter Roster</button>
+      <button class="btn btn-s btn-sm" onclick="om('bulkAddModal')">⬆ Bulk Add Workers</button>
+      <button class="btn btn-p btn-sm" onclick="om('addWorkerModal')">+ Add Worker</button>
+    </div>
+  </div>
+  <div class="hero-meta">
+    <div><div class="meta-label">Start Date</div><div class="meta-val">15 Jan 2024</div></div>
+    <div><div class="meta-label">End Date</div><div class="meta-val">31 Dec 2024</div></div>
+    <div><div class="meta-label">Shift Hours</div><div class="meta-val text-mono">07:00 – 17:00</div></div>
+    <div><div class="meta-label">Late Threshold</div><div class="meta-val">15 minutes</div></div>
+    <div><div class="meta-label">Geo-fence Zone</div><div class="meta-val">Zone Alpha — 150m</div></div>
+    <div><div class="meta-label">Project Duration</div><div class="meta-val">352 days</div></div>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="hero-stat-num text-green" id="stat-present">18</div><div class="hero-stat-label">Present Today</div></div>
+    <div class="hero-stat"><div class="hero-stat-num text-red" id="stat-absent">4</div><div class="hero-stat-label">Absent Today</div></div>
+    <div class="hero-stat"><div class="hero-stat-num text-amber" id="stat-tasks">7</div><div class="hero-stat-label">Open Tasks</div></div>
+    <div class="hero-stat"><div class="hero-stat-num text-red" id="stat-vio">2</div><div class="hero-stat-label">Open Violations</div></div>
+  </div>
+</div>
+
+<!-- SECTION 2: SUPERVISOR PANEL -->
+<div class="section-card" id="sec-supervisor">
+  <div class="section-header" onclick="toggleSection('supervisor')">
+    <div class="section-title">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 00-16 0"/></svg>
+      Supervisor Panel
+    </div>
+    <div class="section-actions" onclick="event.stopPropagation()">
+      <button class="btn btn-s btn-sm" onclick="om('changeSuperModal')">⇓ Change Supervisor</button>
+      <svg class="collapse-arrow" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </div>
+  <div class="section-body" id="supervisor-content">
+    <div class="sup-card">
+      <div class="avatar av-blue">SR</div>
+      <div class="sup-info">
+        <div class="sup-name">Subbiah Ravichandran</div>
+        <div class="sup-sub">IET-017 &nbsp;·&nbsp; Lifting Supervisor &nbsp;·&nbsp; +65 9123 4567</div>
+        <div class="sup-tags">
+          <span class="badge bg">▲ Face Enrolled</span>
+          <span class="badge bb">WP Valid</span>
+          <span class="badge bp">Supervisor Role</span>
+          <span class="badge bt">CSOC Certified</span>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div class="text-xs text-dim">Today's check-in</div>
+        <div class="text-mono" style="font-size:15px;color:var(--green);font-weight:600;">07:02</div>
+        <div class="text-xs text-dim" style="margin-top:4px;">On time</div>
+      </div>
+    </div>
+    <div class="sup-stats">
+      <div class="sup-stat"><div class="sup-stat-num text-green">22</div><div class="sup-stat-lbl">Days Present (May)</div></div>
+      <div class="sup-stat"><div class="sup-stat-num text-amber">1</div><div class="sup-stat-lbl">Late Count (May)</div></div>
+      <div class="sup-stat"><div class="sup-stat-num" style="color:var(--accent2)">148</div><div class="sup-stat-lbl">Days on Project</div></div>
+    </div>
+    <div class="timeline">
+      <div class="timeline-label">Supervisor History</div>
+      <div class="timeline-item">
+        <div><div class="timeline-dot"></div><div class="timeline-line"></div></div>
+        <div>
+          <div class="timeline-who">Subbiah Ravichandran (IET-017) — Current</div>
+          <div class="timeline-when">Assigned 15 Jan 2024 &nbsp;·&nbsp; Changed by Admin (Prem)</div>
+          <div class="diff-block"><span class="diff-old">Rajan Muthu</span><span class="diff-arrow">→</span><span class="diff-new">Subbiah Ravichandran</span></div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div><div class="timeline-dot old"></div><div class="timeline-line"></div></div>
+        <div>
+          <div class="timeline-who">Rajan Muthu (IET-023) — Transferred Out</div>
+          <div class="timeline-when">15 Jan 2024 – 01 Mar 2024 &nbsp;·&nbsp; Transferred to Tuas Project</div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div><div class="timeline-dot old"></div></div>
+        <div>
+          <div class="timeline-who">Palaniswamy K (IET-031) — Initial Assignment</div>
+          <div class="timeline-when">15 Jan 2024 &nbsp;·&nbsp; Project Start</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 3: WORKER ROSTER -->
+<div class="section-card" id="sec-roster">
+  <div class="section-header" onclick="toggleSection('roster')">
+    <div class="section-title">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      Worker Roster
+      <span class="badge bb" id="roster-count">22 Workers</span>
+    </div>
+    <div class="section-actions" onclick="event.stopPropagation()">
+      <button class="btn btn-p btn-sm" onclick="om('addWorkerModal')">+ Add Worker</button>
+      <svg class="collapse-arrow" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </div>
+  <div class="section-body" id="roster-content">
+    <div style="display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap;">
+      <div class="filter-tabs" id="rosterTabs">
+        <div class="filter-tab active" onclick="filterRoster('all',this)">All (22)</div>
+        <div class="filter-tab" onclick="filterRoster('active',this)">Active (18)</div>
+        <div class="filter-tab" onclick="filterRoster('temp',this)">Temporary (3)</div>
+        <div class="filter-tab" onclick="filterRoster('removed',this)">Removed (1)</div>
+      </div>
+      <div class="search-wrap">
+        <span class="search-icon" style="font-size:13px;">🔍</span>
+        <input type="text" placeholder="Search by name or IET No..." id="rosterSearch" oninput="searchRoster(this.value)">
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table id="rosterTable">
+        <thead>
+          <tr>
+            <th>Worker</th><th>Designation</th><th>Type</th><th>Period</th>
+            <th>Today</th><th>Face</th><th>WP</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="rosterBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 4: TEMPORARY ASSIGNMENTS -->
+<div class="section-card" id="sec-temp">
+  <div class="section-header" onclick="toggleSection('temp')">
+    <div class="section-title">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Temporary &amp; Rotating Assignments
+      <span class="badge ba">3 Active</span>
+    </div>
+    <div class="section-actions" onclick="event.stopPropagation()">
+      <button class="btn btn-s btn-sm" onclick="om('tempAssignModal')">+ Temporary Assign</button>
+      <svg class="collapse-arrow" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </div>
+  <div class="section-body" id="temp-content">
+    <div class="temp-grid" id="tempGrid"></div>
+    <div class="info-box">ℹ️ Temporary assignments auto-remove on the end date at midnight. A notification is sent to the supervisor and admin 2 days before.</div>
+  </div>
+</div>
+
+<!-- SECTION 5: GEO-FENCE ZONE -->
+<div class="section-card" id="sec-geo">
+  <div class="section-header" onclick="toggleSection('geo')">
+    <div class="section-title">
+      <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      Geo-fence Zone
+    </div>
+    <div class="section-actions" onclick="event.stopPropagation()">
+      <button class="btn btn-s btn-sm" onclick="om('editZoneModal')">✏️ Edit Zone</button>
+      <svg class="collapse-arrow" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </div>
+  <div class="section-body" id="geo-content">
+    <div class="geo-grid">
+      <div>
+        <div style="margin-bottom:12px;"><div class="meta-label">Zone Name</div><div class="meta-val">Zone Alpha — Marina Bay</div></div>
+        <div style="margin-bottom:12px;"><div class="meta-label">Coordinates</div><div class="meta-val text-mono" style="font-size:12px;">1.2834° N, 103.8607° E</div></div>
+        <div style="margin-bottom:12px;"><div class="meta-label">Radius</div><div class="meta-val">150 m</div></div>
+        <div style="margin-bottom:12px;"><div class="meta-label">Active Hours</div><div class="meta-val text-mono">06:30 – 18:00</div></div>
+        <div><div class="meta-label">Last Modified</div><div class="meta-val">Prem &nbsp;·&nbsp; 3 Jun 2024</div></div>
+        <div class="warn-box">⚠️ Radius was recently changed from 100m → 150m on 3 Jun 2024. Review violation logs for affected check-ins.</div>
+      </div>
+      <div class="geo-map">
+        <div class="geo-map-inner">
+          <div class="geo-ring" style="width:160px;height:160px;top:0;left:0;border-color:var(--accent);"></div>
+          <div class="geo-ring" style="width:110px;height:110px;top:25px;left:25px;border-color:var(--accent);opacity:.5;"></div>
+          <div class="geo-ring" style="width:60px;height:60px;top:50px;left:50px;border-color:var(--accent);opacity:.7;"></div>
+          <div class="geo-pin" style="font-size:22px;">📍</div>
+        </div>
+        <div style="position:absolute;bottom:8px;font-size:10px;color:var(--text3);">150m radius</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 6: ATTENDANCE SUMMARY -->
+<div class="section-card" id="sec-attendance">
+  <div class="section-header" onclick="toggleSection('attendance')">
+    <div class="section-title">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Attendance Summary
+    </div>
+    <div class="section-actions" onclick="event.stopPropagation()">
+      <button class="btn btn-s btn-sm">Full Report →</button>
+      <svg class="collapse-arrow" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </div>
+  <div class="section-body" id="attendance-content">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
+      <div class="hero-stat"><div class="hero-stat-num text-green">86%</div><div class="hero-stat-label">Avg Attendance (May)</div></div>
+      <div class="hero-stat"><div class="hero-stat-num" style="color:var(--accent2)">2,847</div><div class="hero-stat-label">Total Hours Logged</div></div>
+      <div class="hero-stat"><div class="hero-stat-num text-amber">12</div><div class="hero-stat-label">Late Count (May)</div></div>
+      <div class="hero-stat"><div class="hero-stat-num text-red">3</div><div class="hero-stat-label">Geo Violations</div></div>
+    </div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:200px;">
+        <div class="text-xs text-dim" style="margin-bottom:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;">This Week</div>
+        <div class="mini-chart">
+          <div class="mini-bar-wrap"><div class="mini-bar" style="height:50px;background:var(--green);width:100%;"></div><div class="mini-bar-label">Mon</div></div>
+          <div class="mini-bar-wrap"><div class="mini-bar" style="height:46px;background:var(--green);width:100%;"></div><div class="mini-bar-label">Tue</div></div>
+          <div class="mini-bar-wrap"><div class="mini-bar" style="height:42px;background:var(--amber);width:100%;"></div><div class="mini-bar-label">Wed</div></div>
+          <div class="mini-bar-wrap"><div class="mini-bar" style="height:52px;background:var(--green);width:100%;"></div><div class="mini-bar-label">Thu</div></div>
+          <div class="mini-bar-wrap"><div class="mini-bar" style="height:36px;background:var(--accent);width:100%;opacity:.5;"></div><div class="mini-bar-label">Fri</div></div>
+        </div>
+      </div>
+      <div style="flex:1;min-width:200px;">
+        <div class="text-xs text-dim" style="margin-bottom:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;">Alerts</div>
+        <div class="compliance-item" style="padding:8px 0;">
+          <div class="comp-icon" style="background:var(--rbg);color:var(--red);">!</div>
+          <div class="comp-info"><div class="comp-name">Karuppaiah Selvam (IET-056)</div><div class="comp-detail text-red">Absent 3 consecutive days</div></div>
+        </div>
+        <div class="compliance-item" style="padding:8px 0;">
+          <div class="comp-icon" style="background:var(--abg);color:var(--amber);">!</div>
+          <div class="comp-info"><div class="comp-name">Muthu Selvam (IET-067)</div><div class="comp-detail text-amber">Late 4x this month</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 7: TASKS SUMMARY -->
+<div class="section-card" id="sec-tasks">
+  <div class="section-header" onclick="toggleSection('tasks')">
+    <div class="section-title">
+      <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      Tasks Summary
+      <span class="badge br">2 Overdue</span>
+    </div>
+    <div class="section-actions" onclick="event.stopPropagation()">
+      <button class="btn btn-s btn-sm" onclick="om('addTaskModal')">+ Add Task</button>
+      <svg class="collapse-arrow" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </div>
+  <div class="section-body" id="tasks-content">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
+      <div class="hero-stat"><div class="hero-stat-num text-dim">5</div><div class="hero-stat-label">To Do</div></div>
+      <div class="hero-stat"><div class="hero-stat-num" style="color:var(--accent2)">4</div><div class="hero-stat-label">In Progress</div></div>
+      <div class="hero-stat"><div class="hero-stat-num text-green">18</div><div class="hero-stat-label">Done</div></div>
+      <div class="hero-stat"><div class="hero-stat-num text-red">2</div><div class="hero-stat-label">Overdue</div></div>
+    </div>
+    <div id="taskList">
+      <div class="task-row"><div class="task-check" onclick="toggleTask(this)"></div><div class="task-name">Conduct daily toolbox meeting with crew</div><span class="badge bb">In Progress</span></div>
+      <div class="task-row"><div class="task-check" onclick="toggleTask(this)"></div><div class="task-name">Submit weekly safety report to Surbana</div><span class="badge br">Overdue</span></div>
+      <div class="task-row"><div class="task-check" onclick="toggleTask(this)"></div><div class="task-name">Inspect lifting equipment — Tower B crane</div><span class="badge br">Overdue</span></div>
+      <div class="task-row"><div class="task-check done" onclick="toggleTask(this)"></div><div class="task-name done">Update face enrollment for new hires</div><span class="badge bg">Done</span></div>
+      <div class="task-row"><div class="task-check" onclick="toggleTask(this)"></div><div class="task-name">Prepare June roster adjustment plan</div><span class="badge bgr">To Do</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 8: VIOLATIONS -->
+<div class="section-card" id="sec-violations">
+  <div class="section-header" onclick="toggleSection('violations')">
+    <div class="section-title">
+      <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Violations
+      <span class="badge br">2 Open</span>
+    </div>
+    <div class="section-actions" onclick="event.stopPropagation()">
+      <button class="btn btn-s btn-sm">View All →</button>
+      <svg class="collapse-arrow" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </div>
+  <div class="section-body" id="violations-content">
+    <div id="violationList">
+      <div class="vio-item">
+        <div class="vio-stripe" style="background:var(--red);"></div>
+        <div class="vio-content">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div class="vio-title">Geo-fence Violation — Check-in outside zone</div>
+            <span class="badge br">Unresolved</span>
+          </div>
+          <div class="vio-detail">Muthu Selvam (IET-067) checked in 340m outside Zone Alpha boundary.</div>
+          <div class="vio-time">10 Jun 2024 &nbsp;·&nbsp; 07:18 AM</div>
+        </div>
+        <button class="btn btn-sm" style="background:var(--gbg);color:var(--green);margin-left:12px;flex-shrink:0;" onclick="resolveViolation(this)">Resolve</button>
+      </div>
+      <div class="vio-item">
+        <div class="vio-stripe" style="background:var(--amber);"></div>
+        <div class="vio-content">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div class="vio-title">Late Arrival Threshold Exceeded</div>
+            <span class="badge ba">Unresolved</span>
+          </div>
+          <div class="vio-detail">Chinniah Adaikkalam (IET-015) — 28 minutes late. Threshold: 15 min.</div>
+          <div class="vio-time">09 Jun 2024 &nbsp;·&nbsp; 07:43 AM</div>
+        </div>
+        <button class="btn btn-sm" style="background:var(--gbg);color:var(--green);margin-left:12px;flex-shrink:0;" onclick="resolveViolation(this)">Resolve</button>
+      </div>
+      <div class="vio-item">
+        <div class="vio-stripe" style="background:var(--green);"></div>
+        <div class="vio-content">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div class="vio-title">PIN Fallback Used</div>
+            <span class="badge bg">Resolved</span>
+          </div>
+          <div class="vio-detail">Rajesh Kumar (IET-044) used PIN instead of face scan — face scan failure.</div>
+          <div class="vio-time">08 Jun 2024 &nbsp;·&nbsp; 07:04 AM</div>
+        </div>
+        <span style="margin-left:12px;font-size:11px;color:var(--text3);">Resolved by Prem</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 9: ACTIVITY LOG -->
+<div class="section-card" id="sec-activity">
+  <div class="section-header" onclick="toggleSection('activity')">
+    <div class="section-title">
+      <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Project Activity Log
+    </div>
+    <div class="section-actions" onclick="event.stopPropagation()">
+      <button class="btn btn-s btn-sm">Full Log →</button>
+      <svg class="collapse-arrow" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </div>
+  <div class="section-body" id="activity-content">
+    <div id="activityFeed">
+      <div class="activity-item">
+        <div class="act-icon" style="background:var(--aglow);color:var(--accent2);">+</div>
+        <div class="act-body">
+          <div class="act-text">Worker <strong>Selvakumar Arumugam (IET-042)</strong> added to roster — Permanent assignment</div>
+          <div class="act-time">10 Jun 2024 &nbsp;·&nbsp; 09:14 AM &nbsp;·&nbsp; by Admin (Prem)</div>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="act-icon" style="background:var(--rbg);color:var(--red);">⚠</div>
+        <div class="act-body">
+          <div class="act-text">Geo-fence violation — <strong>Muthu Selvam (IET-067)</strong> checked in 340m outside zone</div>
+          <div class="act-time">10 Jun 2024 &nbsp;·&nbsp; 07:18 AM &nbsp;·&nbsp; Auto-generated</div>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="act-icon" style="background:var(--abg);color:var(--amber);">⇓</div>
+        <div class="act-body">
+          <div class="act-text">Roster altered — <strong>Karuppaiah Selvam (IET-056)</strong> removed, <strong>Selvakumar Arumugam (IET-042)</strong> added from 10 Jun</div>
+          <div class="act-time">09 Jun 2024 &nbsp;·&nbsp; 05:30 PM &nbsp;·&nbsp; by Admin (Prem)</div>
+          <div class="diff-block"><span class="diff-old">IET-056 Active</span><span class="diff-arrow">→</span><span class="diff-new">IET-042 Active</span></div>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="act-icon" style="background:var(--gbg);color:var(--green);">●</div>
+        <div class="act-body">
+          <div class="act-text">Zone radius updated — Zone Alpha</div>
+          <div class="act-time">03 Jun 2024 &nbsp;·&nbsp; 02:15 PM &nbsp;·&nbsp; by Admin (Prem)</div>
+          <div class="diff-block"><span class="diff-old">100m</span><span class="diff-arrow">→</span><span class="diff-new">150m</span></div>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="act-icon" style="background:var(--pbg);color:var(--purple);">⇑</div>
+        <div class="act-body">
+          <div class="act-text">Supervisor changed — handover from <strong>Rajan Muthu</strong> to <strong>Subbiah Ravichandran</strong></div>
+          <div class="act-time">01 Mar 2024 &nbsp;·&nbsp; 08:00 AM &nbsp;·&nbsp; by Admin (Prem)</div>
+          <div class="diff-block"><span class="diff-old">Rajan Muthu (IET-023)</span><span class="diff-arrow">→</span><span class="diff-new">Subbiah Ravichandran (IET-017)</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 10: COMPLIANCE & EXPIRY ALERTS -->
+<div class="section-card" id="sec-compliance">
+  <div class="section-header" onclick="toggleSection('compliance')">
+    <div class="section-title">
+      <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      Compliance &amp; Expiry Alerts
+      <span class="badge br">6 Issues</span>
+    </div>
+    <div class="section-actions" onclick="event.stopPropagation()">
+      <svg class="collapse-arrow" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </div>
+  <div class="section-body" id="compliance-content">
+    <div class="compliance-item">
+      <div class="comp-icon" style="background:var(--rbg);color:var(--red);">WP</div>
+      <div class="comp-info"><div class="comp-name">Veerappan Kandhasamy (IET-009)</div><div class="comp-detail text-red">Work Permit expiring in 3 days — Exp: 13 Jun 2024</div></div>
+      <button class="btn btn-d btn-xs">Action</button>
+    </div>
+    <div class="compliance-item">
+      <div class="comp-icon" style="background:var(--rbg);color:var(--red);">CE</div>
+      <div class="comp-info"><div class="comp-name">Chinniah Adaikkalam (IET-015)</div><div class="comp-detail text-red">CSOC Certificate expired — Exp: 01 Jun 2024</div></div>
+      <button class="btn btn-d btn-xs">Renew</button>
+    </div>
+    <div class="compliance-item">
+      <div class="comp-icon" style="background:var(--abg);color:var(--amber);">WP</div>
+      <div class="comp-info"><div class="comp-name">Rajesh Kumar (IET-044)</div><div class="comp-detail text-amber">Work Permit expiring in 18 days — Exp: 28 Jun 2024</div></div>
+      <button class="btn btn-s btn-xs">Review</button>
+    </div>
+    <div class="compliance-item">
+      <div class="comp-icon" style="background:var(--abg);color:var(--amber);">PP</div>
+      <div class="comp-info"><div class="comp-name">Muthu Selvam (IET-067)</div><div class="comp-detail text-amber">Passport expiring in 22 days — Exp: 02 Jul 2024</div></div>
+      <button class="btn btn-s btn-xs">Notify</button>
+    </div>
+    <div class="compliance-item">
+      <div class="comp-icon" style="background:var(--pbg);color:var(--purple);">FE</div>
+      <div class="comp-info"><div class="comp-name">Selvakumar Arumugam (IET-042)</div><div class="comp-detail" style="color:var(--purple);">Not face-enrolled — cannot use face check-in</div></div>
+      <button class="btn btn-s btn-xs">Enroll</button>
+    </div>
+    <div class="compliance-item">
+      <div class="comp-icon" style="background:var(--aglow);color:var(--accent2);">FE</div>
+      <div class="comp-info"><div class="comp-name">Palaniswamy K (IET-031)</div><div class="comp-detail" style="color:var(--accent2);">Face re-enrollment due — last enrolled 11 months ago</div></div>
+      <button class="btn btn-s btn-xs">Re-enroll</button>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 11: PROJECT SETTINGS -->
+<div class="section-card collapsed" id="sec-settings">
+  <div class="section-header" onclick="toggleSection('settings')">
+    <div class="section-title">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      Project Settings
+    </div>
+    <div class="section-actions" onclick="event.stopPropagation()">
+      <svg class="collapse-arrow" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </div>
+  <div class="section-body" id="settings-content" style="display:none;">
+    <div class="settings-grid">
+      <div>
+        <div class="text-xs text-dim" style="font-weight:600;letter-spacing:.8px;text-transform:uppercase;margin-bottom:12px;">Shift &amp; Timing</div>
+        <div class="setting-item">
+          <div><div class="setting-label">Shift Start</div><div class="setting-desc">Check-in window opens 30 min before</div></div>
+          <span class="inline-val text-mono text-blue" onclick="makeEditable(this)">07:00</span>
+        </div>
+        <div class="setting-item">
+          <div><div class="setting-label">Shift End / Auto-checkout</div><div class="setting-desc">Workers auto-checked out at this time</div></div>
+          <span class="inline-val text-mono text-blue" onclick="makeEditable(this)">17:00</span>
+        </div>
+        <div class="setting-item">
+          <div><div class="setting-label">Late Threshold</div><div class="setting-desc">Violation logged after this delay</div></div>
+          <span class="inline-val text-mono text-blue" onclick="makeEditable(this)">15 min</span>
+        </div>
+      </div>
+      <div>
+        <div class="text-xs text-dim" style="font-weight:600;letter-spacing:.8px;text-transform:uppercase;margin-bottom:12px;">Alerts &amp; Automation</div>
+        <div class="setting-item">
+          <div><div class="setting-label">Auto-checkout</div><div class="setting-desc">Auto check-out at shift end</div></div>
+          <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="setting-item">
+          <div><div class="setting-label">Violation Alerts</div><div class="setting-desc">Notify supervisor on violation</div></div>
+          <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="setting-item">
+          <div><div class="setting-label">Low Attendance Alert</div><div class="setting-desc">Alert if attendance &lt; 80%</div></div>
+          <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="setting-item">
+          <div><div class="setting-label">Task Overdue Alerts</div><div class="setting-desc">Notify when task passes due date</div></div>
+          <div class="toggle" onclick="this.classList.toggle('on')"></div>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <button class="btn btn-s" onclick="toast('Settings saved','success')">Save Settings</button>
+      <button class="btn btn-d" onclick="toast('Archive requires CEO confirmation','error')">🗑️ Archive Project</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block modals %}
+
+<!-- MODAL: ADD WORKER -->
+<div class="mo" id="addWorkerModal">
+  <div class="md">
+    <div class="mh">
+      <div class="mt-modal">Add Worker to Project</div>
+      <div class="mc" onclick="cm('addWorkerModal')">✕</div>
+    </div>
+    <div class="mb">
+      <div class="fg" style="grid-template-columns:1fr;">
+        <div class="fgrp">
+          <label class="fl">Select Worker</label>
+          <select class="fi" id="addWorkerSelect">
+            <option value="">— Search or select worker —</option>
+            <option value="IET-009">IET-009 — Veerappan Kandhasamy (Rigger Signalman)</option>
+            <option value="IET-015">IET-015 — Chinniah Adaikkalam (Rigger)</option>
+            <option value="IET-031">IET-031 — Palaniswamy K (Signalman)</option>
+            <option value="IET-044">IET-044 — Rajesh Kumar (Safety Officer)</option>
+            <option value="IET-056">IET-056 — Karuppaiah Selvam (Rigger)</option>
+            <option value="IET-067">IET-067 — Muthu Selvam (Rigger Signalman)</option>
+            <option value="IET-042">IET-042 — Selvakumar Arumugam (Banksman)</option>
+          </select>
+        </div>
+        <div class="fgrp">
+          <label class="fl">Assignment Type</label>
+          <select class="fi" id="assignType" onchange="toggleTempDates(this.value)">
+            <option value="permanent">Permanent</option>
+            <option value="temporary">Temporary (set date range)</option>
+          </select>
+        </div>
+        <div id="tempDateFields" style="display:none;">
+          <div class="fg">
+            <div class="fgrp"><label class="fl">Start Date</label><input type="date" class="fi" id="tempStart"></div>
+            <div class="fgrp"><label class="fl">End Date</label><input type="date" class="fi" id="tempEnd"></div>
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-top:5px;">Worker will be auto-removed on the end date.</div>
+        </div>
+        <div class="fgrp">
+          <label class="fl">Designation on this Project</label>
+          <input type="text" class="fi" placeholder="e.g. Rigger, Safety Officer">
+        </div>
+        <div class="fgrp">
+          <label class="fl">Notes (optional)</label>
+          <textarea class="fi" rows="2" placeholder="Any special notes..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-s" onclick="cm('addWorkerModal')">Cancel</button>
+      <button class="btn btn-p" onclick="addWorkerToRoster()">Add to Roster</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ALTER ROSTER -->
+<div class="mo" id="alterRosterModal">
+  <div class="md">
+    <div class="mh">
+      <div class="mt-modal">Alter Roster</div>
+      <div class="mc" onclick="cm('alterRosterModal')">✕</div>
+    </div>
+    <div class="mb">
+      <div class="info-box" style="margin-top:0;margin-bottom:16px;">ℹ️ Roster alteration schedules a swap on a future date. The old worker is marked "Removed" and the new worker is activated from the chosen date.</div>
+      <div class="fgrp" style="margin-bottom:16px;">
+        <label class="fl">Effective Date</label>
+        <input type="date" class="fi">
+      </div>
+      <div class="divider"></div>
+      <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:start;">
+        <div>
+          <div class="text-xs text-dim" style="margin-bottom:10px;font-weight:600;">REMOVE FROM PROJECT</div>
+          <select class="fi">
+            <option>IET-056 — Karuppaiah Selvam</option>
+            <option>IET-067 — Muthu Selvam</option>
+          </select>
+        </div>
+        <div style="padding-top:28px;text-align:center;font-size:20px;color:var(--text3);">⇄</div>
+        <div>
+          <div class="text-xs text-dim" style="margin-bottom:10px;font-weight:600;">ADD TO PROJECT</div>
+          <select class="fi">
+            <option>IET-042 — Selvakumar Arumugam</option>
+            <option>IET-031 — Palaniswamy K</option>
+          </select>
+        </div>
+      </div>
+      <div class="fgrp" style="margin-top:16px;">
+        <label class="fl">Reason for Alteration</label>
+        <textarea class="fi" rows="2" placeholder="e.g. Worker transferred to Tuas project..."></textarea>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-s" onclick="cm('alterRosterModal')">Cancel</button>
+      <button class="btn btn-p" onclick="submitAlterRoster()">Schedule Alteration</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: CHANGE SUPERVISOR -->
+<div class="mo" id="changeSuperModal">
+  <div class="md" style="max-width:500px;">
+    <div class="mh">
+      <div class="mt-modal">Change Supervisor</div>
+      <div class="mc" onclick="cm('changeSuperModal')">✕</div>
+    </div>
+    <div class="mb">
+      <div class="warn-box" style="margin-top:0;margin-bottom:16px;">⚠️ Changing the supervisor will immediately revoke app access from Subbiah Ravichandran and grant it to the new supervisor.</div>
+      <div class="fg" style="grid-template-columns:1fr;">
+        <div class="fgrp">
+          <label class="fl">Current Supervisor</label>
+          <input class="fi" value="Subbiah Ravichandran (IET-017)" disabled style="opacity:.6;">
+        </div>
+        <div class="fgrp">
+          <label class="fl">New Supervisor</label>
+          <select class="fi">
+            <option>— Select supervisor —</option>
+            <option>IET-023 — Rajan Muthu (Lifting Supervisor)</option>
+            <option>IET-031 — Palaniswamy K (Supervisor)</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg" style="margin-top:14px;">
+        <div class="fgrp"><label class="fl">Handover Date</label><input type="date" class="fi"></div>
+        <div class="fgrp"><label class="fl">Handover Period (days)</label><input type="number" class="fi" value="3" min="0" max="14"></div>
+      </div>
+      <div class="fgrp" style="margin-top:14px;">
+        <label class="fl">Reason for Change</label>
+        <textarea class="fi" rows="2" placeholder="e.g. Transfer to other project, resignation..."></textarea>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-s" onclick="cm('changeSuperModal')">Cancel</button>
+      <button class="btn btn-p" onclick="changeSupervisor()">Confirm Change</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: TEMPORARY ASSIGN -->
+<div class="mo" id="tempAssignModal">
+  <div class="md" style="max-width:480px;">
+    <div class="mh">
+      <div class="mt-modal">Temporary Assignment</div>
+      <div class="mc" onclick="cm('tempAssignModal')">✕</div>
+    </div>
+    <div class="mb">
+      <div class="fg" style="grid-template-columns:1fr;">
+        <div class="fgrp">
+          <label class="fl">Select Worker</label>
+          <select class="fi">
+            <option>— Select worker —</option>
+            <option>IET-009 — Veerappan Kandhasamy</option>
+            <option>IET-044 — Rajesh Kumar</option>
+            <option>IET-031 — Palaniswamy K</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg" style="margin-top:14px;">
+        <div class="fgrp"><label class="fl">Start Date</label><input type="date" class="fi"></div>
+        <div class="fgrp"><label class="fl">End Date</label><input type="date" class="fi"></div>
+      </div>
+      <div class="fgrp" style="margin-top:14px;">
+        <label class="fl">Auto-remove on end date?</label>
+        <select class="fi">
+          <option>Yes — auto-remove at midnight on end date</option>
+          <option>No — require manual removal</option>
+        </select>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-s" onclick="cm('tempAssignModal')">Cancel</button>
+      <button class="btn btn-p" onclick="toast('Temporary assignment created','success');cm('tempAssignModal')">Create Assignment</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: BULK ADD -->
+<div class="mo" id="bulkAddModal">
+  <div class="md" style="max-width:480px;">
+    <div class="mh">
+      <div class="mt-modal">Bulk Add Workers</div>
+      <div class="mc" onclick="cm('bulkAddModal')">✕</div>
+    </div>
+    <div class="mb">
+      <div class="fgrp">
+        <label class="fl">Select Multiple Workers</label>
+        <select class="fi" multiple size="6" style="height:auto;">
+          <option>IET-009 — Veerappan Kandhasamy (Rigger Signalman)</option>
+          <option>IET-015 — Chinniah Adaikkalam (Rigger)</option>
+          <option>IET-031 — Palaniswamy K (Signalman)</option>
+          <option>IET-044 — Rajesh Kumar (Safety Officer)</option>
+          <option>IET-056 — Karuppaiah Selvam (Rigger)</option>
+          <option>IET-067 — Muthu Selvam (Rigger Signalman)</option>
+        </select>
+        <div style="font-size:11px;color:var(--text3);margin-top:5px;">Hold Ctrl / Cmd to select multiple workers.</div>
+      </div>
+      <div class="fgrp" style="margin-top:14px;">
+        <label class="fl">Assignment Type for All</label>
+        <select class="fi"><option>Permanent</option><option>Temporary</option></select>
+      </div>
+      <div class="divider"></div>
+      <div style="border:1.5px dashed var(--border2);border-radius:var(--r);padding:24px;text-align:center;cursor:pointer;" onclick="toast('CSV upload coming soon','info')">
+        <div style="font-size:24px;margin-bottom:8px;">⬆</div>
+        <div style="color:var(--text2);font-size:13px;">Click to upload workers.csv</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px;">IET No, Name, Designation format</div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-s" onclick="cm('bulkAddModal')">Cancel</button>
+      <button class="btn btn-p" onclick="toast('Workers added to roster','success');cm('bulkAddModal')">Add Selected Workers</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ADD TASK -->
+<div class="mo" id="addTaskModal">
+  <div class="md" style="max-width:480px;">
+    <div class="mh">
+      <div class="mt-modal">Add Task</div>
+      <div class="mc" onclick="cm('addTaskModal')">✕</div>
+    </div>
+    <div class="mb">
+      <div class="fg" style="grid-template-columns:1fr;">
+        <div class="fgrp">
+          <label class="fl">Task Title</label>
+          <input type="text" class="fi" placeholder="e.g. Conduct weekly safety briefing">
+        </div>
+      </div>
+      <div class="fg" style="margin-top:14px;">
+        <div class="fgrp">
+          <label class="fl">Assigned To</label>
+          <select class="fi">
+            <option>Subbiah Ravichandran (IET-017)</option>
+            <option>Rajan Muthu (IET-023)</option>
+          </select>
+        </div>
+        <div class="fgrp">
+          <label class="fl">Due Date</label>
+          <input type="date" class="fi">
+        </div>
+      </div>
+      <div class="fgrp" style="margin-top:14px;">
+        <label class="fl">Priority</label>
+        <select class="fi"><option>Normal</option><option>High</option><option>Critical</option></select>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-s" onclick="cm('addTaskModal')">Cancel</button>
+      <button class="btn btn-p" onclick="addTask()">Add Task</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: EDIT PROJECT -->
+<div class="mo" id="editProjectModal">
+  <div class="md">
+    <div class="mh">
+      <div class="mt-modal">Edit Project</div>
+      <div class="mc" onclick="cm('editProjectModal')">✕</div>
+    </div>
+    <div class="mb">
+      <div class="fg">
+        <div class="fgrp"><label class="fl">Project Name</label><input type="text" class="fi" value="Marina Bay Complex — Tower B"></div>
+        <div class="fgrp"><label class="fl">Project Code</label><input type="text" class="fi" value="MBC-2024"></div>
+        <div class="fgrp full"><label class="fl">Client</label><input type="text" class="fi" value="Surbana Jurong Pte Ltd"></div>
+        <div class="fgrp full"><label class="fl">Site Address</label><input type="text" class="fi" value="18 Marina Gardens Dr, Singapore 018953"></div>
+        <div class="fgrp"><label class="fl">Start Date</label><input type="date" class="fi" value="2024-01-15"></div>
+        <div class="fgrp"><label class="fl">End Date</label><input type="date" class="fi" value="2024-12-31"></div>
+        <div class="fgrp"><label class="fl">Shift Start</label><input type="time" class="fi" value="07:00"></div>
+        <div class="fgrp"><label class="fl">Shift End</label><input type="time" class="fi" value="17:00"></div>
+        <div class="fgrp full">
+          <label class="fl">Status</label>
+          <select class="fi"><option>Active</option><option>On Hold</option><option>Completed</option><option>Archived</option></select>
+        </div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-s" onclick="cm('editProjectModal')">Cancel</button>
+      <button class="btn btn-p" onclick="toast('Project details saved','success');cm('editProjectModal')">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: EDIT ZONE -->
+<div class="mo" id="editZoneModal">
+  <div class="md" style="max-width:500px;">
+    <div class="mh">
+      <div class="mt-modal">Edit Geo-fence Zone</div>
+      <div class="mc" onclick="cm('editZoneModal')">✕</div>
+    </div>
+    <div class="mb">
+      <div class="fg" style="grid-template-columns:1fr;">
+        <div class="fgrp"><label class="fl">Zone Name</label><input type="text" class="fi" value="Zone Alpha — Marina Bay"></div>
+      </div>
+      <div class="fg" style="margin-top:14px;">
+        <div class="fgrp"><label class="fl">Latitude</label><input type="text" class="fi" value="1.2834"></div>
+        <div class="fgrp"><label class="fl">Longitude</label><input type="text" class="fi" value="103.8607"></div>
+        <div class="fgrp"><label class="fl">Radius (meters)</label><input type="number" class="fi" value="150" min="30" max="1000"></div>
+        <div class="fgrp"><label class="fl">Buffer (meters)</label><input type="number" class="fi" value="30" min="0" max="100"></div>
+        <div class="fgrp"><label class="fl">Active From</label><input type="time" class="fi" value="06:30"></div>
+        <div class="fgrp"><label class="fl">Active Until</label><input type="time" class="fi" value="18:00"></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-s" onclick="cm('editZoneModal')">Cancel</button>
+      <button class="btn btn-p" onclick="toast('Zone saved','success');cm('editZoneModal')">Save Zone</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// ===== DATA =====
+const workers = [
+  {id:'IET-009',name:'Veerappan Kandhasamy',designation:'Rigger Signalman',type:'permanent',period:'15 Jan 2024 – Ongoing',today:'present',face:true,wp:'valid',status:'active',av:'VK',color:'av-blue'},
+  {id:'IET-015',name:'Chinniah Adaikkalam',designation:'Rigger',type:'permanent',period:'15 Jan 2024 – Ongoing',today:'late',face:true,wp:'valid',status:'active',av:'CA',color:'av-green'},
+  {id:'IET-017',name:'Subbiah Ravichandran',designation:'Lifting Supervisor',type:'permanent',period:'15 Jan 2024 – Ongoing',today:'present',face:true,wp:'valid',status:'active',av:'SR',color:'av-purple'},
+  {id:'IET-023',name:'Rajan Muthu',designation:'Lifting Supervisor',type:'temporary',period:'01 Jun – 05 Jun 2024',today:'absent',face:true,wp:'valid',status:'temp',av:'RM',color:'av-teal'},
+  {id:'IET-031',name:'Palaniswamy K',designation:'Signalman',type:'temporary',period:'01 Jun – 10 Jun 2024',today:'present',face:false,wp:'valid',status:'temp',av:'PK',color:'av-amber'},
+  {id:'IET-044',name:'Rajesh Kumar',designation:'Safety Officer',type:'permanent',period:'15 Jan 2024 – Ongoing',today:'present',face:true,wp:'expiring',status:'active',av:'RK',color:'av-blue'},
+  {id:'IET-056',name:'Karuppaiah Selvam',designation:'Rigger',type:'permanent',period:'15 Jan 2024 – Ongoing',today:'absent',face:true,wp:'valid',status:'removed',av:'KS',color:'av-red'},
+  {id:'IET-067',name:'Muthu Selvam',designation:'Rigger Signalman',type:'temporary',period:'10 Jun – 14 Jun 2024',today:'present',face:true,wp:'valid',status:'temp',av:'MS',color:'av-teal'},
+  {id:'IET-042',name:'Selvakumar Arumugam',designation:'Banksman',type:'permanent',period:'10 Jun 2024 – Ongoing',today:'present',face:false,wp:'valid',status:'active',av:'SA',color:'av-green'},
+];
+
+const tempAssignments = [
+  {name:'Rajan Muthu',id:'IET-023',period:'01 Jun – 05 Jun 2024',daysLeft:0,status:'ended',designation:'Lifting Supervisor',av:'RM',color:'av-teal'},
+  {name:'Palaniswamy K',id:'IET-031',period:'01 Jun – 10 Jun 2024',daysLeft:0,status:'ending',designation:'Signalman',av:'PK',color:'av-amber'},
+  {name:'Muthu Selvam',id:'IET-067',period:'10 Jun – 14 Jun 2024',daysLeft:4,status:'ok',designation:'Rigger Signalman',av:'MS',color:'av-teal'},
+];
+
+// ===== ROSTER =====
+let currentFilter = 'all', currentSearch = '';
+
+function renderRoster(){
+  const tbody = document.getElementById('rosterBody');
+  const filtered = workers.filter(w => {
+    const mf = currentFilter==='all' || (currentFilter==='active'&&w.status==='active') || (currentFilter==='temp'&&w.status==='temp') || (currentFilter==='removed'&&w.status==='removed');
+    const ms = currentSearch==='' || w.name.toLowerCase().includes(currentSearch.toLowerCase()) || w.id.toLowerCase().includes(currentSearch.toLowerCase());
+    return mf && ms;
+  });
+  tbody.innerHTML = filtered.map(w => {
+    const todayHtml = w.today==='present' ? `<span class="status-dot sd-green"></span>Present` : w.today==='late' ? `<span class="status-dot sd-amber"></span>Late` : `<span class="status-dot sd-red"></span>Absent`;
+    const typeBadge = w.type==='permanent' ? `<span class="badge bb">Permanent</span>` : `<span class="badge ba">Temporary</span>`;
+    const wpHtml = w.wp==='valid' ? `<span class="text-green">✓</span>` : w.wp==='expiring' ? `<span class="text-amber">⚠</span>` : `<span class="text-red">✗</span>`;
+    const style = w.status==='removed' ? 'opacity:.5;' : '';
+    return `<tr style="${style}">
+      <td><div class="worker-cell"><div class="av ${w.color}" style="width:32px;height:32px;font-size:11px;">${w.av}</div><div class="worker-info"><div class="name en">${w.name}</div><div class="iet eid">${w.id}</div></div></div></td>
+      <td style="color:var(--text2)">${w.designation}</td>
+      <td>${typeBadge}</td>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--text3)">${w.period}</td>
+      <td>${todayHtml}</td>
+      <td style="text-align:center">${w.face?'<span class="text-green">✓</span>':'<span class="text-red">✗</span>'}</td>
+      <td style="text-align:center">${wpHtml}</td>
+      <td><div style="display:flex;gap:4px">${w.status!=='removed'?`<button class="ab av-b" onclick="toast('Edit: ${w.name}','info')">Edit</button><button class="ab ad" onclick="removeWorker('${w.id}')">Remove</button>`:'<span style="font-size:11px;color:var(--text3)">Removed</span>'}</div></td>
+    </tr>`;
+  }).join('');
+}
+
+function filterRoster(type, el){
+  currentFilter = type;
+  document.querySelectorAll('#rosterTabs .filter-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderRoster();
+}
+function searchRoster(val){ currentSearch=val; renderRoster(); }
+
+function removeWorker(id){
+  const w = workers.find(x=>x.id===id);
+  if(!w||w.status==='removed') return;
+  w.status='removed'; w.today='absent';
+  renderRoster();
+  toast(`${w.name} removed from roster`,'success');
+  addActivity(`Worker <strong>${w.name} (${w.id})</strong> removed from roster`,'−','var(--rbg)','var(--red)');
+}
+
+function addWorkerToRoster(){
+  const sel = document.getElementById('addWorkerSelect');
+  if(!sel.value){ toast('Please select a worker','error'); return; }
+  const type = document.getElementById('assignType').value;
+  const id = sel.value;
+  const w = workers.find(x=>x.id===id);
+  if(w && w.status!=='removed'){ toast('Worker already in roster','error'); return; }
+  if(w){ w.status=type==='temporary'?'temp':'active'; w.type=type; w.today='absent'; }
+  renderRoster();
+  updateCount();
+  toast('Worker added to roster','success');
+  cm('addWorkerModal');
+}
+
+function updateCount(){
+  document.getElementById('roster-count').textContent = workers.filter(w=>w.status!=='removed').length + ' Workers';
+}
+
+// ===== TEMP CARDS =====
+function renderTemp(){
+  document.getElementById('tempGrid').innerHTML = tempAssignments.map((t,i)=>{
+    const cls = t.status==='ended'?'ended':t.status==='ending'?'ending-soon':'';
+    const badge = t.status==='ended'?'<span class="badge bgr">Ended</span>':t.status==='ending'?'<span class="badge br">Ends today</span>':`<span class="badge bg">${t.daysLeft} days left</span>`;
+    return `<div class="temp-card ${cls}">
+      <div class="countdown">${badge}</div>
+      <div class="worker-cell" style="margin-bottom:12px;">
+        <div class="av ${t.color}" style="width:34px;height:34px;font-size:11px;">${t.av}</div>
+        <div class="worker-info"><div class="name en">${t.name}</div><div class="iet eid">${t.id} · ${t.designation}</div></div>
+      </div>
+      <div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-bottom:12px;">${t.period}</div>
+      <div style="display:flex;gap:6px;">
+        ${t.status!=='ended'?`<button class="btn btn-s btn-xs" onclick="toast('Assignment extended +5 days','success')">Extend +5d</button>`:''}
+        <button class="btn btn-d btn-xs" onclick="removeTempCard(${i})">Remove</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function removeTempCard(i){ tempAssignments.splice(i,1); renderTemp(); toast('Assignment removed','success'); }
+
+// ===== ACTIVITY =====
+function addActivity(text, icon, bg, color){
+  const feed = document.getElementById('activityFeed');
+  const now = new Date();
+  const t = `10 Jun 2024 · ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+  const el = document.createElement('div');
+  el.className = 'activity-item';
+  el.innerHTML = `<div class="act-icon" style="background:${bg};color:${color};">${icon}</div><div class="act-body"><div class="act-text">${text}</div><div class="act-time">${t} · by Admin (Prem)</div></div>`;
+  feed.insertBefore(el, feed.firstChild);
+}
+
+// ===== OTHER =====
+function resolveViolation(btn){
+  const item = btn.closest('.vio-item');
+  const badge = item.querySelector('.badge');
+  badge.className='badge bg'; badge.textContent='Resolved';
+  item.querySelector('.vio-stripe').style.background='var(--green)';
+  btn.remove();
+  const note=document.createElement('span'); note.style.cssText='margin-left:12px;font-size:11px;color:var(--text3);'; note.textContent='Resolved by Prem';
+  item.appendChild(note);
+  toast('Violation resolved','success');
+  const sv=document.getElementById('stat-vio'); sv.textContent=Math.max(0,parseInt(sv.textContent)-1);
+}
+
+function toggleTask(el){
+  el.classList.toggle('done');
+  const nm=el.nextElementSibling; nm.classList.toggle('done');
+  const badge=nm.nextElementSibling;
+  if(el.classList.contains('done')){ badge.className='badge bg'; badge.textContent='Done'; toast('Task marked complete','success'); }
+  else { badge.className='badge bb'; badge.textContent='In Progress'; }
+}
+
+function addTask(){
+  const row=document.createElement('div'); row.className='task-row';
+  row.innerHTML=`<div class="task-check" onclick="toggleTask(this)"></div><div class="task-name">New task added</div><span class="badge bgr">To Do</span>`;
+  document.getElementById('taskList').appendChild(row);
+  cm('addTaskModal'); toast('Task added','success');
+}
+
+function submitAlterRoster(){ cm('alterRosterModal'); addActivity('Roster alteration scheduled','⇄','var(--abg)','var(--amber)'); toast('Roster alteration scheduled','success'); }
+function changeSupervisor(){ cm('changeSuperModal'); addActivity('Supervisor change initiated','⇑','var(--pbg)','var(--purple)'); toast('Supervisor change scheduled','success'); }
+
+function toggleTempDates(val){
+  document.getElementById('tempDateFields').style.display=val==='temporary'?'':'none';
+}
+
+function makeEditable(el){
+  const val=el.textContent;
+  const input=document.createElement('input'); input.type='text'; input.value=val; input.className='inline-input'; input.style.width='80px';
+  el.replaceWith(input); input.focus(); input.select();
+  input.addEventListener('blur',()=>{ const span=document.createElement('span'); span.className='inline-val text-mono text-blue'; span.textContent=input.value; span.onclick=function(){makeEditable(this);}; input.replaceWith(span); toast('Setting updated','success'); });
+  input.addEventListener('keydown',e=>{ if(e.key==='Enter') input.blur(); });
+}
+
+// ===== INIT =====
+renderRoster();
+renderTemp();
+</script>
+{% endblock %}

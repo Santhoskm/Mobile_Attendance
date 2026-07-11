@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Violations — IET Smart Solution{% endblock %}
+{% block nav_violations %}active{% endblock %}
+{% block page_title %}Geo-fence Violations{% endblock %}
+
+{% block extra_styles %}
+.vc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:10px;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center}
+.vc.un{border-left:3px solid var(--red)}.vc.res{border-left:3px solid var(--green);opacity:.65}
+{% endblock %}
+
+{% block content %}
+<div class="sh">
+  <div><div class="sh-title">Geo-fence Violations</div><div class="sh-sub">3 unresolved violations require action</div></div>
+  <button class="btn btn-s btn-sm">📥 Export</button>
+</div>
+<div class="sg sg3">
+  <div class="sc red"><div class="sc-lbl">Unresolved</div><div class="sc-val">3</div></div>
+  <div class="sc green"><div class="sc-lbl">Resolved Today</div><div class="sc-val">2</div></div>
+  <div class="sc blue"><div class="sc-lbl">Total This Month</div><div class="sc-val">28</div></div>
+</div>
+
+<div class="vc un">
+  <div>
+    <div style="display:flex;align-items:center;gap:9px;margin-bottom:8px">
+      <div class="av" style="background:#EF4444;width:34px;height:34px;font-size:12px">RM</div>
+      <div><div style="font-size:14px;font-weight:600;color:var(--text1)">Rajan Muthu — IET-023</div><div style="font-size:12px;color:var(--text3)">Tuas Link Phase 3 · Tuas Link Zone B</div></div>
+      <span class="badge br" style="margin-left:auto">Unresolved</span>
+    </div>
+    <div style="display:flex;gap:18px;font-size:12px;color:var(--text2)">
+      <div>⏰ <strong>09:31 AM</strong> today</div>
+      <div>📍 <span style="font-family:var(--mono)">1.3291°N 103.6401°E</span></div>
+      <div>Type: Check-in outside zone</div>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:7px">
+    <button class="btn btn-s btn-sm" onclick="om('m-resolve')">✏️ Resolve with Note</button>
+    <button class="btn btn-p btn-sm" onclick="toast('Violation marked as resolved','✅')">✅ Mark Resolved</button>
+  </div>
+</div>
+
+<div class="vc un">
+  <div>
+    <div style="display:flex;align-items:center;gap:9px;margin-bottom:8px">
+      <div class="av" style="background:#F59E0B;width:34px;height:34px;font-size:12px">KS</div>
+      <div><div style="font-size:14px;font-weight:600;color:var(--text1)">Karuppaiah Selvam — IET-056</div><div style="font-size:12px;color:var(--text3)">Marina Bay Construction · Marina Bay Site A</div></div>
+      <span class="badge br" style="margin-left:auto">Unresolved</span>
+    </div>
+    <div style="display:flex;gap:18px;font-size:12px;color:var(--text2)">
+      <div>⏰ <strong>10:14 AM</strong> today</div>
+      <div>📍 <span style="font-family:var(--mono)">1.2845°N 103.8612°E</span></div>
+      <div>Type: Drift outside zone</div>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:7px">
+    <button class="btn btn-s btn-sm" onclick="om('m-resolve')">✏️ Resolve with Note</button>
+    <button class="btn btn-p btn-sm" onclick="toast('Violation marked as resolved','✅')">✅ Mark Resolved</button>
+  </div>
+</div>
+
+<div class="vc res">
+  <div>
+    <div style="display:flex;align-items:center;gap:9px;margin-bottom:8px">
+      <div class="av" style="background:#10B981;width:34px;height:34px;font-size:12px">AP</div>
+      <div><div style="font-size:14px;font-weight:600;color:var(--text1)">Arumugam Pillai — IET-078</div><div style="font-size:12px;color:var(--text3)">Harbour Road Phase 2</div></div>
+      <span class="badge bg" style="margin-left:auto">Resolved</span>
+    </div>
+    <div style="display:flex;gap:18px;font-size:12px;color:var(--text2)">
+      <div>⏰ <strong>08:47 AM</strong></div><div>Type: Check-in outside zone</div><div>📝 "GPS drift confirmed at entrance"</div>
+    </div>
+  </div>
+  <div></div>
+</div>
+{% endblock %}
+
+{% block modals %}
+<div class="mo" id="m-resolve">
+  <div class="md" style="width:460px">
+    <div class="mh"><div class="mt">Resolve Violation</div><div class="mc" onclick="cm('m-resolve')">✕</div></div>
+    <div class="mb">
+      <div style="background:var(--bg3);border-radius:8px;padding:13px;margin-bottom:14px;font-size:13px;color:var(--text2)"><div style="font-weight:600;color:var(--text1);margin-bottom:3px">Rajan Muthu — IET-023</div><div>Tuas Link Phase 3 · 09:31 AM · Check-in outside zone</div></div>
+      <div class="fgrp"><label class="fl">Resolution Note <span>*</span></label><textarea class="fi" rows="4" placeholder="e.g. Employee was at site entrance, GPS drift confirmed..."></textarea></div>
+      <div class="fgrp" style="margin-top:10px"><label class="fl">Attendance Action</label><select class="fi"><option>Keep as Violation (flagged)</option><option>Override — Mark as Present</option><option>Override — Mark as Absent</option></select></div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-s" onclick="cm('m-resolve')">Cancel</button>
+      <button class="btn btn-p" onclick="cm('m-resolve');toast('Violation resolved','✅')">Save Resolution</button>
+    </div>
+  </div>
+</div>
+{% endblock %}

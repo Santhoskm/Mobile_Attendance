@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Settings — IET Smart Solution{% endblock %}
+{% block nav_settings %}active{% endblock %}
+{% block page_title %}System Settings{% endblock %}
+
+{% block extra_styles %}
+.stg{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.stc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:20px}
+.stt{font-size:14px;font-weight:600;color:var(--text1);margin-bottom:12px}
+.str{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--border)}
+.str:last-child{border-bottom:none}
+.stl{font-size:13px;color:var(--text1)}.std{font-size:11px;color:var(--text3);margin-top:2px}
+.tgl{width:38px;height:20px;border-radius:99px;background:var(--bg4);position:relative;cursor:pointer;transition:background .2s;border:none;flex-shrink:0}
+.tgl.on{background:var(--accent)}.tgl::after{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .2s}.tgl.on::after{transform:translateX(18px)}
+{% endblock %}
+
+{% block content %}
+<div class="sh">
+  <div><div class="sh-title">System Settings</div></div>
+</div>
+<div class="stg">
+  <div class="stc">
+    <div class="stt">⏱ Attendance Rules</div>
+    <div class="str"><div><div class="stl">Late Threshold</div><div class="std">Minutes after shift start = Late</div></div><input class="fi" value="15" style="width:60px;padding:5px;text-align:center;font-family:var(--mono)"></div>
+    <div class="str"><div><div class="stl">Auto-checkout</div><div class="std">Auto check-out at shift end</div></div><button class="tgl on" onclick="this.classList.toggle('on')"></button></div>
+    <div class="str"><div><div class="stl">Shift Start</div></div><input class="fi" value="08:00" type="time" style="width:110px;padding:5px"></div>
+    <div class="str"><div><div class="stl">Shift End</div></div><input class="fi" value="17:00" type="time" style="width:110px;padding:5px"></div>
+  </div>
+  <div class="stc">
+    <div class="stt">📍 Geo-fence</div>
+    <div class="str"><div><div class="stl">GPS Buffer</div><div class="std">Extra metres added to zones</div></div><input class="fi" value="30" style="width:60px;padding:5px;text-align:center;font-family:var(--mono)"></div>
+    <div class="str"><div><div class="stl">Check Interval (min)</div><div class="std">How often geo-fence is checked</div></div><input class="fi" value="5" style="width:60px;padding:5px;text-align:center;font-family:var(--mono)"></div>
+    <div class="str"><div><div class="stl">Violation Notifications</div><div class="std">Push alert on violation</div></div><button class="tgl on" onclick="this.classList.toggle('on')"></button></div>
+  </div>
+  <div class="stc">
+    <div class="stt">📷 Face Detection</div>
+    <div class="str"><div><div class="stl">Confidence Threshold</div><div class="std">Minimum match %</div></div><input class="fi" value="80" style="width:60px;padding:5px;text-align:center;font-family:var(--mono)"></div>
+    <div class="str"><div><div class="stl">Max Failed Attempts</div><div class="std">Before PIN fallback</div></div><input class="fi" value="3" style="width:60px;padding:5px;text-align:center;font-family:var(--mono)"></div>
+    <div class="str"><div><div class="stl">Liveness Check</div><div class="std">Require blink/movement</div></div><button class="tgl on" onclick="this.classList.toggle('on')"></button></div>
+    <div class="str"><div><div class="stl">Re-enrollment (months)</div></div><input class="fi" value="12" style="width:60px;padding:5px;text-align:center;font-family:var(--mono)"></div>
+  </div>
+  <div class="stc">
+    <div class="stt">🔔 Notifications</div>
+    <div class="str"><div><div class="stl">Check-in Reminders</div><div class="std">Remind employees before shift</div></div><button class="tgl on" onclick="this.classList.toggle('on')"></button></div>
+    <div class="str"><div><div class="stl">Absence Alert</div><div class="std">Alert supervisor after 30 min</div></div><button class="tgl on" onclick="this.classList.toggle('on')"></button></div>
+    <div class="str"><div><div class="stl">WP Expiry Warning Days</div></div><input class="fi" value="30" style="width:60px;padding:5px;text-align:center;font-family:var(--mono)"></div>
+  </div>
+</div>
+<div style="display:flex;justify-content:flex-end;gap:9px;margin-top:6px">
+  <button class="btn btn-s">Reset Defaults</button>
+  <button class="btn btn-p" onclick="toast('Settings saved','✅')">Save Settings</button>
+</div>
+{% endblock %}

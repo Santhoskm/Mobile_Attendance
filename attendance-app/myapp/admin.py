@@ -3,7 +3,9 @@ from .models import *
 from import_export.admin import ImportExportModelAdmin
 from import_export import resources, fields
 from import_export.widgets import DateWidget
+from datetime import datetime
 
+from .models import ViolationType, Violation, ProjectDocument, ProjectEmployee
 # Register your models here.
 
 
@@ -75,19 +77,50 @@ class EmployeeRegistrationWorkforceResource(resources.ModelResource):
 
 class EmployeeRegistrationWorkforceAdmin(ImportExportModelAdmin):
     resource_class = EmployeeRegistrationWorkforceResource
-    list_display = ('empid','empname',)
+    list_display = ('empno','empname',)
 
 
 class AttendanceAdmin(ImportExportModelAdmin):
-    list_display = ('employee', 'date', 'status')
+    list_display = ('employee', 'date', 'status','active_hours')
+    search_fields = (
+        'employee__empno',
+        'employee__empname',
+        'project_name',
+        'status',
+        'date',
+    )
+
+    def active_hours(self, obj):
+        return obj.active_hours
+    active_hours.short_description = "Active Hours"
 
 
 class UserAdmin(ImportExportModelAdmin):
     list_display = ('username', 'email', 'is_staff', 'is_active')
 
 
+class ProjectsAdmin(ImportExportModelAdmin):
+    list_display = ('projectname',)
+
+
+
+class ProjectWorkerAdmin(ImportExportModelAdmin):
+    list_display = ('empname','role','projectname')
+
+
+
+
+class ProjectEmployeeAdmin(ImportExportModelAdmin):
+    list_display = ('employee','project','role','deletestatus')
+
+
 admin.site.register(EmployeeRegistrationWorkforce,EmployeeRegistrationWorkforceAdmin)
 admin.site.register(Attendance,AttendanceAdmin)
 admin.site.register(ProjectAttendance)
-admin.site.register(ProjectEmployee)
+admin.site.register(ProjectEmployee,ProjectEmployeeAdmin)
 admin.site.register(User,UserAdmin)
+admin.site.register(Projects,ProjectsAdmin)
+admin.site.register(ViolationType)
+admin.site.register(Violation)
+admin.site.register(ProjectDocument)
+admin.site.register(ProjectWorker,ProjectWorkerAdmin)

@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import Attendance,EmployeeRegistrationWorkforce
+#from .models import Attendance,EmployeeRegistrationWorkforce,Projects
+from .models import Attendance, EmployeeRegistrationWorkforce, ProjectAttendance
 from .models import User
 
 
@@ -10,7 +11,7 @@ class AttendanceSerializer(serializers.ModelSerializer):
         read_only=True
     )
 
-    employee_no = serializers.CharField(
+    '''employee_no = serializers.CharField(
         source='employee.empid',
         read_only=True
     )
@@ -18,7 +19,9 @@ class AttendanceSerializer(serializers.ModelSerializer):
     employee = serializers.SlugRelatedField(
         queryset=EmployeeRegistrationWorkforce.objects.all(),
         slug_field='empid'
-    )
+    )'''
+    employee_no = serializers.CharField(source='employee.empno', read_only=True)
+    employee = serializers.SlugRelatedField(queryset=EmployeeRegistrationWorkforce.objects.all(), slug_field='empno')
 
     class Meta:
         model = Attendance
@@ -49,3 +52,10 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         user.save()
 
         return user        
+
+
+
+class ProjectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProjectAttendance
+        fields = '__all__'

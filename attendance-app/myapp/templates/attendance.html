@@ -1,0 +1,320 @@
+{% extends "base.html" %}
+
+{% block title %}Daily Attendance — IET Smart Solution{% endblock %}
+{% block nav_attendance %}active{% endblock %}
+{% block page_title %}Daily Attendance{% endblock %}
+
+{% block extra_styles %}
+.sg5{grid-template-columns:repeat(5,1fr)}
+{% endblock %}
+
+{% block content %}
+<style>
+.badge{
+    padding:6px 12px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:600;
+}
+
+.bg-success{
+    background:#0f2f27;
+    color:#22c55e;
+}
+
+.bg-danger{
+    background:#3b1a1a;
+    color:#ef4444;
+}
+
+.bg-warning{
+    background:#3b3215;
+    color:#f59e0b;
+}
+
+.bg-info{
+    background:#16354a;
+    color:#38bdf8;
+}
+.att-list
+{
+display:flex;
+}
+.fi-att {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: var(--text1);
+    font-family: var(--font);
+    font-size: 13px;
+    outline: none;
+    transition: border-color .15s;
+    /* width: 100%; */
+}
+</style>
+<div class="sh">
+  <div><div class="sh-title">Daily Attendance</div><div class="sh-sub">20 May 2026 — 198 present, 32 absent, 11 late</div></div>
+  <div><div class="sh-title">Daily Attendance</div><div class="sh-sub">{{ selected_date|default:"Today" }} — {{ present_count }} present, {{ absent_count }} absent</div></div>
+  <div style="display:flex;gap:8px">
+    <!--<form method="GET">
+    <input type="date"
+           name="date"
+           class="fi"
+           value="{{ request.GET.date }}"
+           style="width:150px;padding:7px 10px"
+           onchange="this.form.submit()">
+</form>-->
+<div class="att-list">
+<form method="GET">
+
+<input
+type="date"
+name="date"
+value="{{selected_date}}" class="fi-att">
+
+<input
+type="month"
+name="month"
+value="{{selected_month}}" class="fi-att">
+
+<select name="project" class="fi-att" style="width:170px;padding:7px 10px">
+
+<option value="">All Projects</option>
+
+{% for i in projects %}
+
+<option
+value="{{i.id}}"
+{% if selected_project == i.id|stringformat:"s" %}
+selected
+{% endif %}
+>
+
+{{i.projectname}}
+
+</option>
+
+{% endfor %}
+
+</select>
+
+<input type="hidden" name="status" value="{{selected_status}}">
+
+<button class="btn btn-primary">
+Filter
+</button>
+
+</form>
+    <!--<select class="fi" style="width:170px;padding:7px 10px">
+      <option>All Projects</option>
+      {% for i in projects %}
+      <option value="{{i.projectname}}">{{i.projectname}}</option>
+      {% endfor %}
+    </select>-->
+    <!--<button class="btn btn-s btn-sm">📥 Export CSV</button>-->
+    <a class="btn btn-s btn-sm" href="?date={{selected_date}}
+&month={{selected_month}}
+&project={{selected_project}}
+&status={{selected_status}}
+&export=excel"
+class="btn btn-success">
+
+Download Excel
+
+</a>
+</div>
+  </div>
+</div>
+<div class="sg sg5" style="margin-bottom:18px">
+  <div class="sc green" style="cursor:pointer;" onclick="window.location.href='?date={{selected_date|default:''}}&month={{selected_month|default:''}}&project={{selected_project|default:''}}&status=Present'">
+      <div class="sc-lbl">Present</div><div class="sc-val" style="font-size:24px">{{ present_count }}</div>
+  </div>
+  
+  <div class="sc red" style="cursor:pointer;" onclick="window.location.href='?date={{selected_date|default:''}}&month={{selected_month|default:''}}&project={{selected_project|default:''}}&status=Absent'">
+      <div class="sc-lbl">Absent</div><div class="sc-val" style="font-size:24px">{{ absent_count }}</div>
+  </div>
+  
+  <div class="sc teal" style="cursor:pointer;" onclick="window.location.href='?date={{selected_date|default:''}}&month={{selected_month|default:''}}&project={{selected_project|default:''}}&status=CheckedOut'">
+      <div class="sc-lbl">Checked Out</div><div class="sc-val" style="font-size:24px">{{ checked_out_count }}</div>
+  </div>
+  
+  <div class="sc red" style="cursor:pointer;" onclick="window.location.href='?date={{selected_date|default:''}}&month={{selected_month|default:''}}&project={{selected_project|default:''}}&status=Violation'">
+      <div class="sc-lbl">Violations</div><div class="sc-val" style="font-size:24px">{{ violations_count }}</div>
+  </div>
+</div>
+<div class="tw">
+  <div class="ttb">
+    <div class="ftabs">
+      <div class="ft active">
+    <a href="{% url 'attendance' %}"
+       class="ft {% if not selected_status %}active{% endif %}">
+       All
+    </a>
+      </div>
+      <div class="ft">  <a href="{% url 'attendance' %}?status=Present"
+       class="ft {% if selected_status == 'Present' %}active{% endif %}">
+       Present
+    </a></div>
+      <div class="ft"> <a href="{% url 'attendance' %}?status=Absent"
+       class="ft {% if selected_status == 'Absent' %}active{% endif %}">
+       Absent
+    </a></div>
+      <div class="ft">
+       <a href="{% url 'attendance' %}?status=Violation"
+       class="ft {% if selected_status == 'Violation' %}active{% endif %}">
+       Violations
+    </a>
+     </div>
+    </div>
+    <div class="tsrch" style="margin-left:auto"><span style="color:var(--text3)">🔍</span><input type="text" placeholder="Search employee..."></div>
+  </div>
+  <table>
+    <thead>
+      <tr><th>Employee</th><th>Project</th><th>Date</th><th>Check-in</th><th>Check-out</th><th>Hours</th><th>Face</th><th>Status</th><th>Note</th></tr>
+    </thead>
+
+<tbody>
+      {% for attendance in emplist %}
+      <tr>
+        <td>
+          <div class="ec">
+            <div class="av" style="background:#3B82F6">{{ attendance.initials }}</div>
+            <div>
+              <div class="en">{{ attendance.employee }}</div>
+              <div class="eid"></div>
+            </div>
+          </div>
+        </td>
+        <td style="font-size:12px">{{ attendance.project }}</td>
+        <td><span style="font-family:var(--mono);color:var(--green);font-size:12px">{{ attendance.date }}</span></td>
+        <td><span style="font-family:var(--mono);color:var(--green);font-size:12px">{{ attendance.check_in }}</span></td>
+        <td><span style="font-family:var(--mono);font-size:12px;color:var(--text3)">{{ attendance.check_out }}</span></td>
+        <td style="font-family:var(--mono);font-size:12px">{{ attendance.active_hours }}</td>
+        
+        <td style="padding:6px">
+          {% if attendance.face_enrolled %}
+            <span style="color:var(--green)">✓</span>
+          {% else %}
+            <span style="color:var(--red)">✗</span>
+          {% endif %}
+        </td>
+        
+        <td>
+          {% if attendance.status == "Present" %}
+              <span class="badge bg-success">{{ attendance.status }}</span>
+          {% elif attendance.status == "Absent" %}
+              <span class="badge bg-danger">{{ attendance.status }}</span>
+          {% elif attendance.status == "Leave" %}
+              <span class="badge bg-warning">{{ attendance.status }}</span>
+          {% elif attendance.status == "Half Day" %}
+              <span class="badge bg-info">{{ attendance.status }}</span>
+          {% else %}
+              <span class="badge">{{ attendance.status }}</span>
+          {% endif %}
+        </td>
+
+        <td>—</td>
+        <td>—</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+
+
+<!--    <tbody>
+      {% for i in emplist %}
+      <tr>
+        <td><div class="ec"><div class="av" style="background:#3B82F6">{{ i.initials }}</div><div><div class="en">{{i.employee}}</div><div class="eid"></div></div></div></td>
+        <td style="font-size:12px">{{i.project}}</td>
+        <td><span style="font-family:var(--mono);color:var(--green);font-size:12px">{{i.date}}</span></td>
+        <td><span style="font-family:var(--mono);color:var(--green);font-size:12px">{{i.check_in}}</span></td>
+        <td><span style="font-family:var(--mono);font-size:12px;color:var(--text3)">{{i.check_out}}</span></td>
+        <td style="font-family:var(--mono);font-size:12px">{{i.active_hours}}</td>
+        <td style="padding:6px">
+          {% if i.face_enrolled %}
+            <span style="color:var(--green)">✓</span>
+          {% else %}
+            <span style="color:var(--red)">✗</span>
+          {% endif %}
+        </td>
+        <td>
+    {% if i.status == "Present" %}
+        <span class="badge bg-success">{{ i.status }}</span>
+
+    {% elif i.status == "Absent" %}
+        <span class="badge bg-danger">{{ i.status }}</span>
+
+    {% elif i.status == "Leave" %}
+        <span class="badge bg-warning">{{ i.status }}</span>
+
+    {% elif i.status == "Half Day" %}
+        <span class="badge bg-info">{{ i.status }}</span>
+
+    {% else %}
+        <span class="badge">{{ i.status }}</span>
+    {% endif %}
+</td>
+
+<td>—</td>
+        <td>—</td>
+      </tr>
+      {% endfor %}
+      <tr>
+        <td><div class="ec"><div class="av" style="background:#10B981">CA</div><div><div class="en">Chinniah Adaikkalam</div><div class="eid">IET-015</div></div></div></td>
+        <td style="font-size:12px">Marina Bay</td>
+        <td><span style="font-family:var(--mono);color:var(--green);font-size:12px">09:07</span></td>
+        <td><span style="font-family:var(--mono);font-size:12px">13:45</span></td>
+        <td style="font-family:var(--mono);font-size:12px">4h 38m</td>
+        <td><span class="badge bg">✓ Yes</span></td><td><span class="badge bg">✓ Yes</span></td>
+        <td><span class="badge bg">Present</span></td><td>—</td>
+      </tr>
+      <tr>
+        <td><div class="ec"><div class="av" style="background:#F59E0B">SR</div><div><div class="en">Subbiah Ravichandran</div><div class="eid">IET-017</div></div></div></td>
+        <td style="font-size:12px">Jurong West</td>
+        <td><span style="font-family:var(--mono);color:var(--amber);font-size:12px">09:24</span></td>
+        <td><span style="font-family:var(--mono);font-size:12px;color:var(--text3)">—</span></td>
+        <td style="font-family:var(--mono);font-size:12px">4h 09m</td>
+        <td><span class="badge bg">✓ Yes</span></td><td><span class="badge bg">✓ Yes</span></td>
+        <td><span class="badge ba">Late</span></td><td style="font-size:11px;color:var(--text3)">+24 min</td>
+      </tr>
+      <tr>
+        <td><div class="ec"><div class="av" style="background:#EF4444">RM</div><div><div class="en">Rajan Muthu</div><div class="eid">IET-023</div></div></div></td>
+        <td style="font-size:12px">Tuas Link P3</td>
+        <td><span style="font-family:var(--mono);color:var(--red);font-size:12px">09:31</span></td>
+        <td>—</td>
+        <td style="font-family:var(--mono);font-size:12px">4h 02m</td>
+        <td><span class="badge bg">✓ Yes</span></td><td><span class="badge br">✗ No</span></td>
+        <td><span class="badge br">Violation</span></td>
+        <td><button class="ab av-b" onclick="om('m-resolve')">Resolve</button></td>
+      </tr>
+      <tr>
+        <td><div class="ec"><div class="av" style="background:#8B5CF6">PK</div><div><div class="en">Palaniswamy K</div><div class="eid">IET-031</div></div></div></td>
+        <td style="font-size:12px">Harbour Road P2</td>
+        <td>—</td><td>—</td><td>—</td><td>—</td><td>—</td>
+        <td><span class="badge br">Absent</span></td><td>—</td>
+      </tr>
+    </tbody>-->
+  </table>
+  <div class="pag">
+    <div class="pi">Showing 1–10 of 230</div>
+    <div class="pbs"><div class="pb">‹</div><div class="pb active">1</div><div class="pb">2</div><div class="pb">3</div><div class="pb">›</div></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block modals %}
+<div class="mo" id="m-resolve">
+  <div class="md" style="width:460px">
+    <div class="mh"><div class="mt">Resolve Violation</div><div class="mc" onclick="cm('m-resolve')">✕</div></div>
+    <div class="mb">
+      <div style="background:var(--bg3);border-radius:8px;padding:13px;margin-bottom:14px;font-size:13px;color:var(--text2)"><div style="font-weight:600;color:var(--text1);margin-bottom:3px">Rajan Muthu — IET-023</div><div>Tuas Link Phase 3 · 09:31 AM · Check-in outside zone</div></div>
+      <div class="fgrp"><label class="fl">Resolution Note <span>*</span></label><textarea class="fi" rows="4" placeholder="e.g. Employee was at site entrance, GPS drift confirmed..."></textarea></div>
+      <div class="fgrp" style="margin-top:10px"><label class="fl">Attendance Action</label><select class="fi"><option>Keep as Violation (flagged)</option><option>Override — Mark as Present</option><option>Override — Mark as Absent</option></select></div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-s" onclick="cm('m-resolve')">Cancel</button>
+      <button class="btn btn-p" onclick="cm('m-resolve');toast('Violation resolved','✅')">Save Resolution</button>
+    </div>
+  </div>
+</div>
+{% endblock %}

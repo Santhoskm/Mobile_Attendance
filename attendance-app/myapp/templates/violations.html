@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Violations — IET Smart Solution{% endblock %}
+{% block nav_violations %}active{% endblock %}
+{% block page_title %}Geo-fence Violations{% endblock %}
+
+{% block extra_styles %}
+.vc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:10px;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center}
+.vc.st-pending{border-left:3px solid var(--red)}
+.vc.st-reviewed{border-left:3px solid var(--green);opacity:.75}
+.vc.st-rejected{border-left:3px solid #6B7280;opacity:.75}
+.badge-pending{background:rgba(239,68,68,.12);color:var(--red)}
+.badge-reviewed{background:rgba(16,185,129,.12);color:var(--green)}
+.badge-rejected{background:rgba(107,114,128,.15);color:#6B7280}
+.badge-pending,.badge-reviewed,.badge-rejected{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.vf{display:flex;gap:8px;margin-bottom:14px}
+.vf a{padding:6px 12px;border-radius:20px;font-size:12px;border:1px solid var(--border);color:var(--text2);text-decoration:none}
+.vf a.active{background:var(--accent,#3B82F6);color:#fff;border-color:transparent}
+{% endblock %}
+
+{% block content %}
+<div class="sh">
+  <div><div class="sh-title">Geo-fence Violations</div><div class="sh-sub">{{ pending_count }} pending violation{{ pending_count|pluralize }} require action</div></div>
+  <button class="btn btn-s btn-sm">📥 Export</button>
+</div>
+
+<div class="sg sg3">
+  <div class="sc red"><div class="sc-lbl">Pending</div><div class="sc-val">{{ pending_count }}</div></div>
+  <div class="sc green"><div class="sc-lbl">Reviewed Today</div><div class="sc-val">{{ reviewed_today_count }}</div></div>
+  <div class="sc blue"><div class="sc-lbl">Total This Month</div><div class="sc-val">{{ total_month_count }}</div></div>
+</div>
+
+<div class="vf">
+  <a href="{% url 'violationsadmin' %}" class="{% if not status_filter %}active{% endif %}">All</a>
+  <a href="{% url 'violationsadmin' %}?status=Pending" class="{% if status_filter == 'Pending' %}active{% endif %}">Pending</a>
+  <a href="{% url 'violationsadmin' %}?status=Reviewed" class="{% if status_filter == 'Reviewed' %}active{% endif %}">Reviewed</a>
+  <a href="{% url 'violationsadmin' %}?status=Rejected" class="{% if status_filter == 'Rejected' %}active{% endif %}">Rejected</a>
+</div>
+
+{% for v in violations %}
+<div class="vc st-{{ v.status|lower }}">
+  <div>
+    <div style="display:flex;align-items:center;gap:9px;margin-bottom:8px">
+      <div class="av" style="background:{% if v.status == 'Pending' %}#EF4444{% elif v.status == 'Reviewed' %}#10B981{% else %}#6B7280{% endif %};width:34px;height:34px;font-size:12px">{{ v.initials }}</div>
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--text1)">{{ v.employee.empname }} — {{ v.empno }}</div>
+        <div style="font-size:12px;color:var(--text3)">{{ v.project.projectname }}{% if v.location %} · {{ v.location }}{% endif %}</div>
+      </div>
+      <span class="badge-{{ v.status|lower }}" style="margin-left:auto">{{ v.status }}</span>
+    </div>
+    <div style="display:flex;gap:18px;font-size:12px;color:var(--text2);flex-wrap:wrap">
+      <div>⏰ <strong>{{ v.violation_date }}</strong></div>
+      <div>Type: {{ v.violation_type.name|default:"Unspecified" }}</div>
+      {% if v.status == 'Pending' %}
+        <div>{{ v.description }}</div>
+      {% else %}
+        <div>📝 "{{ v.review_remarks|default:"No remarks" }}"</div>
+        <div>By: {{ v.reviewed_by_empno }} · {{ v.reviewed_at|date:"d M, h:i A" }}</div>
+      {% endif %}
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:7px">
+    {% if v.status == 'Pending' %}
+      <button class="btn btn-s btn-sm" onclick="openResolve('{{ v.id }}','{{ v.employee.empname|escapejs }}','{{ v.empno }}','{{ v.project.projectname|escapejs }}','{{ v.violation_date }}','{{ v.violation_type.name|default:"Unspecified"|escapejs }}')">✏️ Resolve with Note</button>
+      <form method="post" action="{% url 'resolve_violation_admin' v.id %}" style="margin:0">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="approve">
+        <button type="submit" class="btn btn-p btn-sm" style="width:100%">✅ Mark Resolved</button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+{% empty %}
+<div class="vc" style="grid-template-columns:1fr">
+  <div style="text-align:center;color:var(--text3);padding:20px 0">No violations found for this filter.</div>
+</div>
+{% endfor %}
+{% endblock %}
+
+{% block modals %}
+<div class="mo" id="m-resolve">
+  <div class="md" style="width:460px">
+    <div class="mh"><div class="mt">Resolve Violation</div><div class="mc" onclick="cm('m-resolve')">✕</div></div>
+    <form method="post" id="resolve-form">
+      {% csrf_token %}
+      <div class="mb">
+        <div style="background:var(--bg3);border-radius:8px;padding:13px;margin-bottom:14px;font-size:13px;color:var(--text2)">
+          <div style="font-weight:600;color:var(--text1);margin-bottom:3px" id="rv-name"></div>
+          <div id="rv-meta"></div>
+        </div>
+        <div class="fgrp"><label class="fl">Resolution Note <span>*</span></label><textarea class="fi" name="review_remarks" rows="4" placeholder="e.g. Employee was at site entrance, GPS drift confirmed..." required></textarea></div>
+        <div class="fgrp" style="margin-top:10px">
+          <label class="fl">Decision</label>
+          <select class="fi" name="action">
+            <option value="approve">Approve — Mark as Reviewed</option>
+            <option value="reject">Reject Violation</option>
+          </select>
+        </div>
+        <div class="fgrp" style="margin-top:10px"><label class="fl">Penalty (optional)</label><input class="fi" type="text" name="penalty" placeholder="e.g. Verbal warning"></div>
+      </div>
+      <div class="mf">
+        <button type="button" class="btn btn-s" onclick="cm('m-resolve')">Cancel</button>
+        <button type="submit" class="btn btn-p">Save Resolution</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function openResolve(id, empname, empno, projectname, vdate, vtype) {
+  document.getElementById('rv-name').textContent = empname + ' — ' + empno;
+  document.getElementById('rv-meta').textContent = projectname + ' · ' + vdate + ' · ' + vtype;
+  document.getElementById('resolve-form').action = '/violationsadmin/' + id + '/resolve/';
+  om('m-resolve');
+}
+</script>
+{% endblock %}
