@@ -257,13 +257,6 @@ const TaskScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         );
     };
 
-    const getGreeting = () => {
-        const hour = new Date().getHours();
-        if (hour < 12) return 'Good Morning';
-        if (hour < 17) return 'Good Afternoon';
-        return 'Good Evening';
-    };
-
     // Format helpers
     const formatTimeOnly = (value: string | null) => {
         if (!value) return '--:--';
@@ -304,28 +297,11 @@ const TaskScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             {/* Header Section */}
             <View style={styles.header}>
                 <View style={styles.headerContent}>
-                    <View style={styles.welcomeSection}>
-                        <Text style={styles.greeting}>{getGreeting()},</Text>
-                        <Text style={styles.userName}>{userData?.username || 'Employee'}</Text>
-                        <View style={styles.employeeInfo}>
-                            <View style={styles.infoBadge}>
-                                <Ionicons name="briefcase-outline" size={16} color="#fff" />
-                                <Text style={styles.infoText}>EMP: {userData?.empid || 'N/A'}</Text>
-                            </View>
-                            <View style={styles.infoBadge}>
-                                <Ionicons name="business-outline" size={16} color="#fff" />
-                                <Text style={styles.infoText}>
-                                    {userData?.position || 'Employee'}
-                                </Text>
-                            </View>
-                        </View>
-                    </View>
                     <TouchableOpacity
-                        style={styles.logoutButton}
-                        onPress={handleLogout}
+                        style={styles.backButton}
+                        onPress={() => navigation.goBack()}
                     >
-                        <Ionicons name="log-out-outline" size={24} color="#fff" />
-                        <Text style={styles.logoutButtonText}>Logout</Text>
+                        <Ionicons name="arrow-back" size={24} color="#fff" />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -415,14 +391,6 @@ const TaskScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                         </Text>
                     </View>
                 )}
-
-                <TouchableOpacity
-                    style={styles.attendanceHistoryLink}
-                    onPress={() => navigation.navigate('AttendanceHistory')}
-                >
-                    <Text style={styles.attendanceHistoryText}>View Full History</Text>
-                    <Ionicons name="chevron-forward" size={16} color="#007bff" />
-                </TouchableOpacity>
             </View>
 
             {/* Stats Cards */}
@@ -541,7 +509,7 @@ const styles = StyleSheet.create({
     header: {
         backgroundColor: '#007bff',
         paddingTop: 55,
-        paddingBottom: 30,
+        paddingBottom: 16,
         borderBottomLeftRadius: 30,
         borderBottomRightRadius: 30,
     },
@@ -550,6 +518,14 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
+    },
+    backButton: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: 'rgba(255,255,255,0.2)',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     welcomeSection: {
         flex: 1,

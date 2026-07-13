@@ -85,6 +85,34 @@ export interface ProjectCheckInsResponse {
 
     }>;
 }
+export interface LeaveApplicationData {
+    project_id: number;
+    leave_type: string;
+    from_date: string;
+    to_date: string;
+    reason?: string;
+    attachmentUri?: string;
+}
+
+export interface LeaveRecord {
+    id: number;
+    employee_no: string;
+    employee_name: string;
+    project_id: number;
+    project_name: string;
+    leave_type: string;
+    from_date: string;
+    to_date: string;
+    days: number;
+    reason: string;
+    attachment: string | null;
+    status: 'Pending' | 'Approved' | 'Rejected';
+    goes_to_admin_direct: boolean;
+    reviewed_by: string | null;
+    reviewed_at: string | null;
+    review_notes: string;
+    submitted_at: string;
+}
 
 const api = axios.create({
     baseURL: BASE_URL,
@@ -413,6 +441,83 @@ export const apiService = {
     // api.ts - Update getMyProjects method
 
     // api.ts - Update getMyProjects method
+
+    async applyLeave(data: LeaveApplicationData): Promise<any> {
+        try {
+            const formData = new FormData();
+            formData.append('project_id', String(data.project_id));
+            formData.append('leave_type', data.leave_type);
+            formData.append('from_date', data.from_date);
+            formData.append('to_date', data.to_date);
+            if (data.reason) formData.append('reason', data.reason);
+            if (data.attachmentUri) {
+                const filename = data.attachmentUri.split('/').pop() || 'attachment';
+                formData.append('attachment', {
+                    uri: data.attachmentUri,
+                    name: filename,
+                    type: 'application/octet-stream',
+                } as any);
+            }
+            const response = await api.post('/api/leaves/apply/', formData, {
+                headers: { 'Content-Type': 'multipart/form-data', 'Accept': 'application/json' },
+                timeout: 20000,
+                cancelToken: cancelTokenSource.token,
+            });
+            return response.data;
+        } catch (error) {
+            console.log('Apply leave error:', error);
+            throw error;
+        }
+    },
+
+    async getMyLeaves(projectId?: number): Promise<{ status: boolean; leaves: LeaveRecord[] }> {
+        try {
+            let url = '/api/leaves/mine/';
+            if (projectId) url += `?project_id=${projectId}`;
+            const response = await api.get(url, { timeout: 10000, cancelToken: cancelTokenSource.token });
+            return response.data;
+        } catch (error) {
+            console.log('Get my leaves error:', error);
+            return { status: false, leaves: [] };
+        }
+    },
+
+    async getLeaveApprovals(projectId?: number): Promise<{ status: boolean; leaves: LeaveRecord[] }> {
+        try {
+            let url = '/api/leaves/approvals/';
+            if (projectId) url += `?project_id=${projectId}`;
+            const response = await api.get(url, { timeout: 10000, cancelToken: cancelTokenSource.token });
+            return response.data;
+        } catch (error) {
+            console.log('Get leave approvals error:', error);
+            return { status: false, leaves: [] };
+        }
+    },
+
+    async reviewLeave(leaveId: number, action: 'approve' | 'reject', reviewNotes?: string): Promise<any> {
+        try {
+            const response = await api.post(`/api/leaves/${leaveId}/review/`, {
+                action, review_notes: reviewNotes || '',
+            }, { timeout: 10000, cancelToken: cancelTokenSource.token });
+            return response.data;
+        } catch (error) {
+            console.log('Review leave error:', error);
+            throw error;
+        }
+    },
+
+    async getLeaveCalendar(projectId: number, month?: string): Promise<{ status: boolean; leaves: LeaveRecord[] }> {
+        try {
+            let url = `/api/leaves/calendar/?project_id=${projectId}`;
+            if (month) url += `&month=${month}`;
+            const response = await api.get(url, { timeout: 10000, cancelToken: cancelTokenSource.token });
+            return response.data;
+        } catch (error) {
+            console.log('Get leave calendar error:', error);
+            return { status: false, leaves: [] };
+        }
+    },
+
 
     async getMyProjects(empid: string): Promise<any> {
         try {

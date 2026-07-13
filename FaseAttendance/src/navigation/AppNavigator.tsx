@@ -15,6 +15,7 @@ import DocumentsScreen from '../screens/DocumentsScreen';
 import ViolationsScreen from '../screens/ViolationsScreen';
 import MainTabScreen from '../screens/MainTabScreen';
 import ProjectDetailScreen from '../screens/ProjectDetailScreen';
+import LeaveScreen from '../screens/LeaveScreen';
 
 const Stack = createStackNavigator();
 
@@ -29,6 +30,11 @@ const AppNavigator = () => {
                 <Stack.Screen name="FaceEnrollment" component={FaceEnrollmentScreen} />
                 <Stack.Screen name="AttendanceHistory" component={AttendanceHistoryScreen} />
                 <Stack.Screen name="ProjectDetail" component={ProjectDetailScreen} />
+                <Stack.Screen name="Leave" component={LeaveScreen} />
+                <Stack.Screen name="Projects" component={TaskScreen} />
+                <Stack.Screen name="Violations" component={ViolationsScreen} />
+                <Stack.Screen name="Documents" component={DocumentsScreen} />
+                <Stack.Screen name="Profile" component={ProfileScreen} />
             </Stack.Navigator>
         </NavigationContainer>
     );
