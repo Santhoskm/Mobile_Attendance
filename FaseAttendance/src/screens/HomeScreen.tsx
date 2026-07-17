@@ -377,6 +377,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import { apiService } from '../services/api';
+import FloatingBroadcastButton from '../components/FloatingBroadcastButton';
 
 interface UserData {
     username?: string;
@@ -448,6 +449,13 @@ const TILES: TileConfig[] = [
         color: '#6f42c1',
         onPress: (navigation) => navigation.navigate('Documents'),
     },
+    // {
+    //     key: 'broadcasts',
+    //     label: 'Broadcasts',
+    //     icon: 'megaphone-outline',
+    //     color: '#e83e8c',
+    //     onPress: (navigation) => navigation.navigate('Broadcasts'),
+    // },
     {
         key: 'faceEnrollment',
         label: 'Face Register',
@@ -933,6 +941,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     </View>
                 )}
             </ScrollView>
+            <FloatingBroadcastButton navigation={navigation} />
         </SafeAreaView>
     );
 };

@@ -16,6 +16,7 @@ import ViolationsScreen from '../screens/ViolationsScreen';
 import MainTabScreen from '../screens/MainTabScreen';
 import ProjectDetailScreen from '../screens/ProjectDetailScreen';
 import LeaveScreen from '../screens/LeaveScreen';
+import BroadcastsScreen from '../screens/BroadcastsScreen';
 
 const Stack = createStackNavigator();
 
@@ -35,6 +36,7 @@ const AppNavigator = () => {
                 <Stack.Screen name="Violations" component={ViolationsScreen} />
                 <Stack.Screen name="Documents" component={DocumentsScreen} />
                 <Stack.Screen name="Profile" component={ProfileScreen} />
+                <Stack.Screen name="Broadcasts" component={BroadcastsScreen} />
             </Stack.Navigator>
         </NavigationContainer>
     );

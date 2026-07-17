@@ -774,5 +774,33 @@ export const apiService = {
             console.log('Get my OT error:', error);
             return { status: false, records: [] };
         }
-    }
+    },
+
+    async getBroadcasts(): Promise<any> {
+        try {
+            const response = await api.get('/api/broadcasts/mine/', {
+                timeout: 10000,
+                cancelToken: cancelTokenSource.token,
+            });
+            return response.data;
+        } catch (error) {
+            console.log('Get broadcasts error:', error);
+            return { broadcasts: [] };
+        }
+    },
+
+    async markBroadcastRead(broadcastId: number): Promise<any> {
+        try {
+            const response = await api.post(`/api/broadcasts/${broadcastId}/read/`, {}, {
+                timeout: 10000,
+                cancelToken: cancelTokenSource.token,
+            });
+            return response.data;
+        } catch (error) {
+            console.log('Mark broadcast read error:', error);
+            throw error;
+        }
+    },
+
+
 };
