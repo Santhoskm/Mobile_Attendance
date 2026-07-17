@@ -1,4 +1,4 @@
-// LeaveScreen.tsx - Leave calendar, apply, approve and history
+// LeaveScreen.tsx - Leave calendar, apply and history
 import React, { useState, useEffect, useCallback } from 'react';
 import {
     View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput,
@@ -9,7 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as DocumentPicker from 'expo-document-picker';
 import { apiService, LeaveRecord } from '../services/api';
 
-type SubTab = 'summary' | 'calendar' | 'apply' | 'approve' | 'history';
+type SubTab = 'summary' | 'calendar' | 'apply' | 'history';
 
 const WEEKDAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 const MONTH_LABELS = [
@@ -35,13 +35,11 @@ const LeaveScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const [activeSubTab, setActiveSubTab] = useState<SubTab>('summary');
     const [empid, setEmpid] = useState<string>('');
     const [projects, setProjects] = useState<ProjectOption[]>([]);
-    const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
 
     const [myLeaves, setMyLeaves] = useState<LeaveRecord[]>([]);
-    const [approvals, setApprovals] = useState<LeaveRecord[]>([]);
     const [loading, setLoading] = useState(false);
 
-    // Calendar tab state
+    // Calendar tab state - self leave only, not scoped to any project
     const [calendarMonth, setCalendarMonth] = useState(new Date());
     const [calendarLeaves, setCalendarLeaves] = useState<LeaveRecord[]>([]);
     const [calendarLoading, setCalendarLoading] = useState(false);
@@ -57,24 +55,19 @@ const LeaveScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const [attachmentName, setAttachmentName] = useState<string>('');
     const [submitting, setSubmitting] = useState(false);
 
-    const isSupervisorAnywhere = projects.some((p) => p.role === 'Supervisor');
-
     useEffect(() => {
         init();
     }, []);
 
     useEffect(() => {
-        if (selectedProjectId) {
+        if (empid) {
             loadMyLeaves();
-            if (isSupervisorAnywhere) loadApprovals();
         }
-    }, [selectedProjectId]);
+    }, [empid]);
 
     useEffect(() => {
-        if (selectedProjectId) {
-            loadCalendar();
-        }
-    }, [selectedProjectId, calendarMonth]);
+        loadCalendar();
+    }, [calendarMonth]);
 
     const init = async () => {
         try {
@@ -90,7 +83,6 @@ const LeaveScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 role: p.role,
             }));
             setProjects(list);
-            if (list.length > 0) setSelectedProjectId(list[0].id);
         } catch (error) {
             console.log('Leave init error:', error);
         }
@@ -99,35 +91,27 @@ const LeaveScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const loadMyLeaves = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await apiService.getMyLeaves(selectedProjectId || undefined);
+            // No project filter here - a person's leave history isn't scoped
+            // per project, it's one list regardless of how many projects they're on.
+            const res = await apiService.getMyLeaves();
             setMyLeaves(res.leaves || []);
         } finally {
             setLoading(false);
         }
-    }, [selectedProjectId]);
-
-    const loadApprovals = useCallback(async () => {
-        try {
-            const res = await apiService.getLeaveApprovals(selectedProjectId || undefined);
-            setApprovals(res.leaves || []);
-        } catch (error) {
-            console.log('Load approvals error:', error);
-        }
-    }, [selectedProjectId]);
+    }, [empid]);
 
     const loadCalendar = useCallback(async () => {
-        if (!selectedProjectId) return;
         setCalendarLoading(true);
         try {
             const monthStr = `${calendarMonth.getFullYear()}-${String(calendarMonth.getMonth() + 1).padStart(2, '0')}`;
-            const res = await apiService.getLeaveCalendar(selectedProjectId, monthStr);
+            const res = await apiService.getLeaveCalendar(monthStr);
             setCalendarLeaves(res.leaves || []);
         } catch (error) {
             console.log('Load calendar error:', error);
         } finally {
             setCalendarLoading(false);
         }
-    }, [selectedProjectId, calendarMonth]);
+    }, [calendarMonth]);
 
     const pickAttachment = async () => {
         try {
@@ -142,10 +126,6 @@ const LeaveScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     };
 
     const submitLeave = async () => {
-        if (!selectedProjectId) {
-            Alert.alert('Select a project', 'Please choose a project first.');
-            return;
-        }
         if (!fromDate || !toDate) {
             Alert.alert('Missing dates', 'Please enter both From Date and To Date (YYYY-MM-DD).');
             return;
@@ -157,7 +137,6 @@ const LeaveScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         setSubmitting(true);
         try {
             const res = await apiService.applyLeave({
-                project_id: selectedProjectId,
                 leave_type: leaveType,
                 from_date: fromDate,
                 to_date: toDate,
@@ -165,7 +144,7 @@ const LeaveScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 attachmentUri,
             });
             if (res.status) {
-                Alert.alert('Submitted', 'Your leave application has been sent for approval.');
+                Alert.alert('Submitted', 'Your leave application has been sent to admin for approval.');
                 setStep(1);
                 setFromDate('');
                 setToDate('');
@@ -183,41 +162,6 @@ const LeaveScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             setSubmitting(false);
         }
     };
-
-    const handleReview = async (leaveId: number, action: 'approve' | 'reject') => {
-        try {
-            const res = await apiService.reviewLeave(leaveId, action);
-            if (res.status) {
-                loadApprovals();
-            } else {
-                Alert.alert('Error', res.message || 'Could not update leave.');
-            }
-        } catch (error) {
-            Alert.alert('Error', 'Could not update leave.');
-        }
-    };
-
-    const renderProjectPicker = () => (
-        <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.projectPicker}
-            contentContainerStyle={styles.projectPickerContent}
-        >
-            {projects.map((p) => (
-                <TouchableOpacity
-                    key={p.id}
-                    style={[styles.projectChip, selectedProjectId === p.id && styles.projectChipActive]}
-                    onPress={() => setSelectedProjectId(p.id)}
-                    disabled={projects.length <= 1}
-                >
-                    <Text style={[styles.projectChipText, selectedProjectId === p.id && styles.projectChipTextActive]}>
-                        {p.projectname}
-                    </Text>
-                </TouchableOpacity>
-            ))}
-        </ScrollView>
-    );
 
     const renderStatusBadge = (status: string) => (
         <View style={[styles.badge, { backgroundColor: `${STATUS_COLORS[status] || '#adb5bd'}22` }]}>
@@ -399,6 +343,14 @@ const LeaveScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
     const renderApply = () => (
         <ScrollView showsVerticalScrollIndicator={false}>
+            <View style={styles.applyInfoBanner}>
+                <Ionicons name="information-circle-outline" size={16} color="#007bff" />
+                <Text style={styles.applyInfoText}>
+                    One application covers all your projects: {projects.map((p) => p.projectname).join(', ') || '—'}.
+                    It will be reviewed by admin.
+                </Text>
+            </View>
+
             <View style={styles.stepHeader}>
                 <View style={[styles.stepPill, step === 1 && styles.stepPillActive]}>
                     <Text style={[styles.stepPillText, step === 1 && styles.stepPillTextActive]}>1 Leave Category</Text>
@@ -473,37 +425,6 @@ const LeaveScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         </ScrollView>
     );
 
-    const renderApprove = () => (
-        <ScrollView showsVerticalScrollIndicator={false}>
-            {!isSupervisorAnywhere ? (
-                <Text style={styles.emptyText}>You don't have approval access on any project.</Text>
-            ) : approvals.length === 0 ? (
-                <Text style={styles.emptyText}>No pending requests.</Text>
-            ) : (
-                approvals.map((l) => (
-                    <View key={l.id} style={styles.approveCard}>
-                        <View style={{ flex: 1 }}>
-                            <Text style={styles.leaveType}>{l.employee_name} · {l.leave_type}</Text>
-                            <Text style={styles.leaveDates}>{l.from_date} → {l.to_date} · {l.days} day(s)</Text>
-                            {!!l.reason && <Text style={styles.leaveReason}>"{l.reason}"</Text>}
-                            {l.goes_to_admin_direct && (
-                                <Text style={styles.adminNote}>Applicant is project supervisor — admin review</Text>
-                            )}
-                        </View>
-                        <View style={styles.approveButtons}>
-                            <TouchableOpacity style={styles.approveBtn} onPress={() => handleReview(l.id, 'approve')}>
-                                <Ionicons name="checkmark" size={18} color="#fff" />
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.rejectBtn} onPress={() => handleReview(l.id, 'reject')}>
-                                <Ionicons name="close" size={18} color="#fff" />
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                ))
-            )}
-        </ScrollView>
-    );
-
     const renderHistory = () => (
         <ScrollView showsVerticalScrollIndicator={false}>
             {myLeaves.length === 0 ? (
@@ -528,7 +449,6 @@ const LeaveScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             case 'summary': return renderSummary();
             case 'calendar': return renderCalendar();
             case 'apply': return renderApply();
-            case 'approve': return renderApprove();
             case 'history': return renderHistory();
         }
     };
@@ -537,7 +457,6 @@ const LeaveScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         { key: 'summary', label: 'Summary', icon: 'grid-outline' },
         { key: 'calendar', label: 'Calendar', icon: 'calendar-outline' },
         { key: 'apply', label: 'Apply Leave', icon: 'create-outline' },
-        { key: 'approve', label: 'Approve', icon: 'checkmark-done-outline' },
         { key: 'history', label: 'History', icon: 'time-outline' },
     ];
 
@@ -551,15 +470,12 @@ const LeaveScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 <View style={{ width: 26 }} />
             </View>
 
-            {renderProjectPicker()}
-
             <View style={styles.content}>
                 {renderContent()}
             </View>
 
             <View style={styles.subTabBar}>
                 {SUB_TABS.map((tab) => {
-                    if (tab.key === 'approve' && !isSupervisorAnywhere) return null;
                     const isActive = activeSubTab === tab.key;
                     return (
                         <TouchableOpacity
@@ -592,27 +508,6 @@ const styles = StyleSheet.create({
     },
     backButton: { padding: 5 },
     headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#fff' },
-    projectPicker: {
-        flexGrow: 0,
-        backgroundColor: '#fff',
-        marginHorizontal: 16,
-        marginTop: -18,
-        marginBottom: 16,
-        borderRadius: 16,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
-        shadowRadius: 8,
-        elevation: 4,
-    },
-    projectPickerContent: { paddingHorizontal: 10, paddingVertical: 10 },
-    projectChip: {
-        paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20,
-        backgroundColor: '#f0f4f8', marginRight: 8,
-    },
-    projectChipActive: { backgroundColor: '#007bff' },
-    projectChipText: { fontSize: 12, fontWeight: '600', color: '#6c757d' },
-    projectChipTextActive: { color: '#fff' },
     content: { flex: 1, padding: 16 },
     statsRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 },
     statCard: {
@@ -669,20 +564,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20, alignItems: 'center', justifyContent: 'center',
     },
     secondaryBtnText: { color: '#6c757d', fontWeight: '700', fontSize: 13 },
-    approveCard: {
-        flexDirection: 'row', backgroundColor: '#fff', borderRadius: 12,
-        padding: 14, marginBottom: 10, alignItems: 'center',
-    },
-    adminNote: { fontSize: 10, color: '#fd7e14', marginTop: 4 },
-    approveButtons: { flexDirection: 'row', gap: 8, marginLeft: 8 },
-    approveBtn: {
-        width: 34, height: 34, borderRadius: 17, backgroundColor: '#28a745',
-        alignItems: 'center', justifyContent: 'center',
-    },
-    rejectBtn: {
-        width: 34, height: 34, borderRadius: 17, backgroundColor: '#dc3545',
-        alignItems: 'center', justifyContent: 'center',
-    },
     calendarCard: {
         backgroundColor: '#fff', borderRadius: 14, padding: 16, marginBottom: 20,
     },
@@ -722,6 +603,11 @@ const styles = StyleSheet.create({
     subTab: { flex: 1, alignItems: 'center', gap: 3 },
     subTabLabel: { fontSize: 10, color: '#adb5bd', fontWeight: '600' },
     subTabLabelActive: { color: '#007bff' },
+    applyInfoBanner: {
+        flexDirection: 'row', alignItems: 'center', gap: 8,
+        backgroundColor: '#e7f3ff', borderRadius: 10, padding: 10, marginBottom: 12,
+    },
+    applyInfoText: { flex: 1, fontSize: 12.5, color: '#0d5aa7' },
 });
 
 export default LeaveScreen;

@@ -59,7 +59,7 @@ const MainTabScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             case 'checkin':
                 return <DashboardScreen navigation={navigation} route={{}} />;
             case 'profile':
-                return <ProfileScreen navigation={navigation} />;
+                return <ProfileScreen navigation={{ ...navigation, goBack: () => setActiveTab('home') }} />;
             default:
                 return <HomeScreen navigation={navigation} />;
         }

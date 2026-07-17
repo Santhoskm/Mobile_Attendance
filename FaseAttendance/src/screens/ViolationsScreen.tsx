@@ -432,7 +432,10 @@ const ViolationsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         <SafeAreaView style={styles.container}>
             {/* Header */}
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>Violations</Text>
+                <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                    <Ionicons name="arrow-back" size={26} color="#fff" />
+                </TouchableOpacity>
+                <Text style={[styles.headerTitle, { flex: 1, marginLeft: 12 }]}>Violations</Text>
                 <TouchableOpacity
                     style={styles.addButton}
                     onPress={() => setShowSubmitModal(true)}
@@ -783,6 +786,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     headerTitle: { fontSize: 22, fontWeight: 'bold', color: '#fff' },
+    backButton: { padding: 5 },
     addButton: {
         backgroundColor: 'rgba(255,255,255,0.25)',
         width: 44,

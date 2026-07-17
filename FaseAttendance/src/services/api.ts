@@ -35,6 +35,13 @@ export interface RegisterResponse {
     errors?: any;
 }
 
+export interface Shift {
+    id: number;
+    shift_name: string;
+    shiftstarttime: string;
+    shiftendtime: string;
+}
+
 export interface Project {
     id: number;
     projectname?: string;
@@ -45,6 +52,7 @@ export interface Project {
     projectenddate?: string;
     shiftstarttime?: string;
     shiftendtime?: string;
+    shifts?: Shift[];
     threshold?: number;
     site_latitude?: number;
     site_longitude?: number;
@@ -75,6 +83,7 @@ export interface ProjectCheckInsResponse {
         project_name: string;
         check_in_time: string;
         check_out_time?: string;
+        shift_name?: string;
         latitude?: number;
         longitude?: number;
         notes?: string;
@@ -86,7 +95,6 @@ export interface ProjectCheckInsResponse {
     }>;
 }
 export interface LeaveApplicationData {
-    project_id: number;
     leave_type: string;
     from_date: string;
     to_date: string;
@@ -98,8 +106,6 @@ export interface LeaveRecord {
     id: number;
     employee_no: string;
     employee_name: string;
-    project_id: number;
-    project_name: string;
     leave_type: string;
     from_date: string;
     to_date: string;
@@ -445,7 +451,6 @@ export const apiService = {
     async applyLeave(data: LeaveApplicationData): Promise<any> {
         try {
             const formData = new FormData();
-            formData.append('project_id', String(data.project_id));
             formData.append('leave_type', data.leave_type);
             formData.append('from_date', data.from_date);
             formData.append('to_date', data.to_date);
@@ -482,11 +487,9 @@ export const apiService = {
         }
     },
 
-    async getLeaveApprovals(projectId?: number): Promise<{ status: boolean; leaves: LeaveRecord[] }> {
+    async getLeaveApprovals(): Promise<{ status: boolean; leaves: LeaveRecord[] }> {
         try {
-            let url = '/api/leaves/approvals/';
-            if (projectId) url += `?project_id=${projectId}`;
-            const response = await api.get(url, { timeout: 10000, cancelToken: cancelTokenSource.token });
+            const response = await api.get('/api/leaves/approvals/', { timeout: 10000, cancelToken: cancelTokenSource.token });
             return response.data;
         } catch (error) {
             console.log('Get leave approvals error:', error);
@@ -506,10 +509,10 @@ export const apiService = {
         }
     },
 
-    async getLeaveCalendar(projectId: number, month?: string): Promise<{ status: boolean; leaves: LeaveRecord[] }> {
+    async getLeaveCalendar(month?: string): Promise<{ status: boolean; leaves: LeaveRecord[] }> {
         try {
-            let url = `/api/leaves/calendar/?project_id=${projectId}`;
-            if (month) url += `&month=${month}`;
+            let url = '/api/leaves/calendar/';
+            if (month) url += `?month=${month}`;
             const response = await api.get(url, { timeout: 10000, cancelToken: cancelTokenSource.token });
             return response.data;
         } catch (error) {
@@ -733,6 +736,43 @@ export const apiService = {
         } catch (error) {
             console.log('Server health check failed:', error);
             return false;
+        }
+    },
+
+
+    async getOtApprovals(projectId?: number): Promise<{ status: boolean; records: any[] }> {
+        try {
+            let url = '/api/ot/approvals/';
+            if (projectId) url += `?project_id=${projectId}`;
+            const response = await api.get(url, { timeout: 10000, cancelToken: cancelTokenSource.token });
+            return response.data;
+        } catch (error) {
+            console.log('Get OT approvals error:', error);
+            return { status: false, records: [] };
+        }
+    },
+
+    async reviewOt(attendanceId: number, action: 'approve' | 'reject', reviewNotes?: string): Promise<any> {
+        try {
+            const response = await api.post(`/api/ot/${attendanceId}/review/`, {
+                action, review_notes: reviewNotes || '',
+            }, { timeout: 10000, cancelToken: cancelTokenSource.token });
+            return response.data;
+        } catch (error) {
+            console.log('Review OT error:', error);
+            throw error;
+        }
+    },
+
+    async getMyOt(projectId?: number): Promise<{ status: boolean; records: any[] }> {
+        try {
+            let url = '/api/ot/mine/';
+            if (projectId) url += `?project_id=${projectId}`;
+            const response = await api.get(url, { timeout: 10000, cancelToken: cancelTokenSource.token });
+            return response.data;
+        } catch (error) {
+            console.log('Get my OT error:', error);
+            return { status: false, records: [] };
         }
     }
 };

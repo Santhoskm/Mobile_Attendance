@@ -32,6 +32,23 @@ import { isWithinGeofence } from '../utils/geofence';
 import { muteCameraSound, optimizeCameraForSpeed } from '../utils/cameraOptimizer';
 import * as ImageManipulator from 'expo-image-manipulator';
 
+
+interface Shift {
+    id: number;
+    shift_name: string;
+    shiftstarttime: string;
+    shiftendtime: string;
+    shift_startdate?: string | null;   // "YYYY-MM-DD"
+    shift_enddate?: string | null;     // "YYYY-MM-DD"
+    works_mon?: boolean;
+    works_tue?: boolean;
+    works_wed?: boolean;
+    works_thu?: boolean;
+    works_fri?: boolean;
+    works_sat?: boolean;
+    works_sun?: boolean;
+}
+
 interface ProjectDetail {
     id: number;
     projectname: string;
@@ -39,11 +56,14 @@ interface ProjectDetail {
     site_address?: string;
     shift_start?: string;
     shift_end?: string;
+    shifts?: Shift[];
+    assigned_shift_id?: number | null;
     role: 'Supervisor' | 'Employee';
     latitude?: number;
     longitude?: number;
     geofence_radius?: number;
 }
+
 
 interface Employee {
     empno: string;
@@ -51,6 +71,8 @@ interface Employee {
     role: string;
     designation: string;
     contact: string;
+    shift_id?: number | null;
+    shift_name?: string | null;
 }
 
 interface Violation {
@@ -71,6 +93,21 @@ interface Violation {
     reviewed_at: string | null;
     review_remarks: string;
     created_at: string;
+}
+
+
+// ADD after the Violation interface
+interface OtRecord {
+    id: number;
+    date: string;
+    check_in: string | null;
+    check_out: string | null;
+    shift_name: string | null;
+    ot_minutes: number;
+    ot_status: 'Pending' | 'Approved' | 'Rejected';
+    ot_reviewed_by: string | null;
+    ot_reviewed_at: string | null;
+    ot_review_notes: string;
 }
 
 interface Document {
@@ -97,6 +134,7 @@ interface AttendanceRecord {
     status: string;
     checkin_place?: string;
     checkout_place?: string;
+    shift_name?: string;
 }
 
 const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ navigation, route }) => {
@@ -109,7 +147,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
     const [refreshing, setRefreshing] = useState(false);
 
     // Section nav bar state
-    const [activeTab, setActiveTab] = useState<'attendance' | 'team' | 'violations' | 'documents'>('attendance');
+    const [activeTab, setActiveTab] = useState<'attendance' | 'team' | 'violations' | 'ot' | 'documents'>('attendance');
 
     // Attendance state
     const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
@@ -118,6 +156,68 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
     const [currentCheckInId, setCurrentCheckInId] = useState<number | null>(null);
     const [checkInTime, setCheckInTime] = useState<string | null>(null);
     const [otherProjectCheckIn, setOtherProjectCheckIn] = useState<string | null>(null);
+    const shifts: Shift[] = project?.shifts || [];
+
+    const getTodayDayKey = (): keyof Shift => {
+        const map: (keyof Shift)[] = ['works_sun', 'works_mon', 'works_tue', 'works_wed', 'works_thu', 'works_fri', 'works_sat'];
+        return map[new Date().getDay()];
+    };
+
+    // Is this shift scheduled to run at all today — within its date range and on today's weekday?
+    const isShiftScheduledToday = (s: Shift) => {
+        const todayStr = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+        if (s.shift_startdate && todayStr < s.shift_startdate) return false;
+        if (s.shift_enddate && todayStr > s.shift_enddate) return false;
+        const dayKey = getTodayDayKey();
+        if (s[dayKey] === false) return false; // explicit day-off; undefined/true = scheduled
+        return true;
+    };
+
+    // Human-readable reason a shift isn't available yet — powers the "Starts on ..." messaging.
+    const getShiftScheduleLabel = (s: Shift): string | null => {
+        const todayStr = new Date().toISOString().slice(0, 10);
+        if (s.shift_startdate && todayStr < s.shift_startdate) {
+            const d = new Date(s.shift_startdate);
+            return `Starts ${d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}`;
+        }
+        if (s.shift_enddate && todayStr > s.shift_enddate) return 'Shift ended';
+        const dayKey = getTodayDayKey();
+        if (s[dayKey] === false) return 'Not scheduled today';
+        return null;
+    };
+
+    const isShiftActiveNow = (s: Shift) => {
+        if (!isShiftScheduledToday(s)) return false;
+        const nowStr = new Date().toTimeString().slice(0, 8); // "HH:MM:SS"
+        return nowStr >= s.shiftstarttime && nowStr <= s.shiftendtime;
+    };
+    const activeShifts = shifts.filter(isShiftActiveNow);
+
+    // Worker: shift is fixed by their project assignment — no picking, just a window check.
+    // Worker: shift is fixed by their project assignment — no picking, just a window check.
+    const myShift: Shift | null = shifts.find(s => s.id === project?.assigned_shift_id) || null;
+    const myShiftIsActiveNow = myShift ? isShiftActiveNow(myShift) : false;
+
+    // Supervisor: locked to their assigned shift, same as a worker, whenever one is assigned.
+    // Only a supervisor with NO shift assignment falls back to picking among whichever is live right now.
+    const isShiftLockedSupervisor = isSupervisor && !!myShift;
+    const [supervisorSelectedShift, setSupervisorSelectedShift] = useState<Shift | null>(null);
+
+    useEffect(() => {
+        if (!isSupervisor) return;
+        if (myShift) {
+            setSupervisorSelectedShift(myShift);
+            return;
+        }
+        if (activeShifts.length === 1 && (!supervisorSelectedShift || !isShiftActiveNow(supervisorSelectedShift))) {
+            setSupervisorSelectedShift(activeShifts[0]);
+        } else if (supervisorSelectedShift && !isShiftActiveNow(supervisorSelectedShift)) {
+            setSupervisorSelectedShift(null);
+        }
+        // re-check every 30s so the UI flips automatically at shift boundaries
+    }, [shifts, isSupervisor, myShift]);
+
+    const selectedShift = isSupervisor ? supervisorSelectedShift : myShift;
 
     // Camera state for attendance
     const [showCamera, setShowCamera] = useState(false);
@@ -132,6 +232,10 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
     // Violations state
     const [violations, setViolations] = useState<Violation[]>([]);
     const [loadingViolations, setLoadingViolations] = useState(false);
+
+    const [otRecords, setOtRecords] = useState<OtRecord[]>([]);
+    const [loadingOt, setLoadingOt] = useState(false);
+
     const [violationFilter, setViolationFilter] = useState<'all' | 'Pending' | 'Reviewed' | 'Rejected'>('all');
 
     // Documents state
@@ -186,6 +290,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                 loadEmployees();
             }
             loadViolations();
+            loadOt();
             loadDocuments();
             loadAttendance();
             checkAttendanceStatus();
@@ -325,6 +430,21 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
         }
     };
 
+    const loadOt = async () => {
+        setLoadingOt(true);
+        try {
+            const response = await apiService.getMyOt(projectId);
+            if (response.status) {
+                setOtRecords(response.records);
+            }
+        } finally {
+            setLoadingOt(false);
+        }
+    };
+
+
+
+
     const loadDocuments = async () => {
         setLoadingDocuments(true);
         try {
@@ -345,6 +465,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
             await loadEmployees();
         }
         await loadViolations();
+        await loadOt();
         await loadDocuments();
         await loadAttendance();
         await checkAttendanceStatus();
@@ -407,6 +528,46 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
         if (action === 'checkout' && !isCheckedIn && !otherProjectCheckIn) {
             Alert.alert('Error', 'You need to check in first.');
             return;
+        }
+
+
+        if (action === 'checkin') {
+            if (isShiftLockedSupervisor) {
+                // Supervisor assigned to a specific shift — same rule as a worker.
+                if (!myShiftIsActiveNow) {
+                    const scheduleReason = getShiftScheduleLabel(myShift!);
+                    if (scheduleReason) {
+                        Alert.alert('Shift Not Available', scheduleReason);
+                    } else {
+                        Alert.alert('Outside Shift Hours', `Your shift is ${myShift!.shiftstarttime}–${myShift!.shiftendtime}.`);
+                    }
+                    return;
+                }
+            } else if (isSupervisor) {
+                // Supervisor with no shift assignment — pick among whichever is live right now.
+                if (shifts.length > 0 && activeShifts.length === 0) {
+                    Alert.alert('No Shift Active', 'No shift is currently open for check-in. Please try again during shift hours.');
+                    return;
+                }
+                if (activeShifts.length > 1 && !selectedShift) {
+                    Alert.alert('Select a Shift', 'Please choose a shift before checking in.');
+                    return;
+                }
+            } else {
+                if (shifts.length > 0 && !myShift) {
+                    Alert.alert('No Shift Assigned', 'You have not been assigned a shift on this project. Contact your supervisor.');
+                    return;
+                }
+                if (myShift && !myShiftIsActiveNow) {
+                    const scheduleReason = getShiftScheduleLabel(myShift);
+                    if (scheduleReason) {
+                        Alert.alert('Shift Not Available', scheduleReason);
+                    } else {
+                        Alert.alert('Outside Shift Hours', `Your shift is ${myShift.shiftstarttime}–${myShift.shiftendtime}.`);
+                    }
+                    return;
+                }
+            }
         }
 
         setCameraAction(action);
@@ -479,25 +640,18 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                 formData.append('latitude', currentLocation.coords.latitude.toString());
                 formData.append('longitude', currentLocation.coords.longitude.toString());
                 formData.append('project_id', String(projectId));
+                if (cameraAction === 'checkin' && selectedShift) {
+                    formData.append('shift_id', String(selectedShift.id));
+                }
 
                 const requestId = Crypto.randomUUID();
                 formData.append('request_id', requestId);
 
-                const timeoutPromise = new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error('Request timeout')), 15000)
-                );
-
                 let response;
                 if (cameraAction === 'checkin') {
-                    response = await Promise.race([
-                        apiService.faceCheckIn(formData),
-                        timeoutPromise
-                    ]);
+                    response = await apiService.faceCheckIn(formData);
                 } else {
-                    response = await Promise.race([
-                        apiService.faceCheckOut(formData),
-                        timeoutPromise
-                    ]);
+                    response = await apiService.faceCheckOut(formData);
                 }
 
                 if (response.error === 'already_checked_in') {
@@ -546,10 +700,17 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                         setIsCheckedIn(false);
                         setCheckInTime(null);
                         setOtherProjectCheckIn(null);
-                        Alert.alert(
-                            'Success',
-                            `Check-out successful!\nConfidence: ${(response.confidence * 100).toFixed(1)}%`
-                        );
+                        if (response.ot_status === 'Pending') {
+                            Alert.alert(
+                                'Checked Out — Overtime Pending',
+                                `You checked out ${response.ot_minutes} min late. This has been sent for approval and won't count until approved.\nConfidence: ${(response.confidence * 100).toFixed(1)}%`
+                            );
+                        } else {
+                            Alert.alert(
+                                'Success',
+                                `Check-out successful!\nConfidence: ${(response.confidence * 100).toFixed(1)}%`
+                            );
+                        }
                     }
                     await loadAttendance();
                     await checkAttendanceStatus();
@@ -566,8 +727,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
             const netState = await NetInfo.fetch();
             const isActuallyOffline = !netState.isConnected || !netState.isInternetReachable;
             const wasNetworkOrTimeout =
-                error.message === 'Network Error' || error.message === 'Request timeout';
-
+                error.message === 'Network Error' || error.code === 'ECONNABORTED';
             if (isActuallyOffline && wasNetworkOrTimeout && photo && currentLocation) {
                 await offlineQueue.enqueue({
                     empid: userData?.empid || '',
@@ -584,7 +744,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                     'Saved Offline',
                     `No connection — your ${cameraAction} was saved and will sync automatically.`
                 );
-            } else if (!isActuallyOffline && error.message === 'Request timeout') {
+            } else if (!isActuallyOffline && error.code === 'ECONNABORTED') {
                 Alert.alert(
                     'Server Slow',
                     'The server took too long to respond. Please check your connection and try again.'
@@ -625,12 +785,31 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
 
     // Badge counts for the section nav bar
     const pendingViolationsCount = violations.filter(v => v.status === 'Pending').length;
+    const pendingOtCount = otRecords.filter(o => o.ot_status === 'Pending').length;
     const unreadDocumentsCount = documents.filter(d => d.status === 'Sent').length;
+
+    // Icon-first tab bar: inactive tabs show just the icon (+ a small dot if something needs
+    // attention), the active tab expands to show its label and full count.
+    const tabItems: {
+        key: 'attendance' | 'team' | 'violations' | 'ot' | 'documents';
+        label: string;
+        icon: keyof typeof Ionicons.glyphMap;
+        activeIcon: keyof typeof Ionicons.glyphMap;
+        count: number;
+        visible: boolean;
+    }[] = [
+            { key: 'attendance', label: 'Attendance', icon: 'time-outline', activeIcon: 'time', count: 0, visible: true },
+            { key: 'team', label: 'Team', icon: 'people-outline', activeIcon: 'people', count: employees.length, visible: isSupervisor },
+            { key: 'violations', label: 'Violations', icon: 'warning-outline', activeIcon: 'warning', count: pendingViolationsCount, visible: true },
+            { key: 'ot', label: 'OT', icon: 'hourglass-outline', activeIcon: 'hourglass', count: pendingOtCount, visible: true },
+            { key: 'documents', label: 'Documents', icon: 'document-text-outline', activeIcon: 'document-text', count: unreadDocumentsCount, visible: true },
+        ];
 
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'Pending': return '#ff7a1a';
-            case 'Reviewed': return '#28a745';
+            case 'Reviewed':
+            case 'Approved': return '#28a745';
             case 'Rejected': return '#dc3545';
             default: return '#6c757d';
         }
@@ -639,7 +818,8 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
     const getStatusBg = (status: string) => {
         switch (status) {
             case 'Pending': return '#fff4e6';
-            case 'Reviewed': return '#d4edda';
+            case 'Reviewed':
+            case 'Approved': return '#d4edda';
             case 'Rejected': return '#fdecea';
             default: return '#e9ecef';
         }
@@ -901,6 +1081,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                 <Text style={styles.employeeName}>{item.empname}</Text>
                 <Text style={styles.employeeId}>EMP: {item.empno}</Text>
                 <Text style={styles.employeeRole}>{item.role}</Text>
+                {item.shift_name && <Text style={styles.shiftTag}>{item.shift_name}</Text>}
             </View>
             <Ionicons name="chevron-forward" size={20} color="#6c757d" />
         </TouchableOpacity>
@@ -934,6 +1115,38 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
             )}
         </View>
     );
+
+
+    // ADD after renderViolationItem's closing );
+    const renderOtItem = ({ item }: { item: OtRecord }) => (
+        <View style={styles.violationCard}>
+            <View style={styles.violationHeader}>
+                <Text style={styles.violationEmpno}>{new Date(item.date).toLocaleDateString()}</Text>
+                <View style={[styles.statusBadge, { backgroundColor: getStatusBg(item.ot_status) }]}>
+                    <Text style={[styles.statusText, { color: getStatusColor(item.ot_status) }]}>
+                        {item.ot_status}
+                    </Text>
+                </View>
+            </View>
+            <Text style={styles.violationType}>
+                {item.shift_name || 'Shift'} · {item.ot_minutes} min overtime
+            </Text>
+            <Text style={styles.violationDesc}>
+                Checked out at {item.check_out || '—'}
+            </Text>
+            {item.ot_reviewed_by && (
+                <Text style={styles.violationDate}>
+                    Reviewed by {item.ot_reviewed_by} on {item.ot_reviewed_at ? new Date(item.ot_reviewed_at).toLocaleDateString() : ''}
+                </Text>
+            )}
+            {!!item.ot_review_notes && (
+                <Text style={styles.penaltyText}>Note: {item.ot_review_notes}</Text>
+            )}
+        </View>
+    );
+
+
+
 
     const renderDocumentItem = ({ item }: { item: Document }) => {
         const isReceived = item.direction === 'SUPERVISOR_TO_EMP';
@@ -978,6 +1191,10 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                 <Text style={styles.attendanceRecordDate}>
                     {item.date ? new Date(item.date).toLocaleDateString() : '--'}
                 </Text>
+
+                {/* NEW SHIFT TAG */}
+                {item.shift_name && <Text style={styles.shiftTag}>{item.shift_name}</Text>}
+
                 <View style={styles.attendanceRecordTimes}>
                     <View style={styles.attendanceTimeRow}>
                         <Ionicons name="log-in-outline" size={14} color="#28a745" />
@@ -1020,84 +1237,41 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                 </View>
             </View>
 
-            {/* Section Nav Bar */}
+            {/* Section Nav Bar - icon-first: inactive tabs show just the icon, the active
+                tab expands to show its label + count so the row never feels crowded */}
             <View style={styles.tabBarContainer}>
-                <TouchableOpacity
-                    style={[styles.tabBarItem, activeTab === 'attendance' && styles.tabBarItemActive]}
-                    onPress={() => setActiveTab('attendance')}
-                    activeOpacity={0.7}
-                >
-                    <Ionicons
-                        name={activeTab === 'attendance' ? 'time' : 'time-outline'}
-                        size={18}
-                        color={activeTab === 'attendance' ? '#fff' : '#6c757d'}
-                    />
-                    <Text style={[styles.tabBarLabel, activeTab === 'attendance' && styles.tabBarLabelActive]}>
-                        Attendance
-                    </Text>
-                </TouchableOpacity>
-
-                {isSupervisor && (
-                    <TouchableOpacity
-                        style={[styles.tabBarItem, activeTab === 'team' && styles.tabBarItemActive]}
-                        onPress={() => setActiveTab('team')}
-                        activeOpacity={0.7}
-                    >
-                        <Ionicons
-                            name={activeTab === 'team' ? 'people' : 'people-outline'}
-                            size={18}
-                            color={activeTab === 'team' ? '#fff' : '#6c757d'}
-                        />
-                        <Text style={[styles.tabBarLabel, activeTab === 'team' && styles.tabBarLabelActive]}>
-                            Team
-                        </Text>
-                        {employees.length > 0 && (
-                            <View style={styles.tabBarBadge}>
-                                <Text style={styles.tabBarBadgeText}>{employees.length}</Text>
+                {tabItems.filter((tab) => tab.visible).map((tab) => {
+                    const isActive = activeTab === tab.key;
+                    return (
+                        <TouchableOpacity
+                            key={tab.key}
+                            style={[styles.tabBarItem, isActive && styles.tabBarItemActive]}
+                            onPress={() => setActiveTab(tab.key)}
+                            activeOpacity={0.7}
+                        >
+                            <View style={styles.tabIconWrap}>
+                                <Ionicons
+                                    name={isActive ? tab.activeIcon : tab.icon}
+                                    size={isActive ? 18 : 20}
+                                    color={isActive ? '#fff' : '#6c757d'}
+                                />
+                                {!isActive && tab.count > 0 && <View style={styles.tabDot} />}
                             </View>
-                        )}
-                    </TouchableOpacity>
-                )}
-
-                <TouchableOpacity
-                    style={[styles.tabBarItem, activeTab === 'violations' && styles.tabBarItemActive]}
-                    onPress={() => setActiveTab('violations')}
-                    activeOpacity={0.7}
-                >
-                    <Ionicons
-                        name={activeTab === 'violations' ? 'warning' : 'warning-outline'}
-                        size={18}
-                        color={activeTab === 'violations' ? '#fff' : '#6c757d'}
-                    />
-                    <Text style={[styles.tabBarLabel, activeTab === 'violations' && styles.tabBarLabelActive]}>
-                        Violations
-                    </Text>
-                    {pendingViolationsCount > 0 && (
-                        <View style={styles.tabBarBadge}>
-                            <Text style={styles.tabBarBadgeText}>{pendingViolationsCount}</Text>
-                        </View>
-                    )}
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={[styles.tabBarItem, activeTab === 'documents' && styles.tabBarItemActive]}
-                    onPress={() => setActiveTab('documents')}
-                    activeOpacity={0.7}
-                >
-                    <Ionicons
-                        name={activeTab === 'documents' ? 'document-text' : 'document-text-outline'}
-                        size={18}
-                        color={activeTab === 'documents' ? '#fff' : '#6c757d'}
-                    />
-                    <Text style={[styles.tabBarLabel, activeTab === 'documents' && styles.tabBarLabelActive]}>
-                        Documents
-                    </Text>
-                    {unreadDocumentsCount > 0 && (
-                        <View style={styles.tabBarBadge}>
-                            <Text style={styles.tabBarBadgeText}>{unreadDocumentsCount}</Text>
-                        </View>
-                    )}
-                </TouchableOpacity>
+                            {isActive && (
+                                <>
+                                    <Text style={styles.tabBarLabelActive} numberOfLines={1}>
+                                        {tab.label}
+                                    </Text>
+                                    {tab.count > 0 && (
+                                        <View style={styles.tabBarBadge}>
+                                            <Text style={styles.tabBarBadgeText}>{tab.count}</Text>
+                                        </View>
+                                    )}
+                                </>
+                            )}
+                        </TouchableOpacity>
+                    );
+                })}
             </View>
 
             <ScrollView
@@ -1145,11 +1319,87 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                             </View>
                         )}
 
+                        {shifts.length > 0 && !isCheckedIn && !otherProjectCheckIn && (
+                            <View style={styles.shiftListContainer}>
+                                <Text style={styles.shiftListLabel}>
+                                    {myShift
+                                        ? (getShiftScheduleLabel(myShift) || 'Your Shift')
+                                        : isSupervisor
+                                            ? (activeShifts.length > 0 ? 'Select Shift' : 'No shift active right now')
+                                            : 'No shift assigned — contact your supervisor'}
+                                </Text>
+                                {shifts.map((s) => {
+                                    if (isSupervisor && !myShift) {
+                                        const tappable = isShiftActiveNow(s);
+                                        const isSelected = selectedShift?.id === s.id;
+                                        return (
+                                            <TouchableOpacity
+                                                key={s.id}
+                                                disabled={!tappable}
+                                                onPress={() => tappable && setSupervisorSelectedShift(s)}
+                                                style={[
+                                                    styles.shiftListRow,
+                                                    isSelected && styles.shiftListRowActive,
+                                                    !tappable && styles.shiftListRowDisabled,
+                                                ]}
+                                            >
+                                                <View style={styles.shiftListTimeBox}>
+                                                    <Text style={[styles.shiftListTimeText, !tappable && styles.shiftListTimeTextDisabled]}>{s.shiftstarttime}</Text>
+                                                </View>
+                                                <View style={styles.shiftListTimeBox}>
+                                                    <Text style={[styles.shiftListTimeText, !tappable && styles.shiftListTimeTextDisabled]}>{s.shiftendtime}</Text>
+                                                </View>
+                                                {isSelected && (
+                                                    <Ionicons name="checkmark-circle" size={20} color="#28a745" style={{ marginLeft: 8 }} />
+                                                )}
+                                            </TouchableOpacity>
+                                        );
+                                    }
+                                    const isMine = myShift?.id === s.id;
+                                    return (
+                                        <View
+                                            key={s.id}
+                                            style={[
+                                                styles.shiftListRow,
+                                                isMine && styles.shiftListRowActive,
+                                                !isMine && styles.shiftListRowDisabled,
+                                            ]}
+                                        >
+                                            <View style={styles.shiftListTimeBox}>
+                                                <Text style={[styles.shiftListTimeText, !isMine && styles.shiftListTimeTextDisabled]}>{s.shiftstarttime}</Text>
+                                            </View>
+                                            <View style={styles.shiftListTimeBox}>
+                                                <Text style={[styles.shiftListTimeText, !isMine && styles.shiftListTimeTextDisabled]}>{s.shiftendtime}</Text>
+                                            </View>
+                                            {isMine && (
+                                                <Ionicons name="checkmark-circle" size={20} color="#28a745" style={{ marginLeft: 8 }} />
+                                            )}
+                                        </View>
+                                    );
+                                })}
+                            </View>
+                        )}
+
                         <View style={styles.attendanceButtonRow}>
                             <TouchableOpacity
-                                style={[styles.checkInButton, (isCheckedIn || otherProjectCheckIn) && styles.disabledButton]}
+                                style={[
+                                    styles.checkInButton,
+                                    (isCheckedIn || otherProjectCheckIn || (shifts.length > 0 && (
+                                        isShiftLockedSupervisor
+                                            ? !myShiftIsActiveNow
+                                            : isSupervisor
+                                                ? (activeShifts.length === 0 || (activeShifts.length > 1 && !selectedShift))
+                                                : (!myShift || !myShiftIsActiveNow)
+                                    ))) && styles.disabledButton,
+                                ]}
                                 onPress={() => handleAttendance('checkin')}
-                                disabled={isCheckedIn || !!otherProjectCheckIn || isLoading}
+                                disabled={isCheckedIn || !!otherProjectCheckIn || isLoading || (shifts.length > 0 && (
+                                    isShiftLockedSupervisor
+                                        ? !myShiftIsActiveNow
+                                        : isSupervisor
+                                            ? (activeShifts.length === 0 || (activeShifts.length > 1 && !selectedShift))
+                                            : (!myShift || !myShiftIsActiveNow)
+                                ))}
                             >
                                 <Ionicons name="log-in-outline" size={24} color="#fff" />
                                 <Text style={styles.attendanceButtonText}>Check In</Text>
@@ -1198,7 +1448,9 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                 {activeTab === 'team' && isSupervisor && (
                     <View style={styles.section}>
                         <View style={styles.sectionHeader}>
-                            <Text style={styles.sectionTitle}>Team Members</Text>
+                            <Text style={styles.sectionTitle}>
+                                Team Members{myShift ? ` · ${myShift.shift_name}` : ''}
+                            </Text>
                             <Text style={styles.sectionCount}>{employees.length}</Text>
                         </View>
                         {loadingEmployees ? (
@@ -1264,6 +1516,30 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                     </View>
                 )}
 
+
+                {/* OT Section — own overtime status only, no approve/reject here */}
+                {activeTab === 'ot' && (
+                    <View style={styles.section}>
+                        <View style={styles.sectionHeader}>
+                            <Text style={styles.sectionTitle}>Overtime</Text>
+                        </View>
+
+                        {loadingOt ? (
+                            <ActivityIndicator size="small" color="#007bff" />
+                        ) : otRecords.length === 0 ? (
+                            <Text style={styles.emptyText}>No overtime records for this project</Text>
+                        ) : (
+                            <FlatList
+                                data={otRecords}
+                                keyExtractor={(item) => String(item.id)}
+                                renderItem={renderOtItem}
+                                scrollEnabled={false}
+                                nestedScrollEnabled
+                            />
+                        )}
+                    </View>
+                )}
+
                 {/* Documents Section */}
                 {activeTab === 'documents' && (
                     <View style={styles.section}>
@@ -1308,7 +1584,6 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                     </View>
                 )}
             </ScrollView>
-
             {/* Camera Modal for Attendance */}
             <Modal
                 visible={showCamera}
@@ -1682,6 +1957,9 @@ const styles = StyleSheet.create({
     backButton: { padding: 5 },
     headerTitle: { flex: 1, fontSize: 20, fontWeight: 'bold', color: '#fff', marginHorizontal: 10 },
     headerRight: { flexDirection: 'row', alignItems: 'center' },
+    shiftChipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 },
+    shiftChip: { backgroundColor: '#EEF2FF', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 14 },
+    shiftChipText: { fontSize: 12, color: '#4338CA', fontWeight: '600' },
     roleHeaderBadge: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12 },
     supervisorHeaderBadge: { backgroundColor: 'rgba(255,255,255,0.25)' },
     employeeHeaderBadge: { backgroundColor: 'rgba(40,167,69,0.3)' },
@@ -1689,12 +1967,14 @@ const styles = StyleSheet.create({
 
     tabBarContainer: {
         flexDirection: 'row',
+        alignItems: 'center',
         backgroundColor: '#fff',
         marginHorizontal: 16,
         marginTop: -18,
         marginBottom: 16,
         borderRadius: 16,
         padding: 5,
+        gap: 4,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.08,
@@ -1702,29 +1982,49 @@ const styles = StyleSheet.create({
         elevation: 4,
     },
     tabBarItem: {
-        flex: 1,
+        // Inactive tabs stay a fixed, compact icon-only size; the active tab
+        // (via tabBarItemActive) flexes to soak up the freed-up space for its label.
+        flexGrow: 0,
+        flexShrink: 0,
+        width: 42,
+        height: 38,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 4,
-        paddingVertical: 9,
+        gap: 6,
         borderRadius: 12,
     },
-    tabBarItemActive: { backgroundColor: '#007bff' },
-    tabBarLabel: { fontSize: 12, fontWeight: '600', color: '#6c757d' },
-    tabBarLabelActive: { color: '#fff' },
-    tabBarBadge: {
+    tabBarItemActive: {
+        flexGrow: 1,
+        flexShrink: 1,
+        width: undefined,
+        paddingHorizontal: 12,
+        backgroundColor: '#007bff',
+    },
+    tabIconWrap: { position: 'relative', alignItems: 'center', justifyContent: 'center' },
+    tabDot: {
+        position: 'absolute',
+        top: -2,
+        right: -3,
+        width: 8,
+        height: 8,
+        borderRadius: 4,
         backgroundColor: '#dc3545',
+        borderWidth: 1.5,
+        borderColor: '#fff',
+    },
+    tabBarLabel: { fontSize: 12, fontWeight: '600', color: '#6c757d' },
+    tabBarLabelActive: { fontSize: 12, fontWeight: '600', color: '#fff', flexShrink: 1 },
+    tabBarBadge: {
+        backgroundColor: 'rgba(255,255,255,0.9)',
         borderRadius: 9,
         minWidth: 18,
         height: 18,
         paddingHorizontal: 4,
         alignItems: 'center',
         justifyContent: 'center',
-        borderWidth: 1.5,
-        borderColor: '#fff',
     },
-    tabBarBadgeText: { fontSize: 10, fontWeight: '700', color: '#fff' },
+    tabBarBadgeText: { fontSize: 10, fontWeight: '700', color: '#007bff' },
 
     section: { marginHorizontal: 16, marginBottom: 20 },
     sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
@@ -1916,6 +2216,38 @@ const styles = StyleSheet.create({
     profileRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#f1f3f5' },
     profileLabel: { fontSize: 14, color: '#6c757d' },
     profileValue: { fontSize: 14, color: '#343a40', fontWeight: '500' },
+
+    // Shift Picker Modal Styles
+    shiftModalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' },
+    shiftModalCard: { backgroundColor: '#fff', borderRadius: 16, padding: 20, width: '85%' },
+    shiftModalTitle: { fontSize: 16, fontWeight: '700', marginBottom: 12 },
+    shiftOption: { paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#F1F5F9' },
+    shiftOptionText: { fontSize: 14, fontWeight: '600', color: '#1E293B' },
+    shiftOptionTime: { fontSize: 12, color: '#64748B', marginTop: 2 },
+    shiftModalCancel: { marginTop: 12, alignItems: 'center' },
+
+    // Shift Tag Style for Attendance History (Added so your app doesn't crash from missing style)
+    shiftTag: { fontSize: 11, color: '#4338CA', backgroundColor: '#EEF2FF', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, marginTop: 4, marginBottom: 4, alignSelf: 'flex-start', overflow: 'hidden' },
+    shiftListContainer: { marginBottom: 12 },
+    shiftListLabel: { fontSize: 13, fontWeight: '700', color: '#495057', marginBottom: 8 },
+    shiftListRow: {
+        flexDirection: 'row', alignItems: 'center',
+        backgroundColor: '#f8f9fa', borderRadius: 10, padding: 10, marginBottom: 8,
+        borderWidth: 1.5, borderColor: 'transparent',
+    },
+    shiftListRowActive: { borderColor: '#28a745', backgroundColor: '#eafaf0' },
+    shiftListRowDisabled: { opacity: 0.4 },
+    shiftListTimeTextDisabled: { color: '#adb5bd' },
+    shiftListTimeBox: {
+        backgroundColor: '#e9ecef', borderRadius: 8, paddingVertical: 8, paddingHorizontal: 14, marginRight: 10,
+    },
+    shiftListTimeText: { fontSize: 14, fontWeight: '600', color: '#212529' },
+    // ADD to styles
+    activeShiftBanner: {
+        flexDirection: 'row', alignItems: 'center', gap: 6,
+        backgroundColor: '#e9f9ee', borderRadius: 10, padding: 10, marginBottom: 10,
+    },
+    activeShiftBannerText: { fontSize: 12.5, color: '#1e7e34', fontWeight: '600' },
 });
 
 export default ProjectDetailScreen;

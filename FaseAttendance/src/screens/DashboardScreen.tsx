@@ -61,6 +61,9 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
     const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
     const [locationPermission, setLocationPermission] = useState(false);
     const [pendingCount, setPendingCount] = useState(0);
+    const shifts: any[] = route?.params?.selectedProject?.shifts || [];
+    const [selectedShift, setSelectedShift] = useState<any>(null);
+    const [showShiftPicker, setShowShiftPicker] = useState(false);
     const selectedProject = route?.params?.selectedProject;
     const siteLatitude = selectedProject?.latitude;
     const siteLongitude = selectedProject?.longitude;
@@ -222,6 +225,14 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
         }
 
         setCameraAction('checkin');
+
+        if (shifts.length > 1) {
+            setShowShiftPicker(true);
+            return;
+        }
+        if (shifts.length === 1) {
+            setSelectedShift(shifts[0]);
+        }
         setShowCamera(true);
     };
 
@@ -301,6 +312,9 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
                     formData.append('longitude', currentLocation.coords.longitude.toString());
                     formData.append('project_id', projectId ? projectId.toString() : '');
                     formData.append('project_name', projectName || 'NAN');
+                    if (cameraAction === 'checkin' && selectedShift) {
+                        formData.append('shift_id', String(selectedShift.id));
+                    }
                     formData.append('geofence_status', geofenceStatus);
 
                     const requestId = Crypto.randomUUID();

@@ -395,7 +395,10 @@ const DocumentsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         <SafeAreaView style={styles.container}>
             {/* Header */}
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>Documents</Text>
+                <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                    <Ionicons name="arrow-back" size={26} color="#fff" />
+                </TouchableOpacity>
+                <Text style={[styles.headerTitle, { flex: 1, marginLeft: 12 }]}>Documents</Text>
                 <TouchableOpacity
                     style={styles.sendButton}
                     onPress={() => setShowSendModal(true)}
@@ -641,6 +644,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     headerTitle: { fontSize: 22, fontWeight: 'bold', color: '#fff' },
+    backButton: { padding: 5 },
     sendButton: {
         flexDirection: 'row',
         alignItems: 'center',

@@ -23,6 +23,14 @@ interface UserData {
     department?: string;
 }
 
+interface Shift {
+    id: number;
+    shift_name: string;
+    shiftstarttime: string;
+    shiftendtime: string;
+}
+
+// AFTER
 interface AssignedProject {
     id: number;
     projectname: string;
@@ -30,6 +38,8 @@ interface AssignedProject {
     site_address?: string;
     shift_start?: string;
     shift_end?: string;
+    shifts?: Shift[];
+    assigned_shift_id?: number | null;   // ADD
     role: 'Supervisor' | 'Employee';
 }
 
@@ -148,12 +158,15 @@ const TaskScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
             if (response.status && response.projects) {
                 // Map the response to match the expected format
+                // AFTER
                 const mappedProjects = response.projects.map((p: any) => ({
                     id: p.id || p.project_id,
                     projectname: p.projectname || p.project_name || 'N/A',
                     site_address: p.site_address || p.siteaddress || null,
                     shift_start: p.shift_start || null,
                     shift_end: p.shift_end || null,
+                    shifts: p.shifts || [],
+                    assigned_shift_id: p.assigned_shift_id ?? null,   // ADD
                     role: p.role || 'Employee',
                     project_code: p.project_code || p.projectcode || null,
                 }));
@@ -303,6 +316,8 @@ const TaskScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     >
                         <Ionicons name="arrow-back" size={24} color="#fff" />
                     </TouchableOpacity>
+                    <Text style={styles.headerTitle}>Projects</Text>
+                    <View style={{ width: 40 }} />
                 </View>
             </View>
 
@@ -519,6 +534,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
     },
+    headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#fff' },
     backButton: {
         width: 40,
         height: 40,
