@@ -377,7 +377,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import { apiService } from '../services/api';
-import FloatingBroadcastButton from '../components/FloatingBroadcastButton';
+// FloatingBroadcastButton removed — Broadcasts and Support Chat now live as tiles in the grid above
 
 interface UserData {
     username?: string;
@@ -449,19 +449,26 @@ const TILES: TileConfig[] = [
         color: '#6f42c1',
         onPress: (navigation) => navigation.navigate('Documents'),
     },
-    // {
-    //     key: 'broadcasts',
-    //     label: 'Broadcasts',
-    //     icon: 'megaphone-outline',
-    //     color: '#e83e8c',
-    //     onPress: (navigation) => navigation.navigate('Broadcasts'),
-    // },
     {
         key: 'faceEnrollment',
         label: 'Face Register',
         icon: 'scan-outline',
         color: '#0dcaf0',
         onPress: (navigation) => navigation.navigate('FaceEnrollment'),
+    },
+    {
+        key: 'supportChat',
+        label: 'Support Chat',
+        icon: 'chatbubble-ellipses-outline',
+        color: '#3B82F6',
+        onPress: (navigation) => navigation.navigate('SupportChat'),
+    },
+    {
+        key: 'broadcasts',
+        label: 'Broadcasts',
+        icon: 'megaphone-outline',
+        color: '#e83e8c',
+        onPress: (navigation) => navigation.navigate('Broadcasts'),
     },
 ];
 
@@ -783,13 +790,35 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
                     {/* Grid */}
                     <View style={styles.grid}>
-                        {TILES.map((tile) => {
+                        {TILES.map((tile, index) => {
                             const isFaceTile = tile.key === 'faceEnrollment';
                             const isDisabled = isFaceTile && faceEnrolled;
+                            const isEndOfRow = index % 3 === 2;
+
+                            // Stretch tiles in an incomplete last row so they fill the full width
+                            const itemsInLastRow = TILES.length % 3 === 0 ? 3 : TILES.length % 3;
+                            const lastRowStartIndex = TILES.length - itemsInLastRow;
+                            const isInLastRow = itemsInLastRow < 3 && index >= lastRowStartIndex;
+                            const isLastInLastRow = index === TILES.length - 1;
+
+                            let sizeStyle: { width: `${number}%` } | null = null;
+                            if (isInLastRow) {
+                                if (itemsInLastRow === 2) {
+                                    sizeStyle = { width: '48.25%' };
+                                } else if (itemsInLastRow === 1) {
+                                    sizeStyle = { width: '100%' };
+                                }
+                            }
+
                             return (
                                 <TouchableOpacity
                                     key={tile.key}
-                                    style={[styles.tile, isDisabled && styles.tileDisabled]}
+                                    style={[
+                                        styles.tile,
+                                        !isEndOfRow && !(isInLastRow && isLastInLastRow) && styles.tileSpacing,
+                                        sizeStyle,
+                                        isDisabled && styles.tileDisabled,
+                                    ]}
                                     activeOpacity={0.8}
                                     disabled={isDisabled}
                                     onPress={() => tile.onPress(navigation)}
@@ -941,7 +970,6 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     </View>
                 )}
             </ScrollView>
-            <FloatingBroadcastButton navigation={navigation} />
         </SafeAreaView>
     );
 };
@@ -1028,7 +1056,7 @@ const styles = StyleSheet.create({
     grid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-start',
     },
     tile: {
         width: '31%',
@@ -1042,6 +1070,9 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.05,
         shadowRadius: 6,
         elevation: 2,
+    },
+    tileSpacing: {
+        marginRight: '3.5%',
     },
     tileIconWrap: {
         width: 48, height: 48, borderRadius: 24,

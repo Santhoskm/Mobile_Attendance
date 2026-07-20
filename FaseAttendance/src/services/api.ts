@@ -802,5 +802,31 @@ export const apiService = {
         }
     },
 
+    async getChatMessages(): Promise<any> {
+        try {
+            const response = await api.get('/api/chat/messages/', {
+                timeout: 10000,
+                cancelToken: cancelTokenSource.token,
+            });
+            return response.data;
+        } catch (error) {
+            console.log('Get chat messages error:', error);
+            return { messages: [] };
+        }
+    },
+
+    async sendChatMessage(text: string): Promise<any> {
+        try {
+            const response = await api.post('/api/chat/send/', { text }, {
+                timeout: 10000,
+                cancelToken: cancelTokenSource.token,
+            });
+            return response.data;
+        } catch (error) {
+            console.log('Send chat message error:', error);
+            throw error;
+        }
+    },
+
 
 };

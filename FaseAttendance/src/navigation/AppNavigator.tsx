@@ -17,6 +17,7 @@ import MainTabScreen from '../screens/MainTabScreen';
 import ProjectDetailScreen from '../screens/ProjectDetailScreen';
 import LeaveScreen from '../screens/LeaveScreen';
 import BroadcastsScreen from '../screens/BroadcastsScreen';
+import SupportChatScreen from '../screens/SupportChatScreen';
 
 const Stack = createStackNavigator();
 
@@ -37,6 +38,7 @@ const AppNavigator = () => {
                 <Stack.Screen name="Documents" component={DocumentsScreen} />
                 <Stack.Screen name="Profile" component={ProfileScreen} />
                 <Stack.Screen name="Broadcasts" component={BroadcastsScreen} />
+                <Stack.Screen name="SupportChat" component={SupportChatScreen} />
             </Stack.Navigator>
         </NavigationContainer>
     );
