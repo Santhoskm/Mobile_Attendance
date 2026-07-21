@@ -18,12 +18,13 @@ import ProjectDetailScreen from '../screens/ProjectDetailScreen';
 import LeaveScreen from '../screens/LeaveScreen';
 import BroadcastsScreen from '../screens/BroadcastsScreen';
 import SupportChatScreen from '../screens/SupportChatScreen';
+import { navigationRef } from './navigationRef';
 
 const Stack = createStackNavigator();
 
 const AppNavigator = () => {
     return (
-        <NavigationContainer>
+        <NavigationContainer ref={navigationRef}>
             <Stack.Navigator screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="Login" component={LoginScreen} />
                 <Stack.Screen name="Register" component={RegisterScreen} />

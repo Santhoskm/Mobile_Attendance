@@ -189,12 +189,29 @@ export const apiService = {
         try {
             const refreshToken = await AsyncStorage.getItem('refreshToken');
             if (refreshToken) {
+                await this.unregisterPushToken();
                 await api.post('/api/logout/', { refresh: refreshToken });
             }
         } catch (error) {
             // even if the server call fails, still clear local storage
         } finally {
             await this.clearAuthData();
+        }
+    },
+
+    async registerPushToken(token: string) {
+        try {
+            await api.post('/api/device-token/', { token });
+        } catch (error) {
+            // best-effort — don't block login on push registration failing
+        }
+    },
+
+    async unregisterPushToken() {
+        try {
+            await api.post('/api/device-token/', { token: '' });
+        } catch (error) {
+            // best-effort — logout should still proceed if this fails
         }
     },
 

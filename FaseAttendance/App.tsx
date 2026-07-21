@@ -7,10 +7,12 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StatusBar } from 'expo-status-bar';
 import AppNavigator from './src/navigation/AppNavigator';
 import { useNetworkSync } from './src/hooks/useNetworkSync';
+import { usePushNotificationListeners } from './src/hooks/usePushNotifications';
 
 export default function App() {
   const { syncQueue } = useNetworkSync();
   (globalThis as any).triggerAttendanceSync = syncQueue;
+  usePushNotificationListeners();
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

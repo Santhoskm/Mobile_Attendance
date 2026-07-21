@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { apiService, LoginCredentials } from '../services/api';
+import { getExpoPushToken } from '../hooks/usePushNotifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
@@ -59,6 +60,13 @@ const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     access: response.access,
                     refresh: response.refresh,
                 });
+
+                // Register this device for push notifications now that we're authenticated.
+                getExpoPushToken()
+                    .then((token) => {
+                        if (token) apiService.registerPushToken(token);
+                    })
+                    .catch(() => { });
 
 
 

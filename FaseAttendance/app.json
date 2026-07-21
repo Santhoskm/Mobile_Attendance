@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "FaseAttendance",
-    "slug": "FaseAttendance",
+    "name": "IET",
+    "slug": "IET",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -17,6 +17,7 @@
       }
     },
     "android": {
+      "package": "com.IET.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -27,7 +28,6 @@
       "usesCleartextTraffic": true,
       "permissions": [
         "CAMERA",
-        "RECORD_AUDIO",
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION"
       ]
@@ -56,6 +56,13 @@
         "expo-location",
         {
           "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to access your location for attendance verification."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#0B84FF"
         }
       ]
     ]
