@@ -511,7 +511,7 @@ const styles = StyleSheet.create({
     content: { flex: 1, padding: 16 },
     statsRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 },
     statCard: {
-        flex: 1, backgroundColor: '#fff', borderRadius: 12, alignItems: 'center',
+        flex: 1, flexBasis: 0, minWidth: 0, backgroundColor: '#fff', borderRadius: 12, alignItems: 'center',
         paddingVertical: 16, marginHorizontal: 4,
     },
     statNumber: { fontSize: 22, fontWeight: '700', color: '#fd9500' },

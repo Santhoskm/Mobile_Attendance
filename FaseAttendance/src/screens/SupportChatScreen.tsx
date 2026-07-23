@@ -16,7 +16,6 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { apiService } from '../services/api';
-import HeaderLogo from '../components/HeaderLogo';
 
 interface ChatMessage {
     id: number;
@@ -91,7 +90,6 @@ const SupportChatScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
-                <HeaderLogo />
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <Ionicons name="arrow-back" size={24} color="#fff" />
                 </TouchableOpacity>
@@ -106,7 +104,7 @@ const SupportChatScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             >
                 {loading ? (
                     <View style={styles.emptyState}>
-                        <ActivityIndicator size="large" color="#3B82F6" />
+                        <ActivityIndicator size="large" color="#212c6b" />
                     </View>
                 ) : messages.length === 0 ? (
                     <View style={styles.emptyState}>
@@ -156,7 +154,7 @@ const SupportChatScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#f0f4f8' },
     header: {
-        backgroundColor: '#3B82F6',
+        backgroundColor: '#212c6b',
         paddingTop: 55,
         paddingBottom: 20,
         paddingHorizontal: 20,
@@ -178,7 +176,7 @@ const styles = StyleSheet.create({
     bubbleRowRight: { justifyContent: 'flex-end' },
     bubble: { maxWidth: '78%', borderRadius: 14, paddingVertical: 8, paddingHorizontal: 12 },
     bubbleAdmin: { backgroundColor: '#fff', borderBottomLeftRadius: 2 },
-    bubbleMine: { backgroundColor: '#3B82F6', borderBottomRightRadius: 2 },
+    bubbleMine: { backgroundColor: '#212c6b', borderBottomRightRadius: 2 },
     bubbleTextAdmin: { color: '#212529', fontSize: 14 },
     bubbleTextMine: { color: '#fff', fontSize: 14 },
     bubbleMetaAdmin: { color: '#868e96', fontSize: 10, marginTop: 4 },
@@ -207,7 +205,7 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: '#3B82F6',
+        backgroundColor: '#212c6b',
         alignItems: 'center',
         justifyContent: 'center',
     },

@@ -6,39 +6,6 @@ import {
     Platform, SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-// import TaskScreen from './TaskScreen';
-// import ProfileScreen from './ProfileScreen';
-// import DocumentsScreen from './DocumentsScreen';
-// import ViolationsScreen from './ViolationsScreen';
-// import DashboardScreen from './DashboardScreen';
-
-// const TABS = [
-//     { key: 'projects', label: 'Projects', icon: 'briefcase-outline', activeIcon: 'briefcase' },
-//     { key: 'docs', label: 'Docs', icon: 'document-text-outline', activeIcon: 'document-text' },
-//     { key: 'checkin', label: '', icon: 'scan-circle-outline', activeIcon: 'scan-circle' },
-//     { key: 'violations', label: 'Flags', icon: 'warning-outline', activeIcon: 'warning' },
-//     { key: 'profile', label: 'Profile', icon: 'person-outline', activeIcon: 'person' },
-// ];
-
-// const MainTabScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-//     const [activeTab, setActiveTab] = useState('projects');
-
-//     const renderScreen = () => {
-//         switch (activeTab) {
-//             case 'projects':
-//                 return <TaskScreen navigation={navigation} />;
-//             case 'docs':
-//                 return <DocumentsScreen navigation={navigation} />;
-//             case 'checkin':
-//                 return <DashboardScreen navigation={navigation} route={{}} />;
-//             case 'violations':
-//                 return <ViolationsScreen navigation={navigation} />;
-//             case 'profile':
-//                 return <ProfileScreen navigation={navigation} />;
-//             default:
-//                 return <TaskScreen navigation={navigation} />;
-//         }
-//     };
 import HomeScreen from './HomeScreen';
 import DashboardScreen from './DashboardScreen';
 import ProfileScreen from './ProfileScreen';
@@ -57,7 +24,7 @@ const MainTabScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             case 'home':
                 return <HomeScreen navigation={navigation} />;
             case 'checkin':
-                return <DashboardScreen navigation={navigation} route={{}} />;
+                return <DashboardScreen navigation={{ ...navigation, goBack: () => setActiveTab('home') }} route={{}} />;
             case 'profile':
                 return <ProfileScreen navigation={{ ...navigation, goBack: () => setActiveTab('home') }} />;
             default:

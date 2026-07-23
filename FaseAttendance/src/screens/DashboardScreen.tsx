@@ -522,12 +522,9 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
                         <Ionicons name="arrow-back" size={28} color="#fff" />
                     </TouchableOpacity>
                     <View style={styles.headerTextContainer}>
-                        <Text style={styles.greeting}>{getGreeting()},</Text>
-                        <Text style={styles.name}>{userData?.username || 'User'}</Text>
+                        <Text style={styles.name}>Check In</Text>
                     </View>
-                    <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-                        <Ionicons name="log-out-outline" size={28} color="#fff" />
-                    </TouchableOpacity>
+                    <View style={styles.backButton} />
                 </View>
                 <View style={styles.centerContent}>
                     <Ionicons name="camera-outline" size={80} color="#6c757d" />
@@ -559,15 +556,12 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
                         <Ionicons name="arrow-back" size={28} color="#fff" />
                     </TouchableOpacity>
                     <View style={styles.headerTextContainer}>
-                        <Text style={styles.greeting}>{getGreeting()},</Text>
-                        <Text style={styles.name}>{userData?.username || 'User'}</Text>
-                        <Text style={styles.emp}>EMP: {userData?.empid || 'N/A'}</Text>
+                        <Text style={styles.name}>Check In</Text>
                     </View>
-                    <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-                        <Ionicons name="log-out-outline" size={28} color="#fff" />
-                    </TouchableOpacity>
+                    <View style={styles.backButton} />
                 </View>
 
+                {/* Project Card - only shown when opened for a specific project */}
                 {/* Project Card - Prominently displayed */}
                 <View style={styles.projectCard}>
                     <Ionicons name="folder-outline" size={28} color="#212c6b" />

@@ -18,7 +18,6 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { apiService } from '../services/api';
-import HeaderLogo from '../components/HeaderLogo';
 interface Broadcast {
     id: number;
     title: string;
@@ -120,7 +119,6 @@ const BroadcastsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
-                <HeaderLogo />
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <Ionicons name="arrow-back" size={24} color="#fff" />
                 </TouchableOpacity>
