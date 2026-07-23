@@ -26,18 +26,5 @@ export const getOptimalPictureSize = (sizes: string[]): string => {
 };
 
 export const muteCameraSound = async () => {
-    if (Platform.OS === 'android') {
-        try {
-            const { Audio } = require('expo-av');
-            await Audio.setAudioModeAsync({
-                allowsRecordingIOS: false,
-                staysActiveInBackground: false,
-                playsInSilentModeIOS: false,
-                shouldDuckAndroid: true,
-                playThroughEarpieceAndroid: false,
-            });
-        } catch (error) {
-            console.log('Audio mode setting error:', error);
-        }
-    }
+
 };

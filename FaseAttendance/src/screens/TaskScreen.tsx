@@ -324,10 +324,10 @@ const TaskScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             {/* Last Attendance Card */}
             <View style={styles.attendanceCard}>
                 <View style={styles.attendanceHeader}>
-                    <Ionicons name="time-outline" size={22} color="#007bff" />
+                    <Ionicons name="time-outline" size={22} color="#212c6b" />
                     <Text style={styles.attendanceTitle}>Last Attendance</Text>
                     {loadingAttendance ? (
-                        <ActivityIndicator size="small" color="#007bff" />
+                        <ActivityIndicator size="small" color="#212c6b" />
                     ) : (
                         <View style={[
                             styles.statusBadge,
@@ -433,7 +433,7 @@ const TaskScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
                 {isLoading ? (
                     <View style={styles.loadingContainer}>
-                        <ActivityIndicator size="large" color="#007bff" />
+                        <ActivityIndicator size="large" color="#212c6b" />
                         <Text style={styles.loadingText}>Loading projects...</Text>
                     </View>
                 ) : projects.length === 0 ? (
@@ -482,9 +482,9 @@ const TaskScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                                         <Ionicons
                                             name={isSupervisor ? 'shield-checkmark-outline' : 'person-outline'}
                                             size={16}
-                                            color={isSupervisor ? '#007bff' : '#28a745'}
+                                            color={isSupervisor ? '#212c6b' : '#28a745'}
                                         />
-                                        <Text style={[styles.priorityText, { color: isSupervisor ? '#007bff' : '#28a745' }]}>
+                                        <Text style={[styles.priorityText, { color: isSupervisor ? '#212c6b' : '#28a745' }]}>
                                             {isSupervisor ? 'Supervisor Access' : 'Employee Access'}
                                         </Text>
                                     </View>
@@ -522,7 +522,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#f8f9fa',
     },
     header: {
-        backgroundColor: '#007bff',
+        backgroundColor: '#212c6b',
         paddingTop: 55,
         paddingBottom: 16,
         borderBottomLeftRadius: 30,
@@ -685,7 +685,7 @@ const styles = StyleSheet.create({
     },
     attendanceProject: {
         fontSize: 11,
-        color: '#007bff',
+        color: '#212c6b',
         marginTop: 1,
         fontWeight: '500',
     },
@@ -705,7 +705,7 @@ const styles = StyleSheet.create({
         gap: 4,
     },
     attendanceHistoryText: {
-        color: '#007bff',
+        color: '#212c6b',
         fontSize: 13,
         fontWeight: '600',
     },
@@ -746,7 +746,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#6c757d',
     },
     progressCard: {
-        backgroundColor: '#007bff',
+        backgroundColor: '#212c6b',
     },
     statNumber: {
         color: '#fff',
@@ -810,7 +810,7 @@ const styles = StyleSheet.create({
     },
     refreshButton: {
         flexDirection: 'row',
-        backgroundColor: '#007bff',
+        backgroundColor: '#212c6b',
         paddingHorizontal: 20,
         paddingVertical: 12,
         borderRadius: 25,
@@ -835,7 +835,7 @@ const styles = StyleSheet.create({
     },
     supervisorCard: {
         borderLeftWidth: 4,
-        borderLeftColor: '#007bff',
+        borderLeftColor: '#212c6b',
     },
     projectHeader: {
         flexDirection: 'row',
@@ -855,7 +855,7 @@ const styles = StyleSheet.create({
         marginRight: 10,
     },
     supervisorIndicator: {
-        backgroundColor: '#007bff',
+        backgroundColor: '#212c6b',
     },
     employeeIndicator: {
         backgroundColor: '#28a745',
@@ -910,7 +910,7 @@ const styles = StyleSheet.create({
         alignItems: 'flex-end',
     },
     actionText: {
-        color: '#007bff',
+        color: '#212c6b',
         fontSize: 12,
         fontWeight: '600',
     },

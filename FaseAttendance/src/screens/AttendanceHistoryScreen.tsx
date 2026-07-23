@@ -122,7 +122,7 @@ const AttendanceHistoryScreen: React.FC<{ navigation: any }> = ({ navigation }) 
                     <Ionicons
                         name={isPending ? 'cloud-upload-outline' : isComplete ? 'checkmark-circle' : 'time-outline'}
                         size={28}
-                        color={isPending ? '#ff7a1a' : isComplete ? '#28a745' : '#007bff'}
+                        color={isPending ? '#ff7a1a' : isComplete ? '#28a745' : '#212c6b'}
                     />
                 </View>
                 <View style={styles.recordInfo}>
@@ -186,7 +186,7 @@ const AttendanceHistoryScreen: React.FC<{ navigation: any }> = ({ navigation }) 
                     <Ionicons
                         name="list-outline"
                         size={16}
-                        color={viewMode === 'overall' ? '#fff' : '#007bff'}
+                        color={viewMode === 'overall' ? '#fff' : '#212c6b'}
                     />
                     <Text style={[styles.viewTabText, viewMode === 'overall' && styles.viewTabTextActive]}>
                         Overall Attendance
@@ -200,7 +200,7 @@ const AttendanceHistoryScreen: React.FC<{ navigation: any }> = ({ navigation }) 
                     <Ionicons
                         name="folder-outline"
                         size={16}
-                        color={viewMode === 'project' ? '#fff' : '#007bff'}
+                        color={viewMode === 'project' ? '#fff' : '#212c6b'}
                     />
                     <Text style={[styles.viewTabText, viewMode === 'project' && styles.viewTabTextActive]}>
                         Project Wise
@@ -234,7 +234,7 @@ const AttendanceHistoryScreen: React.FC<{ navigation: any }> = ({ navigation }) 
 
             {/* Records List */}
             {loading ? (
-                <ActivityIndicator style={{ marginTop: 40 }} size="large" color="#007bff" />
+                <ActivityIndicator style={{ marginTop: 40 }} size="large" color="#212c6b" />
             ) : visibleRecords.length === 0 ? (
                 <View style={styles.emptyState}>
                     <Ionicons name="document-text-outline" size={60} color="#cbd5e1" />
@@ -257,7 +257,7 @@ const AttendanceHistoryScreen: React.FC<{ navigation: any }> = ({ navigation }) 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#f8f9fa' },
     header: {
-        backgroundColor: '#007bff',
+        backgroundColor: '#212c6b',
         padding: 20,
         paddingTop: 55,
         paddingBottom: 20,
@@ -286,10 +286,10 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         backgroundColor: '#fff',
         borderWidth: 1.5,
-        borderColor: '#007bff',
+        borderColor: '#212c6b',
     },
-    viewTabActive: { backgroundColor: '#007bff' },
-    viewTabText: { color: '#007bff', fontWeight: '600', fontSize: 14 },
+    viewTabActive: { backgroundColor: '#212c6b' },
+    viewTabText: { color: '#212c6b', fontWeight: '600', fontSize: 14 },
     viewTabTextActive: { color: '#fff' },
     projectFilterRow: {
         flexDirection: 'row',
@@ -306,7 +306,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         paddingVertical: 7,
     },
-    projectChipActive: { backgroundColor: '#007bff', borderColor: '#007bff' },
+    projectChipActive: { backgroundColor: '#212c6b', borderColor: '#212c6b' },
     projectChipText: { color: '#343a40', fontSize: 13, fontWeight: '600' },
     projectChipTextActive: { color: '#fff' },
 

@@ -345,7 +345,7 @@ const DocumentsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     <Ionicons
                         name={getDocumentIcon(item.document_type) as any}
                         size={28}
-                        color="#007bff"
+                        color="#212c6b"
                     />
                 </View>
 
@@ -374,7 +374,7 @@ const DocumentsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                             style={styles.docActionBtn}
                             onPress={() => openFile(item.file_url)}
                         >
-                            <Ionicons name="eye-outline" size={18} color="#007bff" />
+                            <Ionicons name="eye-outline" size={18} color="#212c6b" />
                         </TouchableOpacity>
                     )}
 
@@ -415,7 +415,7 @@ const DocumentsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                         selectedValue={selectedProjectId}
                         onValueChange={(value) => setSelectedProjectId(value)}
                         style={styles.projectPicker}
-                        dropdownIconColor="#007bff"
+                        dropdownIconColor="#212c6b"
                     >
                         <Picker.Item label="All Projects" value="" />
                         {projects.map((p) => (
@@ -434,7 +434,7 @@ const DocumentsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     <Ionicons
                         name="download-outline"
                         size={16}
-                        color={activeTab === 'received' ? '#007bff' : '#6c757d'}
+                        color={activeTab === 'received' ? '#212c6b' : '#6c757d'}
                     />
                     <Text style={[styles.tabText, activeTab === 'received' && styles.tabTextActive]}>
                         Received
@@ -448,7 +448,7 @@ const DocumentsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     <Ionicons
                         name="send-outline"
                         size={16}
-                        color={activeTab === 'sent' ? '#007bff' : '#6c757d'}
+                        color={activeTab === 'sent' ? '#212c6b' : '#6c757d'}
                     />
                     <Text style={[styles.tabText, activeTab === 'sent' && styles.tabTextActive]}>
                         Sent
@@ -467,7 +467,7 @@ const DocumentsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             </View>
 
             {loading ? (
-                <ActivityIndicator style={{ marginTop: 40 }} size="large" color="#007bff" />
+                <ActivityIndicator style={{ marginTop: 40 }} size="large" color="#212c6b" />
             ) : documents.length === 0 ? (
                 <View style={styles.emptyState}>
                     <Ionicons
@@ -551,7 +551,7 @@ const DocumentsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
                             {activeTab === 'sent' && (
                                 <View style={styles.infoBox}>
-                                    <Ionicons name="information-circle-outline" size={18} color="#007bff" />
+                                    <Ionicons name="information-circle-outline" size={18} color="#212c6b" />
                                     <Text style={styles.infoBoxText}>
                                         This document will be sent to your project supervisor.
                                     </Text>
@@ -603,7 +603,7 @@ const DocumentsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                             <View style={styles.formGroup}>
                                 <Text style={styles.formLabel}>File *</Text>
                                 <TouchableOpacity style={styles.filePicker} onPress={pickDocument}>
-                                    <Ionicons name="cloud-upload-outline" size={24} color="#007bff" />
+                                    <Ionicons name="cloud-upload-outline" size={24} color="#212c6b" />
                                     <Text style={styles.filePickerText}>
                                         {sendFileName ? sendFileName : 'Tap to select a file'}
                                     </Text>
@@ -633,7 +633,7 @@ const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#f0f4f8' },
 
     header: {
-        backgroundColor: '#007bff',
+        backgroundColor: '#212c6b',
         paddingTop: 55,
         paddingBottom: 20,
         paddingHorizontal: 20,
@@ -703,7 +703,7 @@ const styles = StyleSheet.create({
         elevation: 2,
     },
     tabText: { fontSize: 13, color: '#6c757d', fontWeight: '600' },
-    tabTextActive: { color: '#007bff' },
+    tabTextActive: { color: '#212c6b' },
 
     infoStrip: {
         flexDirection: 'row',
@@ -761,7 +761,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 8,
-        backgroundColor: '#007bff',
+        backgroundColor: '#212c6b',
         paddingHorizontal: 20,
         paddingVertical: 12,
         borderRadius: 20,
@@ -842,10 +842,10 @@ const styles = StyleSheet.create({
         padding: 16,
         borderStyle: 'dashed',
     },
-    filePickerText: { color: '#007bff', fontSize: 14, flex: 1 },
+    filePickerText: { color: '#212c6b', fontSize: 14, flex: 1 },
 
     submitButton: {
-        backgroundColor: '#007bff',
+        backgroundColor: '#212c6b',
         padding: 16,
         borderRadius: 12,
         alignItems: 'center',

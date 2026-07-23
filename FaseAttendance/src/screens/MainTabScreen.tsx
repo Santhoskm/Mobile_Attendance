@@ -104,7 +104,7 @@ const MainTabScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                             <Ionicons
                                 name={(isActive ? tab.activeIcon : tab.icon) as any}
                                 size={22}
-                                color={isActive ? '#007bff' : '#adb5bd'}
+                                color={isActive ? '#212c6b' : '#adb5bd'}
                             />
                             <Text style={[styles.tabLabel, isActive && styles.tabLabelActive]}>
                                 {tab.label}
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
     tabLabelActive: {
-        color: '#007bff',
+        color: '#212c6b',
     },
     centerTabWrap: {
         flex: 1,
@@ -159,10 +159,10 @@ const styles = StyleSheet.create({
         width: 58,
         height: 58,
         borderRadius: 29,
-        backgroundColor: '#007bff',
+        backgroundColor: '#212c6b',
         alignItems: 'center',
         justifyContent: 'center',
-        shadowColor: '#007bff',
+        shadowColor: '#212c6b',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.4,
         shadowRadius: 8,

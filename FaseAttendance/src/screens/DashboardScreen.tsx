@@ -16,13 +16,12 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import { Camera, CameraView } from 'expo-camera';
-import { Audio } from 'expo-av';
 import { apiService } from '../services/api';
-import { optimizeCameraForSpeed, muteCameraSound } from '../utils/cameraOptimizer';
 import * as ImageManipulator from 'expo-image-manipulator';
 import { offlineQueue } from '../services/offlineQueue';
 import * as Crypto from 'expo-crypto';
 import { isWithinGeofence } from '../utils/geofence';
+import { optimizeCameraForSpeed } from '../utils/cameraOptimizer';
 
 
 
@@ -90,7 +89,6 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
     }, [userData]);
 
     const setupAudioForMute = async () => {
-        await muteCameraSound();
         await optimizeCameraForSpeed();
     };
 
@@ -397,7 +395,7 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
                             });
                             Alert.alert(
                                 'Success',
-                                `Check-in successful!\nConfidence: ${(response.confidence * 100).toFixed(1)}%`
+                                `Checked in successfully!`
                             );
                         } else {
                             setAttendanceStatus({
@@ -408,7 +406,7 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
                             });
                             Alert.alert(
                                 'Success',
-                                `Check-out successful!\nConfidence: ${(response.confidence * 100).toFixed(1)}%`
+                                `Checked out successfully!`
                             );
                         }
                     } else {
@@ -572,7 +570,7 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
 
                 {/* Project Card - Prominently displayed */}
                 <View style={styles.projectCard}>
-                    <Ionicons name="folder-outline" size={28} color="#007bff" />
+                    <Ionicons name="folder-outline" size={28} color="#212c6b" />
                     <View style={styles.projectInfo}>
                         <Text style={styles.projectLabel}>Current Project</Text>
                         <Text style={styles.projectName}>{projectName}</Text>
@@ -617,7 +615,7 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
                     style={styles.locationCard}
                     onPress={() => navigation.navigate('AttendanceHistory')}
                 >
-                    <Ionicons name="time-outline" size={20} color="#007bff" />
+                    <Ionicons name="time-outline" size={20} color="#212c6b" />
                     <Text style={styles.locationText}>View Attendance History</Text>
                     <Ionicons name="chevron-forward" size={18} color="#6c757d" />
                 </TouchableOpacity>
@@ -757,7 +755,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#f8f9fa',
     },
     header: {
-        backgroundColor: '#007bff',
+        backgroundColor: '#212c6b',
         padding: 28,
         paddingTop: 55,
         borderBottomLeftRadius: 30,
@@ -804,7 +802,7 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 3,
         borderLeftWidth: 4,
-        borderLeftColor: '#007bff',
+        borderLeftColor: '#212c6b',
     },
     projectInfo: {
         flex: 1,
@@ -823,7 +821,7 @@ const styles = StyleSheet.create({
     },
     projectId: {
         fontSize: 12,
-        color: '#007bff',
+        color: '#212c6b',
     },
     faceCard: {
         margin: 20,
@@ -898,7 +896,7 @@ const styles = StyleSheet.create({
         color: '#343a40',
     },
     time: {
-        color: '#007bff',
+        color: '#212c6b',
         fontSize: 14,
         fontWeight: '500',
     },
@@ -1006,7 +1004,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     grantButton: {
-        backgroundColor: '#007bff',
+        backgroundColor: '#212c6b',
         paddingHorizontal: 30,
         paddingVertical: 12,
         borderRadius: 10,
@@ -1095,7 +1093,7 @@ const styles = StyleSheet.create({
         width: 70,
         height: 70,
         borderRadius: 35,
-        backgroundColor: '#007bff',
+        backgroundColor: '#212c6b',
     },
 });
 

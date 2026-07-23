@@ -92,7 +92,7 @@ const CollapsibleSection: React.FC<{
             >
                 <View style={styles.sectionHeaderLeft}>
                     <View style={styles.sectionIconWrap}>
-                        <Ionicons name={icon as any} size={18} color="#007bff" />
+                        <Ionicons name={icon as any} size={18} color="#212c6b" />
                     </View>
                     <Text style={styles.sectionTitle}>{title}</Text>
                 </View>
@@ -233,7 +233,7 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 </View>
 
                 {loadingProfile ? (
-                    <ActivityIndicator style={{ marginTop: 16 }} size="small" color="#007bff" />
+                    <ActivityIndicator style={{ marginTop: 16 }} size="small" color="#212c6b" />
                 ) : (
                     <>
                         <Text style={styles.userName}>
@@ -389,7 +389,7 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     <StatBox
                         value={attendanceRate != null ? `${attendanceRate}%` : '--'}
                         label="Rate"
-                        color="#007bff"
+                        color="#212c6b"
                     />
                 </View>
 
@@ -408,9 +408,9 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     style={styles.linkRow}
                     onPress={() => navigation.navigate('AttendanceHistory')}
                 >
-                    <Ionicons name="list-outline" size={16} color="#007bff" />
+                    <Ionicons name="list-outline" size={16} color="#212c6b" />
                     <Text style={styles.linkText}>View Full Attendance History</Text>
-                    <Ionicons name="chevron-forward" size={16} color="#007bff" />
+                    <Ionicons name="chevron-forward" size={16} color="#212c6b" />
                 </TouchableOpacity>
             </CollapsibleSection>
 
@@ -490,7 +490,7 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                         <Ionicons
                             name="scan-outline"
                             size={22}
-                            color={faceEnrolled ? '#28a745' : '#007bff'}
+                            color={faceEnrolled ? '#28a745' : '#212c6b'}
                         />
                     </View>
                     <View style={styles.menuContent}>
@@ -518,7 +518,7 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     onPress={() => Alert.alert('Contact Support', 'support@iet.com\n+65 1234 5678')}
                 >
                     <View style={[styles.menuIcon, { backgroundColor: '#e8f0fe' }]}>
-                        <Ionicons name="help-circle-outline" size={22} color="#007bff" />
+                        <Ionicons name="help-circle-outline" size={22} color="#212c6b" />
                     </View>
                     <View style={styles.menuContent}>
                         <Text style={styles.menuText}>Help & Support</Text>
@@ -562,7 +562,7 @@ const styles = StyleSheet.create({
 
     // Header
     header: {
-        backgroundColor: '#007bff',
+        backgroundColor: '#212c6b',
         padding: 20,
         paddingTop: 55,
         paddingBottom: 50,
@@ -586,7 +586,7 @@ const styles = StyleSheet.create({
         padding: 4,
         borderRadius: 58,
         backgroundColor: '#fff',
-        shadowColor: '#007bff',
+        shadowColor: '#212c6b',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.2,
         shadowRadius: 8,
@@ -596,14 +596,14 @@ const styles = StyleSheet.create({
         width: 96,
         height: 96,
         borderRadius: 48,
-        backgroundColor: '#007bff',
+        backgroundColor: '#212c6b',
         alignItems: 'center',
         justifyContent: 'center',
     },
     avatarLargeText: { fontSize: 44, fontWeight: 'bold', color: '#fff' },
     userName: { fontSize: 22, fontWeight: 'bold', color: '#1a1a2e', marginTop: 14 },
     userEmpId: { fontSize: 14, color: '#6c757d', marginTop: 4 },
-    userRole: { fontSize: 13, color: '#007bff', marginTop: 4, fontWeight: '600' },
+    userRole: { fontSize: 13, color: '#212c6b', marginTop: 4, fontWeight: '600' },
     badgeRow: { flexDirection: 'row', gap: 8, marginTop: 10, flexWrap: 'wrap', justifyContent: 'center' },
     badge: {
         flexDirection: 'row',
@@ -672,7 +672,7 @@ const styles = StyleSheet.create({
     sectionDivider: { height: 1, backgroundColor: '#f1f3f5', marginHorizontal: 16 },
     sectionBody: { paddingHorizontal: 16, paddingBottom: 12, paddingTop: 8 },
 
-    requestEditText: { color: '#007bff', fontSize: 12, fontWeight: '600' },
+    requestEditText: { color: '#212c6b', fontSize: 12, fontWeight: '600' },
 
     // Detail rows
     detailRow: {
@@ -721,7 +721,7 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         borderTopColor: '#f1f3f5',
     },
-    linkText: { flex: 1, color: '#007bff', fontSize: 13, fontWeight: '600' },
+    linkText: { flex: 1, color: '#212c6b', fontSize: 13, fontWeight: '600' },
 
     // Certifications
     certRow: {

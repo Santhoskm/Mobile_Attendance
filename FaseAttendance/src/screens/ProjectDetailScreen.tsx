@@ -16,6 +16,7 @@ import {
     Linking,
     Dimensions,
     Platform,
+    InteractionManager,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -29,7 +30,7 @@ import { offlineQueue } from '../services/offlineQueue';
 import NetInfo from '@react-native-community/netinfo';
 import * as Crypto from 'expo-crypto';
 import { isWithinGeofence } from '../utils/geofence';
-import { muteCameraSound, optimizeCameraForSpeed } from '../utils/cameraOptimizer';
+import { optimizeCameraForSpeed } from '../utils/cameraOptimizer';
 import * as ImageManipulator from 'expo-image-manipulator';
 
 
@@ -286,14 +287,19 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
 
     useEffect(() => {
         if (userData?.empid) {
-            if (isSupervisor) {
-                loadEmployees();
-            }
-            loadViolations();
-            loadOt();
-            loadDocuments();
-            loadAttendance();
+            // Needed right away for the Check In / Check Out button state.
             checkAttendanceStatus();
+            // Everything else can wait until the screen transition has finished,
+            // instead of competing with it for the JS thread.
+            InteractionManager.runAfterInteractions(() => {
+                if (isSupervisor) {
+                    loadEmployees();
+                }
+                loadViolations();
+                loadOt();
+                loadDocuments();
+                loadAttendance();
+            });
         }
     }, [userData]);
 
@@ -304,7 +310,6 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
         const locationStatus = await Location.requestForegroundPermissionsAsync();
         setLocationPermission(locationStatus.status === 'granted');
 
-        await muteCameraSound();
         await optimizeCameraForSpeed();
     };
 
@@ -582,10 +587,23 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
         let compressedUri: string = '';
 
         try {
+            // Give instant feedback and take the photo first -- GPS/geofence checks
+            // used to run before this and delayed the shutter with no spinner shown.
+            setIsLoading(true);
+
+            photo = await cameraRef.current.takePictureAsync({
+                quality: 0.6,
+                base64: true,
+                skipProcessing: true,
+                mute: true,
+                ...(Platform.OS === 'android' && { mute: true })
+            });
+            setShowCamera(false);
+
             currentLocation = await getCurrentLocation();
             if (!currentLocation) {
                 Alert.alert('Error', 'Unable to get location. Please try again.');
-                setShowCamera(false);
+                setIsLoading(false);
                 return;
             }
 
@@ -602,25 +620,14 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                     Alert.alert(
                         'Outside Geofence',
                         'You are outside the project location. Please move to the project site.',
-                        [{ text: 'OK', onPress: () => setShowCamera(false) }]
+                        [{ text: 'OK' }]
                     );
+                    setIsLoading(false);
                     return;
                 }
             }
 
-            setIsLoading(true);
-
-            photo = await cameraRef.current.takePictureAsync({
-                quality: 0.6,
-                base64: true,
-                skipProcessing: true,
-                mute: true,
-                ...(Platform.OS === 'android' && { mute: true })
-            });
-
             if (photo) {
-                setShowCamera(false);
-
                 const empid = userData?.empid;
                 if (!empid) {
                     Alert.alert('Error', 'Employee ID not found.');
@@ -694,7 +701,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                         setOtherProjectCheckIn(null);
                         Alert.alert(
                             'Success',
-                            `Check-in successful!\nConfidence: ${(response.confidence * 100).toFixed(1)}%`
+                            `Checked in successfully!`
                         );
                     } else {
                         setIsCheckedIn(false);
@@ -703,12 +710,12 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                         if (response.ot_status === 'Pending') {
                             Alert.alert(
                                 'Checked Out — Overtime Pending',
-                                `You checked out ${response.ot_minutes} min late. This has been sent for approval and won't count until approved.\nConfidence: ${(response.confidence * 100).toFixed(1)}%`
+                                `You checked out ${response.ot_minutes} min late. This has been sent for approval and won't count until approved.`
                             );
                         } else {
                             Alert.alert(
                                 'Success',
-                                `Check-out successful!\nConfidence: ${(response.confidence * 100).toFixed(1)}%`
+                                'Checked out successfully!'
                             );
                         }
                     }
@@ -1155,7 +1162,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
         return (
             <View style={styles.docCard}>
                 <View style={styles.docIcon}>
-                    <Ionicons name="document-text-outline" size={24} color="#007bff" />
+                    <Ionicons name="document-text-outline" size={24} color="#212c6b" />
                 </View>
                 <View style={styles.docInfo}>
                     <Text style={styles.docTitle}>{item.title}</Text>
@@ -1172,7 +1179,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                     </View>
                     {item.file_url && (
                         <TouchableOpacity onPress={() => openFile(item.file_url)} style={styles.docActionBtn}>
-                            <Ionicons name="eye-outline" size={18} color="#007bff" />
+                            <Ionicons name="eye-outline" size={18} color="#212c6b" />
                         </TouchableOpacity>
                     )}
                     {isPending && isReceived && !isSupervisor && (
@@ -1426,7 +1433,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
 
                         {/* Attendance History */}
                         {loadingAttendance ? (
-                            <ActivityIndicator size="small" color="#007bff" style={{ marginTop: 8 }} />
+                            <ActivityIndicator size="small" color="#212c6b" style={{ marginTop: 8 }} />
                         ) : attendanceRecords.length > 0 ? (
                             <View style={styles.attendanceHistory}>
                                 <Text style={styles.attendanceHistoryTitle}>Recent Activity</Text>
@@ -1454,7 +1461,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                             <Text style={styles.sectionCount}>{employees.length}</Text>
                         </View>
                         {loadingEmployees ? (
-                            <ActivityIndicator size="small" color="#007bff" />
+                            <ActivityIndicator size="small" color="#212c6b" />
                         ) : employees.length === 0 ? (
                             <Text style={styles.emptyText}>No employees assigned</Text>
                         ) : (
@@ -1480,7 +1487,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                                         style={styles.addButton}
                                         onPress={() => setShowViolationModal(true)}
                                     >
-                                        <Ionicons name="add" size={20} color="#007bff" />
+                                        <Ionicons name="add" size={20} color="#212c6b" />
                                     </TouchableOpacity>
                                 )}
                             </View>
@@ -1501,7 +1508,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                         </ScrollView>
 
                         {loadingViolations ? (
-                            <ActivityIndicator size="small" color="#007bff" />
+                            <ActivityIndicator size="small" color="#212c6b" />
                         ) : filteredViolations.length === 0 ? (
                             <Text style={styles.emptyText}>No violations found</Text>
                         ) : (
@@ -1525,7 +1532,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                         </View>
 
                         {loadingOt ? (
-                            <ActivityIndicator size="small" color="#007bff" />
+                            <ActivityIndicator size="small" color="#212c6b" />
                         ) : otRecords.length === 0 ? (
                             <Text style={styles.emptyText}>No overtime records for this project</Text>
                         ) : (
@@ -1549,7 +1556,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                                 style={styles.addButton}
                                 onPress={() => setShowSendModal(true)}
                             >
-                                <Ionicons name="send-outline" size={20} color="#007bff" />
+                                <Ionicons name="send-outline" size={20} color="#212c6b" />
                                 <Text style={styles.addButtonText}>Send</Text>
                             </TouchableOpacity>
                         </View>
@@ -1569,7 +1576,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                         </ScrollView>
 
                         {loadingDocuments ? (
-                            <ActivityIndicator size="small" color="#007bff" />
+                            <ActivityIndicator size="small" color="#212c6b" />
                         ) : filteredDocuments.length === 0 ? (
                             <Text style={styles.emptyText}>No documents found</Text>
                         ) : (
@@ -1743,7 +1750,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                             <View style={styles.formGroup}>
                                 <Text style={styles.formLabel}>File *</Text>
                                 <TouchableOpacity style={styles.filePicker} onPress={pickDocument}>
-                                    <Ionicons name="cloud-upload-outline" size={24} color="#007bff" />
+                                    <Ionicons name="cloud-upload-outline" size={24} color="#212c6b" />
                                     <Text style={styles.filePickerText}>
                                         {sendFileName ? sendFileName : 'Tap to select a file'}
                                     </Text>
@@ -1826,11 +1833,11 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                                 <Text style={styles.formLabel}>Evidence</Text>
                                 <View style={styles.evidenceRow}>
                                     <TouchableOpacity style={styles.evidenceButton} onPress={takePhoto}>
-                                        <Ionicons name="camera-outline" size={20} color="#007bff" />
+                                        <Ionicons name="camera-outline" size={20} color="#212c6b" />
                                         <Text style={styles.evidenceButtonText}>Camera</Text>
                                     </TouchableOpacity>
                                     <TouchableOpacity style={styles.evidenceButton} onPress={pickEvidence}>
-                                        <Ionicons name="image-outline" size={20} color="#007bff" />
+                                        <Ionicons name="image-outline" size={20} color="#212c6b" />
                                         <Text style={styles.evidenceButtonText}>Gallery</Text>
                                     </TouchableOpacity>
                                     {evidenceUri && (
@@ -1944,7 +1951,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#f0f4f8' },
     header: {
-        backgroundColor: '#007bff',
+        backgroundColor: '#212c6b',
         paddingTop: 55,
         paddingBottom: 20,
         paddingHorizontal: 20,
@@ -1999,7 +2006,7 @@ const styles = StyleSheet.create({
         flexShrink: 1,
         width: undefined,
         paddingHorizontal: 12,
-        backgroundColor: '#007bff',
+        backgroundColor: '#212c6b',
     },
     tabIconWrap: { position: 'relative', alignItems: 'center', justifyContent: 'center' },
     tabDot: {
@@ -2024,7 +2031,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    tabBarBadgeText: { fontSize: 10, fontWeight: '700', color: '#007bff' },
+    tabBarBadgeText: { fontSize: 10, fontWeight: '700', color: '#212c6b' },
 
     section: { marginHorizontal: 16, marginBottom: 20 },
     sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
@@ -2032,7 +2039,7 @@ const styles = StyleSheet.create({
     sectionCount: { fontSize: 14, color: '#6c757d', backgroundColor: '#e9ecef', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12 },
     sectionActions: { flexDirection: 'row', alignItems: 'center' },
     addButton: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10, backgroundColor: '#e8f0fe' },
-    addButtonText: { color: '#007bff', fontSize: 13, fontWeight: '600' },
+    addButtonText: { color: '#212c6b', fontSize: 13, fontWeight: '600' },
 
     // Attendance styles
     attendanceButtonRow: { flexDirection: 'row', gap: 12, marginBottom: 12 },
@@ -2085,7 +2092,7 @@ const styles = StyleSheet.create({
         width: 44,
         height: 44,
         borderRadius: 22,
-        backgroundColor: '#007bff',
+        backgroundColor: '#212c6b',
         alignItems: 'center',
         justifyContent: 'center',
         marginRight: 12,
@@ -2094,7 +2101,7 @@ const styles = StyleSheet.create({
     employeeInfo: { flex: 1 },
     employeeName: { fontSize: 16, fontWeight: '600', color: '#343a40' },
     employeeId: { fontSize: 12, color: '#6c757d' },
-    employeeRole: { fontSize: 12, color: '#007bff', fontWeight: '500' },
+    employeeRole: { fontSize: 12, color: '#212c6b', fontWeight: '500' },
 
     violationCard: {
         backgroundColor: '#fff',
@@ -2109,7 +2116,7 @@ const styles = StyleSheet.create({
     },
     violationHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
     violationEmpno: { fontSize: 14, fontWeight: '600', color: '#343a40' },
-    violationType: { fontSize: 13, color: '#007bff', fontWeight: '500' },
+    violationType: { fontSize: 13, color: '#212c6b', fontWeight: '500' },
     violationDesc: { fontSize: 13, color: '#6c757d', marginTop: 2 },
     violationDate: { fontSize: 11, color: '#adb5bd', marginTop: 4 },
     penaltyText: { fontSize: 12, color: '#dc3545', fontWeight: '600', marginTop: 2 },
@@ -2143,7 +2150,7 @@ const styles = StyleSheet.create({
 
     reviewButton: {
         marginTop: 8,
-        backgroundColor: '#007bff',
+        backgroundColor: '#212c6b',
         paddingVertical: 6,
         borderRadius: 8,
         alignItems: 'center',
@@ -2152,7 +2159,7 @@ const styles = StyleSheet.create({
 
     filterScroll: { flexDirection: 'row', marginBottom: 12 },
     filterChip: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 16, backgroundColor: '#e9ecef', marginRight: 8 },
-    filterChipActive: { backgroundColor: '#007bff' },
+    filterChipActive: { backgroundColor: '#212c6b' },
     filterChipText: { fontSize: 12, color: '#6c757d', fontWeight: '500' },
     filterChipTextActive: { color: '#fff' },
 
@@ -2170,7 +2177,7 @@ const styles = StyleSheet.create({
     cameraFooter: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: 30, alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' },
     cameraInstruction: { color: '#fff', fontSize: 14, marginBottom: 20, textAlign: 'center' },
     captureButton: { width: 80, height: 80, borderRadius: 40, backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center' },
-    captureInnerButton: { width: 70, height: 70, borderRadius: 35, backgroundColor: '#007bff' },
+    captureInnerButton: { width: 70, height: 70, borderRadius: 35, backgroundColor: '#212c6b' },
 
     // Modal styles
     modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
@@ -2187,15 +2194,15 @@ const styles = StyleSheet.create({
     picker: { height: 48, color: '#343a40' },
 
     filePicker: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#f8f9fa', borderWidth: 1, borderColor: '#e9ecef', borderRadius: 10, padding: 16, borderStyle: 'dashed' },
-    filePickerText: { color: '#007bff', fontSize: 14, flex: 1 },
+    filePickerText: { color: '#212c6b', fontSize: 14, flex: 1 },
 
-    submitButton: { backgroundColor: '#007bff', padding: 16, borderRadius: 12, alignItems: 'center', marginTop: 8 },
+    submitButton: { backgroundColor: '#212c6b', padding: 16, borderRadius: 12, alignItems: 'center', marginTop: 8 },
     submitButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
     // REMOVED DUPLICATE disabledButton - using the one defined above
 
     evidenceRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
     evidenceButton: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#e8f0fe', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 10 },
-    evidenceButtonText: { color: '#007bff', fontSize: 14, fontWeight: '500' },
+    evidenceButtonText: { color: '#212c6b', fontSize: 14, fontWeight: '500' },
     evidencePreview: { flexDirection: 'row', alignItems: 'center', gap: 4 },
     evidencePreviewText: { fontSize: 13, color: '#28a745' },
 
@@ -2209,7 +2216,7 @@ const styles = StyleSheet.create({
     reviewActionText: { fontSize: 14, fontWeight: '600', color: '#6c757d' },
     reviewActionTextActive: { color: '#fff' },
 
-    profileAvatar: { width: 80, height: 80, borderRadius: 40, backgroundColor: '#007bff', alignItems: 'center', justifyContent: 'center', alignSelf: 'center', marginBottom: 12 },
+    profileAvatar: { width: 80, height: 80, borderRadius: 40, backgroundColor: '#212c6b', alignItems: 'center', justifyContent: 'center', alignSelf: 'center', marginBottom: 12 },
     profileAvatarText: { fontSize: 36, fontWeight: 'bold', color: '#fff' },
     profileName: { fontSize: 22, fontWeight: 'bold', color: '#343a40', textAlign: 'center' },
     profileEmpno: { fontSize: 14, color: '#6c757d', textAlign: 'center', marginBottom: 16 },

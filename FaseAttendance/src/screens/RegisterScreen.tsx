@@ -210,7 +210,7 @@ const RegisterScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                         <Ionicons
                             name={agreeToTerms ? 'checkbox-outline' : 'square-outline'}
                             size={20}
-                            color="#007bff"
+                            color="#212c6b"
                         />
                         <Text style={styles.termsText}>
                             I agree to the <Text style={styles.termsLink}>Terms and Conditions</Text>
@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
     welcomeText: {
         fontSize: 28,
         fontWeight: 'bold',
-        color: '#007bff',
+        color: '#212c6b',
         marginBottom: 5,
     },
     subtitle: {
@@ -333,7 +333,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
     },
     termsLink: {
-        color: '#007bff',
+        color: '#212c6b',
         fontWeight: 'bold',
     },
     registerButton: {
@@ -378,7 +378,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
     },
     loginLink: {
-        color: '#007bff',
+        color: '#212c6b',
         fontSize: 14,
         fontWeight: 'bold',
     },

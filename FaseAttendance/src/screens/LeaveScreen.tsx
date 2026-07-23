@@ -196,7 +196,7 @@ const LeaveScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
                 <Text style={styles.sectionHeading}>Upcoming / Recent</Text>
                 {loading ? (
-                    <ActivityIndicator color="#007bff" style={{ marginTop: 20 }} />
+                    <ActivityIndicator color="#212c6b" style={{ marginTop: 20 }} />
                 ) : upcoming.length === 0 ? (
                     <Text style={styles.emptyText}>No leave records yet.</Text>
                 ) : (
@@ -269,7 +269,7 @@ const LeaveScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     </View>
 
                     {calendarLoading ? (
-                        <ActivityIndicator color="#007bff" style={{ marginVertical: 20 }} />
+                        <ActivityIndicator color="#212c6b" style={{ marginVertical: 20 }} />
                     ) : (
                         <View style={styles.calendarGrid}>
                             {cells.map((day, idx) => {
@@ -344,7 +344,7 @@ const LeaveScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const renderApply = () => (
         <ScrollView showsVerticalScrollIndicator={false}>
             <View style={styles.applyInfoBanner}>
-                <Ionicons name="information-circle-outline" size={16} color="#007bff" />
+                <Ionicons name="information-circle-outline" size={16} color="#212c6b" />
                 <Text style={styles.applyInfoText}>
                     One application covers all your projects: {projects.map((p) => p.projectname).join(', ') || '—'}.
                     It will be reviewed by admin.
@@ -371,7 +371,7 @@ const LeaveScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                             onPress={() => setLeaveType(type)}
                         >
                             <Text style={[styles.typeOptionText, leaveType === type && styles.typeOptionTextActive]}>{type}</Text>
-                            {leaveType === type && <Ionicons name="checkmark-circle" size={18} color="#007bff" />}
+                            {leaveType === type && <Ionicons name="checkmark-circle" size={18} color="#212c6b" />}
                         </TouchableOpacity>
                     ))}
                     <TouchableOpacity style={styles.primaryBtn} onPress={() => setStep(2)}>
@@ -404,7 +404,7 @@ const LeaveScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     />
                     <Text style={styles.formLabel}>Attachment (Optional)</Text>
                     <TouchableOpacity style={styles.attachBtn} onPress={pickAttachment}>
-                        <Ionicons name="add" size={20} color="#007bff" />
+                        <Ionicons name="add" size={20} color="#212c6b" />
                         <Text style={styles.attachBtnText}>{attachmentName || 'Add file'}</Text>
                     </TouchableOpacity>
 
@@ -483,7 +483,7 @@ const LeaveScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                             style={styles.subTab}
                             onPress={() => setActiveSubTab(tab.key)}
                         >
-                            <Ionicons name={tab.icon} size={20} color={isActive ? '#007bff' : '#adb5bd'} />
+                            <Ionicons name={tab.icon} size={20} color={isActive ? '#212c6b' : '#adb5bd'} />
                             <Text style={[styles.subTabLabel, isActive && styles.subTabLabelActive]}>{tab.label}</Text>
                         </TouchableOpacity>
                     );
@@ -496,7 +496,7 @@ const LeaveScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 const styles = StyleSheet.create({
     safe: { flex: 1, backgroundColor: '#f0f4f8' },
     header: {
-        backgroundColor: '#007bff',
+        backgroundColor: '#212c6b',
         paddingTop: 55,
         paddingBottom: 20,
         paddingHorizontal: 20,
@@ -541,7 +541,7 @@ const styles = StyleSheet.create({
     },
     typeOptionActive: { backgroundColor: '#e7f1ff' },
     typeOptionText: { fontSize: 13, color: '#495057' },
-    typeOptionTextActive: { color: '#007bff', fontWeight: '700' },
+    typeOptionTextActive: { color: '#212c6b', fontWeight: '700' },
     input: {
         backgroundColor: '#f8f9fb', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10,
         fontSize: 13, color: '#1a2b4c',
@@ -552,7 +552,7 @@ const styles = StyleSheet.create({
         borderWidth: 1, borderColor: '#dee2e6', borderStyle: 'dashed',
         borderRadius: 10, paddingVertical: 12, paddingHorizontal: 12, justifyContent: 'center',
     },
-    attachBtnText: { fontSize: 12, color: '#007bff', fontWeight: '600' },
+    attachBtnText: { fontSize: 12, color: '#212c6b', fontWeight: '600' },
     stepButtonsRow: { flexDirection: 'row', marginTop: 20 },
     primaryBtn: {
         backgroundColor: '#28a745', borderRadius: 10, paddingVertical: 13,
@@ -589,7 +589,7 @@ const styles = StyleSheet.create({
     calendarDayApproved: { backgroundColor: '#28a745' },
     calendarDayPending: { backgroundColor: '#fd9500' },
     calendarDaySelected: { backgroundColor: '#0b3d91' },
-    calendarDayToday: { borderWidth: 1.5, borderColor: '#007bff' },
+    calendarDayToday: { borderWidth: 1.5, borderColor: '#212c6b' },
     calendarDayText: { fontSize: 13, fontWeight: '600', color: '#1a2b4c' },
     calendarDayTextOnColor: { color: '#fff' },
     calendarLegendRow: { flexDirection: 'row', gap: 16, marginTop: 12, flexWrap: 'wrap' },
@@ -602,7 +602,7 @@ const styles = StyleSheet.create({
     },
     subTab: { flex: 1, alignItems: 'center', gap: 3 },
     subTabLabel: { fontSize: 10, color: '#adb5bd', fontWeight: '600' },
-    subTabLabelActive: { color: '#007bff' },
+    subTabLabelActive: { color: '#212c6b' },
     applyInfoBanner: {
         flexDirection: 'row', alignItems: 'center', gap: 8,
         backgroundColor: '#e7f3ff', borderRadius: 10, padding: 10, marginBottom: 12,

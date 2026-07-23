@@ -451,7 +451,7 @@ const ViolationsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                         selectedValue={selectedProjectId}
                         onValueChange={(value) => setSelectedProjectId(value)}
                         style={styles.projectPicker}
-                        dropdownIconColor="#007bff"
+                        dropdownIconColor="#212c6b"
                     >
                         <Picker.Item label="All Projects" value="" />
                         {projects.map((p) => (
@@ -481,14 +481,14 @@ const ViolationsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
             {/* Info Banner */}
             <View style={styles.infoBanner}>
-                <Ionicons name="information-circle-outline" size={18} color="#007bff" />
+                <Ionicons name="information-circle-outline" size={18} color="#212c6b" />
                 <Text style={styles.infoText}>
                     Violations are logged when your location doesn't match the project site or face verification fails. Your supervisor can review these.
                 </Text>
             </View>
 
             {loading ? (
-                <ActivityIndicator style={{ marginTop: 40 }} size="large" color="#007bff" />
+                <ActivityIndicator style={{ marginTop: 40 }} size="large" color="#212c6b" />
             ) : filtered.length === 0 ? (
                 <View style={styles.emptyState}>
                     <Ionicons name="shield-checkmark-outline" size={64} color="#d4edda" />
@@ -622,11 +622,11 @@ const ViolationsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                                 <Text style={styles.formLabel}>Evidence (Optional)</Text>
                                 <View style={styles.evidenceRow}>
                                     <TouchableOpacity style={styles.evidenceButton} onPress={takePhoto}>
-                                        <Ionicons name="camera-outline" size={20} color="#007bff" />
+                                        <Ionicons name="camera-outline" size={20} color="#212c6b" />
                                         <Text style={styles.evidenceButtonText}>Camera</Text>
                                     </TouchableOpacity>
                                     <TouchableOpacity style={styles.evidenceButton} onPress={pickEvidence}>
-                                        <Ionicons name="image-outline" size={20} color="#007bff" />
+                                        <Ionicons name="image-outline" size={20} color="#212c6b" />
                                         <Text style={styles.evidenceButtonText}>Gallery</Text>
                                     </TouchableOpacity>
                                     {evidenceUri && (
@@ -775,7 +775,7 @@ const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#f0f4f8' },
 
     header: {
-        backgroundColor: '#007bff',
+        backgroundColor: '#212c6b',
         paddingTop: 55,
         paddingBottom: 20,
         paddingHorizontal: 20,
@@ -839,7 +839,7 @@ const styles = StyleSheet.create({
         elevation: 2,
     },
     filterTabText: { fontSize: 12, color: '#6c757d', fontWeight: '600' },
-    filterTabTextActive: { color: '#007bff' },
+    filterTabTextActive: { color: '#212c6b' },
 
     infoBanner: {
         marginHorizontal: 16,
@@ -890,7 +890,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#007bff',
+        backgroundColor: '#212c6b',
         paddingVertical: 8,
         borderRadius: 10,
         gap: 4,
@@ -971,7 +971,7 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         borderRadius: 10,
     },
-    evidenceButtonText: { color: '#007bff', fontSize: 14, fontWeight: '500' },
+    evidenceButtonText: { color: '#212c6b', fontSize: 14, fontWeight: '500' },
     evidencePreview: { flexDirection: 'row', alignItems: 'center', gap: 4 },
     evidencePreviewText: { fontSize: 13, color: '#28a745' },
 

@@ -97,7 +97,7 @@ const BroadcastsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     <Ionicons
                         name={(DOC_ICONS[item.document_type] || 'document-outline') as any}
                         size={22}
-                        color="#007bff"
+                        color="#212c6b"
                     />
                 )}
             </View>
@@ -130,7 +130,7 @@ const BroadcastsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
             {loading && !refreshing ? (
                 <View style={styles.emptyState}>
-                    <ActivityIndicator size="large" color="#007bff" />
+                    <ActivityIndicator size="large" color="#212c6b" />
                 </View>
             ) : broadcasts.length === 0 ? (
                 <View style={styles.emptyState}>
@@ -147,7 +147,7 @@ const BroadcastsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     renderItem={renderItem}
                     contentContainerStyle={styles.list}
                     refreshControl={
-                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#007bff']} />
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#212c6b']} />
                     }
                 />
             )}
@@ -173,7 +173,7 @@ const BroadcastsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#f0f4f8' },
     header: {
-        backgroundColor: '#007bff',
+        backgroundColor: '#212c6b',
         paddingTop: 55,
         paddingBottom: 20,
         paddingHorizontal: 20,

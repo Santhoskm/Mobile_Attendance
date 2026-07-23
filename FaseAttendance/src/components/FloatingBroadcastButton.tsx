@@ -213,7 +213,7 @@ const FloatingBroadcastButton: React.FC<{ navigation: any }> = ({ navigation }) 
                     ]}
                 >
                     <TouchableOpacity style={styles.popupTouchable} onPress={openBroadcasts} activeOpacity={0.85}>
-                        <Ionicons name="megaphone" size={18} color="#007bff" />
+                        <Ionicons name="megaphone" size={18} color="#212c6b" />
                         <View style={styles.popupTextWrap}>
                             <Text style={styles.popupTitle} numberOfLines={1}>New broadcast</Text>
                             <Text style={styles.popupBody} numberOfLines={2}>{latest.title}</Text>
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
         width: FAB_SIZE,
         height: FAB_SIZE,
         borderRadius: FAB_SIZE / 2,
-        backgroundColor: '#007bff',
+        backgroundColor: '#212c6b',
         alignItems: 'center',
         justifyContent: 'center',
         shadowColor: '#000',
@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
         elevation: 5,
     },
     popupTextWrap: { flex: 1 },
-    popupTitle: { fontSize: 11, fontWeight: '700', color: '#007bff' },
+    popupTitle: { fontSize: 11, fontWeight: '700', color: '#212c6b' },
     popupBody: { fontSize: 12, color: '#343a40', marginTop: 2 },
     popupTail: {
         position: 'absolute',

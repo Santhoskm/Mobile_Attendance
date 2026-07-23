@@ -181,7 +181,7 @@ const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                             <Ionicons
                                 name={rememberMe ? 'checkbox' : 'square-outline'}
                                 size={20}
-                                color="#007bff"
+                                color="#212c6b"
                             />
                             <Text style={styles.rememberMeText}>Remember Me</Text>
                         </TouchableOpacity>
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
     },
     registerLink: {
-        color: '#007bff',
+        color: '#212c6b',
         fontSize: 14,
         fontWeight: 'bold',
     },
@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
     welcomeText: {
         fontSize: 28,
         fontWeight: 'bold',
-        color: '#007bff',
+        color: '#212c6b',
         marginBottom: 5,
     },
     subtitle: {
@@ -328,18 +328,18 @@ const styles = StyleSheet.create({
         paddingVertical: 5,
     },
     forgotPasswordText: {
-        color: '#007bff',
+        color: '#212c6b',
         fontSize: 14,
         fontWeight: '500',
     },
     loginButton: {
-        backgroundColor: '#007bff',
+        backgroundColor: '#212c6b',
         height: 55,
         borderRadius: 10,
         marginBottom: 30,
         alignItems: 'center',
         justifyContent: 'center',
-        shadowColor: '#007bff',
+        shadowColor: '#212c6b',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
         shadowRadius: 6,

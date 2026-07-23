@@ -12,10 +12,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Camera, CameraView } from 'expo-camera';
-import { Audio } from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { apiService } from '../services/api';
-import { muteCameraSound } from '../utils/cameraOptimizer';
 import * as ImageManipulator from 'expo-image-manipulator';
 
 
@@ -33,12 +31,8 @@ const FaceEnrollmentScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
     useEffect(() => {
         loadUserData();
         requestCameraPermission();
-        setupMutedCamera();
     }, []);
 
-    const setupMutedCamera = async () => {
-        await muteCameraSound();
-    };
 
     const loadUserData = async () => {
         try {
@@ -108,12 +102,6 @@ const FaceEnrollmentScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
     const takePicture = async () => {
         if (cameraRef.current && cameraReady) {
             try {
-                if (Platform.OS === 'android') {
-                    await Audio.setAudioModeAsync({
-                        shouldDuckAndroid: true,
-                        playThroughEarpieceAndroid: false,
-                    });
-                }
 
                 const photo = await cameraRef.current.takePictureAsync({
                     quality: 0.7,
@@ -279,7 +267,7 @@ const FaceEnrollmentScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
                     <View style={{ width: 40 }} />
                 </View>
                 <View style={styles.centerContent}>
-                    <ActivityIndicator size="large" color="#007bff" />
+                    <ActivityIndicator size="large" color="#212c6b" />
                     <Text style={styles.permissionText}>Requesting camera permission...</Text>
                 </View>
             </View>
@@ -347,7 +335,7 @@ const FaceEnrollmentScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
                         </View>
 
                         <View style={styles.instructions}>
-                            <Ionicons name="bulb-outline" size={20} color="#007bff" />
+                            <Ionicons name="bulb-outline" size={20} color="#212c6b" />
                             <Text style={styles.instructionText}>
                                 Make sure your face is well-lit and centered in the frame
                             </Text>
@@ -409,7 +397,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#f8f9fa',
     },
     header: {
-        backgroundColor: '#007bff',
+        backgroundColor: '#212c6b',
         padding: 20,
         paddingTop: 55,
         paddingBottom: 20,
@@ -487,7 +475,7 @@ const styles = StyleSheet.create({
     },
     instructionText: {
         flex: 1,
-        color: '#007bff',
+        color: '#212c6b',
         fontSize: 14,
     },
     captureButton: {
@@ -508,7 +496,7 @@ const styles = StyleSheet.create({
         width: 60,
         height: 60,
         borderRadius: 30,
-        backgroundColor: '#007bff',
+        backgroundColor: '#212c6b',
     },
     previewContainer: {
         height: Dimensions.get('window').height * 0.6,
@@ -572,7 +560,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     grantButton: {
-        backgroundColor: '#007bff',
+        backgroundColor: '#212c6b',
         paddingHorizontal: 30,
         paddingVertical: 12,
         borderRadius: 10,
