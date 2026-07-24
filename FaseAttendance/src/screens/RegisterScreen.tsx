@@ -134,11 +134,11 @@ const RegisterScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 <View style={styles.formContainer}>
                     {/* Employee ID Input */}
                     <View style={styles.inputContainer}>
-                        <Ionicons name="person-outline" size={24} color="#6c757d" style={styles.inputIcon} />
+                        <Ionicons name="person-outline" size={24} color="#000000" style={styles.inputIcon} />
                         <TextInput
                             style={styles.input}
                             placeholder="Employee ID"
-                            placeholderTextColor="#6c757d"
+                            placeholderTextColor="#000000"
                             value={empid}
                             onChangeText={setEmpid}
                             autoCapitalize="none"
@@ -150,11 +150,11 @@ const RegisterScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
                     {/* Username Input */}
                     <View style={styles.inputContainer}>
-                        <Ionicons name="person-add-outline" size={24} color="#6c757d" style={styles.inputIcon} />
+                        <Ionicons name="person-add-outline" size={24} color="#000000" style={styles.inputIcon} />
                         <TextInput
                             style={styles.input}
                             placeholder="Username"
-                            placeholderTextColor="#6c757d"
+                            placeholderTextColor="#000000"
                             value={username}
                             onChangeText={setUsername}
                             autoCapitalize="none"
@@ -166,11 +166,11 @@ const RegisterScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
                     {/* Password Input */}
                     <View style={styles.inputContainer}>
-                        <Ionicons name="lock-closed-outline" size={24} color="#6c757d" style={styles.inputIcon} />
+                        <Ionicons name="lock-closed-outline" size={24} color="#000000" style={styles.inputIcon} />
                         <TextInput
                             style={styles.input}
                             placeholder="Password"
-                            placeholderTextColor="#6c757d"
+                            placeholderTextColor="#000000"
                             value={password}
                             onChangeText={setPassword}
                             secureTextEntry={!showPassword}
@@ -178,17 +178,17 @@ const RegisterScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                             returnKeyType="next"
                         />
                         <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
-                            <Ionicons name={showPassword ? 'eye-outline' : 'eye-off-outline'} size={24} color="#6c757d" />
+                            <Ionicons name={showPassword ? 'eye-outline' : 'eye-off-outline'} size={24} color="#000000" />
                         </TouchableOpacity>
                     </View>
 
                     {/* Confirm Password Input */}
                     <View style={styles.inputContainer}>
-                        <Ionicons name="lock-closed-outline" size={24} color="#6c757d" style={styles.inputIcon} />
+                        <Ionicons name="lock-closed-outline" size={24} color="#000000" style={styles.inputIcon} />
                         <TextInput
                             style={styles.input}
                             placeholder="Confirm Password"
-                            placeholderTextColor="#6c757d"
+                            placeholderTextColor="#000000"
                             value={confirmPassword}
                             onChangeText={setConfirmPassword}
                             secureTextEntry={!showConfirmPassword}
@@ -197,7 +197,7 @@ const RegisterScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                             onSubmitEditing={handleRegister}
                         />
                         <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)} style={styles.eyeIcon}>
-                            <Ionicons name={showConfirmPassword ? 'eye-outline' : 'eye-off-outline'} size={24} color="#6c757d" />
+                            <Ionicons name={showConfirmPassword ? 'eye-outline' : 'eye-off-outline'} size={24} color="#000000" />
                         </TouchableOpacity>
                     </View>
 
@@ -288,7 +288,7 @@ const styles = StyleSheet.create({
     },
     subtitle: {
         fontSize: 16,
-        color: '#6c757d',
+        color: '#000000',
     },
     formContainer: {
         paddingHorizontal: 30,
@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     loginText: {
-        color: '#6c757d',
+        color: '#000000',
         fontSize: 14,
     },
     loginLink: {
@@ -390,12 +390,12 @@ const styles = StyleSheet.create({
         borderTopColor: '#e0e0e0',
     },
     footerText: {
-        color: '#6c757d',
+        color: '#000000',
         fontSize: 12,
         marginBottom: 5,
     },
     versionText: {
-        color: '#6c757d',
+        color: '#000000',
         fontSize: 12,
     },
 });

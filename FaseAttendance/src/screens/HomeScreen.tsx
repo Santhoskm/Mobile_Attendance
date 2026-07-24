@@ -420,7 +420,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                         <Text style={styles.clockTime}>{timeStr}</Text>
                         {!!placeName && (
                             <View style={styles.placeRow}>
-                                <Ionicons name="location-outline" size={13} color="#6c757d" />
+                                <Ionicons name="location-outline" size={13} color="#212529" />
                                 <Text style={styles.placeText}>{placeName}</Text>
                             </View>
                         )}
@@ -702,10 +702,10 @@ const styles = StyleSheet.create({
         shadowRadius: 8,
         elevation: 4,
     },
-    clockDate: { color: '#6c757d', fontSize: 12, fontWeight: '600', marginBottom: 4 },
+    clockDate: { color: '#212529', fontSize: 12, fontWeight: '600', marginBottom: 4 },
     clockTime: { color: '#343a40', fontSize: 24, fontWeight: 'bold' },
     placeRow: { flexDirection: 'row', alignItems: 'center', marginTop: 6, gap: 4 },
-    placeText: { color: '#6c757d', fontSize: 12 },
+    placeText: { color: '#212529', fontSize: 12 },
     clockIconWrap: {
         width: 48, height: 48, borderRadius: 24, backgroundColor: '#e8f0fe',
         alignItems: 'center', justifyContent: 'center',
@@ -772,7 +772,7 @@ const styles = StyleSheet.create({
         alignItems: 'center', justifyContent: 'center',
     },
     notifTitle: { fontSize: 13, fontWeight: '700', color: '#343a40' },
-    notifSubtitle: { fontSize: 12, color: '#6c757d', marginTop: 2 },
+    notifSubtitle: { fontSize: 12, color: '#212529', marginTop: 2 },
 
     notifDismissAction: {
         backgroundColor: '#dc3545',

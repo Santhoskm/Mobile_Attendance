@@ -441,7 +441,7 @@ const TaskScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     </View>
                 ) : projects.length === 0 ? (
                     <View style={styles.emptyContainer}>
-                        <Ionicons name="folder-open-outline" size={80} color="#6c757d" />
+                        <Ionicons name="folder-open-outline" size={80} color="#000000" />
                         <Text style={styles.emptyTitle}>No Projects Assigned</Text>
                         <Text style={styles.emptyText}>You haven't been assigned to any projects yet.</Text>
                         <TouchableOpacity
@@ -664,7 +664,7 @@ const styles = StyleSheet.create({
     },
     attendanceLabel: {
         fontSize: 11,
-        color: '#6c757d',
+        color: '#000000',
         fontWeight: '500',
     },
     attendanceValue: {
@@ -674,7 +674,7 @@ const styles = StyleSheet.create({
     },
     attendanceDate: {
         fontSize: 12,
-        color: '#6c757d',
+        color: '#000000',
         marginTop: 1,
     },
     todayBadge: {
@@ -683,7 +683,7 @@ const styles = StyleSheet.create({
     },
     attendancePlace: {
         fontSize: 11,
-        color: '#6c757d',
+        color: '#000000',
         marginTop: 1,
     },
     attendanceProject: {
@@ -719,7 +719,7 @@ const styles = StyleSheet.create({
     },
     noAttendanceText: {
         fontSize: 14,
-        color: '#6c757d',
+        color: '#000000',
         fontWeight: '500',
         marginTop: 8,
     },
@@ -746,7 +746,7 @@ const styles = StyleSheet.create({
         elevation: 3,
     },
     totalCard: {
-        backgroundColor: '#6c757d',
+        backgroundColor: '#212529',
     },
     progressCard: {
         backgroundColor: '#212c6b',
@@ -779,7 +779,7 @@ const styles = StyleSheet.create({
     },
     projectCount: {
         fontSize: 14,
-        color: '#6c757d',
+        color: '#000000',
         backgroundColor: '#e9ecef',
         paddingHorizontal: 12,
         paddingVertical: 4,
@@ -791,7 +791,7 @@ const styles = StyleSheet.create({
     },
     loadingText: {
         marginTop: 10,
-        color: '#6c757d',
+        color: '#000000',
     },
     emptyContainer: {
         alignItems: 'center',
@@ -802,11 +802,11 @@ const styles = StyleSheet.create({
     emptyTitle: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#6c757d',
+        color: '#000000',
         marginTop: 15,
     },
     emptyText: {
-        color: '#6c757d',
+        color: '#000000',
         marginTop: 8,
         marginBottom: 20,
         textAlign: 'center',
@@ -887,7 +887,7 @@ const styles = StyleSheet.create({
     },
     projectDescription: {
         fontSize: 14,
-        color: '#6c757d',
+        color: '#000000',
         marginBottom: 12,
         lineHeight: 20,
     },
@@ -944,7 +944,7 @@ const styles = StyleSheet.create({
     },
     quickActionSubtext: {
         fontSize: 11,
-        color: '#6c757d',
+        color: '#000000',
         marginTop: 4,
     },
 });

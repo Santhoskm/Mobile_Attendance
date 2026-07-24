@@ -99,7 +99,7 @@ const CollapsibleSection: React.FC<{
                 <View style={styles.sectionHeaderRight}>
                     {rightElement}
                     <Animated.View style={{ transform: [{ rotate }] }}>
-                        <Ionicons name="chevron-down" size={20} color="#6c757d" />
+                        <Ionicons name="chevron-down" size={20} color="#000000" />
                     </Animated.View>
                 </View>
             </TouchableOpacity>
@@ -602,7 +602,7 @@ const styles = StyleSheet.create({
     },
     avatarLargeText: { fontSize: 44, fontWeight: 'bold', color: '#fff' },
     userName: { fontSize: 22, fontWeight: 'bold', color: '#1a1a2e', marginTop: 14 },
-    userEmpId: { fontSize: 14, color: '#6c757d', marginTop: 4 },
+    userEmpId: { fontSize: 14, color: '#000000', marginTop: 4 },
     userRole: { fontSize: 13, color: '#212c6b', marginTop: 4, fontWeight: '600' },
     badgeRow: { flexDirection: 'row', gap: 8, marginTop: 10, flexWrap: 'wrap', justifyContent: 'center' },
     badge: {
@@ -684,7 +684,7 @@ const styles = StyleSheet.create({
         borderBottomColor: '#f8f9fa',
     },
     detailLabelWrap: { flexDirection: 'row', alignItems: 'center', flex: 1 },
-    detailLabel: { fontSize: 13, color: '#6c757d' },
+    detailLabel: { fontSize: 13, color: '#000000' },
     detailValue: { fontSize: 13, color: '#1a1a2e', fontWeight: '500', flex: 1, textAlign: 'right' },
     warningValue: { color: '#ff7a1a', fontWeight: '700' },
     errorValue: { color: '#dc3545', fontWeight: '700' },
@@ -699,7 +699,7 @@ const styles = StyleSheet.create({
         marginBottom: 6,
     },
     rateBarFill: { height: '100%', borderRadius: 4 },
-    rateBarLabel: { fontSize: 12, color: '#6c757d', textAlign: 'right' },
+    rateBarLabel: { fontSize: 12, color: '#000000', textAlign: 'right' },
     statsGrid: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -710,7 +710,7 @@ const styles = StyleSheet.create({
     },
     statBox: { alignItems: 'center', flex: 1 },
     statNumber: { fontSize: 22, fontWeight: 'bold' },
-    statLabel: { fontSize: 11, color: '#6c757d', marginTop: 3 },
+    statLabel: { fontSize: 11, color: '#000000', marginTop: 3 },
 
     linkRow: {
         flexDirection: 'row',
@@ -735,7 +735,7 @@ const styles = StyleSheet.create({
     certIconWrap: { width: 28, alignItems: 'center' },
     certInfo: { flex: 1 },
     certName: { fontSize: 13, fontWeight: '600', color: '#1a1a2e' },
-    certExpiry: { fontSize: 11, color: '#6c757d', marginTop: 2 },
+    certExpiry: { fontSize: 11, color: '#000000', marginTop: 2 },
     certBadge: {
         paddingHorizontal: 10,
         paddingVertical: 4,
@@ -765,7 +765,7 @@ const styles = StyleSheet.create({
     },
     menuContent: { flex: 1 },
     menuText: { fontSize: 14, fontWeight: '500', color: '#1a1a2e' },
-    menuSubtext: { fontSize: 12, color: '#6c757d', marginTop: 2 },
+    menuSubtext: { fontSize: 12, color: '#000000', marginTop: 2 },
 
     // Face enrollment badge
     enrollBadge: {

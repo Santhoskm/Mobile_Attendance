@@ -434,7 +434,7 @@ const DocumentsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     <Ionicons
                         name="download-outline"
                         size={16}
-                        color={activeTab === 'received' ? '#212c6b' : '#6c757d'}
+                        color={activeTab === 'received' ? '#212c6b' : '#000000'}
                     />
                     <Text style={[styles.tabText, activeTab === 'received' && styles.tabTextActive]}>
                         Received
@@ -448,7 +448,7 @@ const DocumentsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     <Ionicons
                         name="send-outline"
                         size={16}
-                        color={activeTab === 'sent' ? '#212c6b' : '#6c757d'}
+                        color={activeTab === 'sent' ? '#212c6b' : '#000000'}
                     />
                     <Text style={[styles.tabText, activeTab === 'sent' && styles.tabTextActive]}>
                         Sent
@@ -458,7 +458,7 @@ const DocumentsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
             {/* Info Strip */}
             <View style={styles.infoStrip}>
-                <Ionicons name="information-circle-outline" size={14} color="#6c757d" />
+                <Ionicons name="information-circle-outline" size={14} color="#000000" />
                 <Text style={styles.infoStripText}>
                     {activeTab === 'received'
                         ? 'Documents sent to you by HR or your supervisor'
@@ -513,7 +513,7 @@ const DocumentsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                         <View style={styles.modalHeader}>
                             <Text style={styles.modalTitle}>Send Document</Text>
                             <TouchableOpacity onPress={() => setShowSendModal(false)}>
-                                <Ionicons name="close" size={24} color="#6c757d" />
+                                <Ionicons name="close" size={24} color="#000000" />
                             </TouchableOpacity>
                         </View>
 
@@ -702,7 +702,7 @@ const styles = StyleSheet.create({
         shadowRadius: 2,
         elevation: 2,
     },
-    tabText: { fontSize: 13, color: '#6c757d', fontWeight: '600' },
+    tabText: { fontSize: 13, color: '#000000', fontWeight: '600' },
     tabTextActive: { color: '#212c6b' },
 
     infoStrip: {
@@ -712,7 +712,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 16,
         marginBottom: 10,
     },
-    infoStripText: { fontSize: 12, color: '#6c757d', flex: 1 },
+    infoStripText: { fontSize: 12, color: '#000000', flex: 1 },
 
     list: { padding: 16, paddingTop: 4 },
 
@@ -740,7 +740,7 @@ const styles = StyleSheet.create({
     },
     docInfo: { flex: 1 },
     docTitle: { fontSize: 14, fontWeight: '600', color: '#1a1a2e' },
-    docMeta: { fontSize: 11, color: '#6c757d', marginTop: 1 },
+    docMeta: { fontSize: 11, color: '#000000', marginTop: 1 },
     docDate: { fontSize: 11, color: '#adb5bd', marginTop: 2 },
     docActions: { alignItems: 'flex-end', gap: 4 },
     docStatusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
@@ -756,7 +756,7 @@ const styles = StyleSheet.create({
 
     emptyState: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 40, marginTop: 40 },
     emptyTitle: { fontSize: 18, fontWeight: 'bold', color: '#343a40', marginTop: 16 },
-    emptySubtext: { fontSize: 13, color: '#6c757d', marginTop: 8, textAlign: 'center', lineHeight: 20 },
+    emptySubtext: { fontSize: 13, color: '#000000', marginTop: 8, textAlign: 'center', lineHeight: 20 },
     emptySendBtn: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -852,7 +852,7 @@ const styles = StyleSheet.create({
         marginTop: 8,
     },
     submitButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
-    disabledButton: { backgroundColor: '#6c757d', opacity: 0.6 },
+    disabledButton: { backgroundColor: '#000000', opacity: 0.6 },
 });
 
 export default DocumentsScreen;

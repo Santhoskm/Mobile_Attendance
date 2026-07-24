@@ -231,12 +231,12 @@ const styles = StyleSheet.create({
     info: { flex: 1 },
     title: { fontSize: 14, fontWeight: '600', color: '#1a1a2e' },
     desc: { fontSize: 12, color: '#495057', marginTop: 2 },
-    meta: { fontSize: 11, color: '#6c757d', marginTop: 4 },
+    meta: { fontSize: 11, color: '#000000', marginTop: 4 },
     date: { fontSize: 11, color: '#adb5bd', marginTop: 2 },
 
     emptyState: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 40 },
     emptyTitle: { fontSize: 18, fontWeight: 'bold', color: '#343a40', marginTop: 16 },
-    emptySubtext: { fontSize: 13, color: '#6c757d', marginTop: 8, textAlign: 'center', lineHeight: 20 },
+    emptySubtext: { fontSize: 13, color: '#000000', marginTop: 8, textAlign: 'center', lineHeight: 20 },
 });
 
 export default BroadcastsScreen;

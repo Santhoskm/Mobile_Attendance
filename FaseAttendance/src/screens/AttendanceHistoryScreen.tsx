@@ -140,7 +140,7 @@ const AttendanceHistoryScreen: React.FC<{ navigation: any }> = ({ navigation }) 
 
                     {isComplete && (
                         <View style={styles.recordRow}>
-                            <Ionicons name="time-outline" size={14} color="#6c757d" />
+                            <Ionicons name="time-outline" size={14} color="#000000" />
                             <Text style={[styles.recordTime, { fontWeight: '600', color: '#343a40' }]}>
                                 {workingHours}
                             </Text>
@@ -337,7 +337,7 @@ const styles = StyleSheet.create({
     recordInfo: { flex: 1 },
     recordProject: { fontSize: 16, fontWeight: 'bold', color: '#343a40', marginBottom: 6 },
     recordRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 3 },
-    recordTime: { fontSize: 13, color: '#6c757d', flex: 1 },
+    recordTime: { fontSize: 13, color: '#000000', flex: 1 },
     pendingBadge: {
         marginTop: 8,
         backgroundColor: '#fff4e6',

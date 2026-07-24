@@ -197,7 +197,7 @@ const ViolationsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             case 'Pending': return '#ff7a1a';
             case 'Reviewed': return '#28a745';
             case 'Rejected': return '#dc3545';
-            default: return '#6c757d';
+            default: return '#000000';
         }
     };
 
@@ -216,7 +216,7 @@ const ViolationsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             case 'High': return '#ff7a1a';
             case 'Medium': return '#ffc107';
             case 'Low': return '#28a745';
-            default: return '#6c757d';
+            default: return '#000000';
         }
     };
 
@@ -393,7 +393,7 @@ const ViolationsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     </View>
                     {item.location && (
                         <View style={styles.metaRow}>
-                            <Ionicons name="location-outline" size={12} color="#6c757d" />
+                            <Ionicons name="location-outline" size={12} color="#000000" />
                             <Text style={styles.metaText}>{item.location}</Text>
                         </View>
                     )}
@@ -530,7 +530,7 @@ const ViolationsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                         <View style={styles.modalHeader}>
                             <Text style={styles.modalTitle}>Report Violation</Text>
                             <TouchableOpacity onPress={() => setShowSubmitModal(false)}>
-                                <Ionicons name="close" size={24} color="#6c757d" />
+                                <Ionicons name="close" size={24} color="#000000" />
                             </TouchableOpacity>
                         </View>
 
@@ -666,7 +666,7 @@ const ViolationsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                         <View style={styles.modalHeader}>
                             <Text style={styles.modalTitle}>Review Violation</Text>
                             <TouchableOpacity onPress={() => setShowReviewModal(false)}>
-                                <Ionicons name="close" size={24} color="#6c757d" />
+                                <Ionicons name="close" size={24} color="#000000" />
                             </TouchableOpacity>
                         </View>
 
@@ -838,7 +838,7 @@ const styles = StyleSheet.create({
         shadowRadius: 2,
         elevation: 2,
     },
-    filterTabText: { fontSize: 12, color: '#6c757d', fontWeight: '600' },
+    filterTabText: { fontSize: 12, color: '#000000', fontWeight: '600' },
     filterTabTextActive: { color: '#212c6b' },
 
     infoBanner: {
@@ -879,9 +879,9 @@ const styles = StyleSheet.create({
     statusText: { fontSize: 11, fontWeight: '700' },
     cardBody: { gap: 4 },
     violationType: { fontSize: 14, fontWeight: '600', color: '#1a1a2e' },
-    description: { fontSize: 13, color: '#6c757d', lineHeight: 18 },
+    description: { fontSize: 13, color: '#000000', lineHeight: 18 },
     metaRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-    metaText: { fontSize: 12, color: '#6c757d' },
+    metaText: { fontSize: 12, color: '#000000' },
     penaltyText: { color: '#dc3545', fontWeight: '600' },
     timestamp: { fontSize: 11, color: '#adb5bd', marginTop: 4 },
 
@@ -903,12 +903,12 @@ const styles = StyleSheet.create({
         borderTopColor: '#f1f3f5',
         gap: 2,
     },
-    reviewRemarksLabel: { fontSize: 11, color: '#6c757d', fontWeight: '600' },
+    reviewRemarksLabel: { fontSize: 11, color: '#000000', fontWeight: '600' },
     reviewRemarksText: { fontSize: 12, color: '#343a40' },
 
     emptyState: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 40 },
     emptyTitle: { fontSize: 18, fontWeight: 'bold', color: '#343a40', marginTop: 16 },
-    emptySubtext: { fontSize: 13, color: '#6c757d', marginTop: 8, textAlign: 'center' },
+    emptySubtext: { fontSize: 13, color: '#000000', marginTop: 8, textAlign: 'center' },
 
     // Modal styles
     modalOverlay: {
@@ -983,7 +983,7 @@ const styles = StyleSheet.create({
         marginTop: 8,
     },
     submitButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
-    disabledButton: { backgroundColor: '#6c757d', opacity: 0.6 },
+    disabledButton: { backgroundColor: '#000000', opacity: 0.6 },
 
     // Review modal specific
     reviewInfoCard: {
@@ -993,7 +993,7 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         gap: 4,
     },
-    reviewInfoLabel: { fontSize: 11, color: '#6c757d', fontWeight: '600', marginTop: 4 },
+    reviewInfoLabel: { fontSize: 11, color: '#000000', fontWeight: '600', marginTop: 4 },
     reviewInfoValue: { fontSize: 14, color: '#343a40' },
     reviewActionRow: { flexDirection: 'row', gap: 12 },
     reviewActionButton: {
@@ -1010,7 +1010,7 @@ const styles = StyleSheet.create({
     },
     reviewActionApprove: { backgroundColor: '#28a745', borderColor: '#28a745' },
     reviewActionReject: { backgroundColor: '#dc3545', borderColor: '#dc3545' },
-    reviewActionText: { fontSize: 14, fontWeight: '600', color: '#6c757d' },
+    reviewActionText: { fontSize: 14, fontWeight: '600', color: '#000000' },
     reviewActionTextActive: { color: '#fff' },
 });
 

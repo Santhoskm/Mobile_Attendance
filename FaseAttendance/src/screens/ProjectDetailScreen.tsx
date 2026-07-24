@@ -821,7 +821,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
             case 'Reviewed':
             case 'Approved': return '#28a745';
             case 'Rejected': return '#dc3545';
-            default: return '#6c757d';
+            default: return '#000000';
         }
     };
 
@@ -1093,7 +1093,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                 <Text style={styles.employeeRole}>{item.role}</Text>
                 {item.shift_name && <Text style={styles.shiftTag}>{item.shift_name}</Text>}
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#6c757d" />
+            <Ionicons name="chevron-forward" size={20} color="#000000" />
         </TouchableOpacity>
     );
 
@@ -1263,7 +1263,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                                 <Ionicons
                                     name={isActive ? tab.activeIcon : tab.icon}
                                     size={isActive ? 18 : 20}
-                                    color={isActive ? '#fff' : '#6c757d'}
+                                    color={isActive ? '#fff' : '#000000'}
                                 />
                                 {!isActive && tab.count > 0 && <View style={styles.tabDot} />}
                             </View>
@@ -1306,7 +1306,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                                     </View>
                                 ) : (
                                     <View style={styles.checkedOutBadge}>
-                                        <Ionicons name="time-outline" size={14} color="#6c757d" />
+                                        <Ionicons name="time-outline" size={14} color="#000000" />
                                         <Text style={styles.checkedOutText}>Checked Out</Text>
                                     </View>
                                 )}
@@ -1662,7 +1662,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                         <View style={styles.modalHeader}>
                             <Text style={styles.modalTitle}>Employee Profile</Text>
                             <TouchableOpacity onPress={() => setShowEmployeeProfile(false)}>
-                                <Ionicons name="close" size={24} color="#6c757d" />
+                                <Ionicons name="close" size={24} color="#000000" />
                             </TouchableOpacity>
                         </View>
                         {selectedEmployee && (
@@ -1699,7 +1699,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                         <View style={styles.modalHeader}>
                             <Text style={styles.modalTitle}>Send Document</Text>
                             <TouchableOpacity onPress={() => setShowSendModal(false)}>
-                                <Ionicons name="close" size={24} color="#6c757d" />
+                                <Ionicons name="close" size={24} color="#000000" />
                             </TouchableOpacity>
                         </View>
                         <ScrollView style={styles.modalBody}>
@@ -1782,7 +1782,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                         <View style={styles.modalHeader}>
                             <Text style={styles.modalTitle}>Report Violation</Text>
                             <TouchableOpacity onPress={() => setShowViolationModal(false)}>
-                                <Ionicons name="close" size={24} color="#6c757d" />
+                                <Ionicons name="close" size={24} color="#000000" />
                             </TouchableOpacity>
                         </View>
                         <ScrollView style={styles.modalBody}>
@@ -1874,7 +1874,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                         <View style={styles.modalHeader}>
                             <Text style={styles.modalTitle}>Review Violation</Text>
                             <TouchableOpacity onPress={() => setShowReviewModal(false)}>
-                                <Ionicons name="close" size={24} color="#6c757d" />
+                                <Ionicons name="close" size={24} color="#000000" />
                             </TouchableOpacity>
                         </View>
                         <ScrollView style={styles.modalBody}>
@@ -2023,7 +2023,7 @@ const styles = StyleSheet.create({
         borderWidth: 1.5,
         borderColor: '#fff',
     },
-    tabBarLabel: { fontSize: 12, fontWeight: '600', color: '#6c757d' },
+    tabBarLabel: { fontSize: 12, fontWeight: '600', color: '#000000' },
     tabBarLabelActive: { fontSize: 12, fontWeight: '600', color: '#fff', flexShrink: 1 },
     tabBarBadge: {
         backgroundColor: 'rgba(255,255,255,0.9)',
@@ -2039,7 +2039,7 @@ const styles = StyleSheet.create({
     section: { marginHorizontal: 16, marginBottom: 20 },
     sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
     sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#343a40' },
-    sectionCount: { fontSize: 14, color: '#6c757d', backgroundColor: '#e9ecef', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12 },
+    sectionCount: { fontSize: 14, color: '#000000', backgroundColor: '#e9ecef', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12 },
     sectionActions: { flexDirection: 'row', alignItems: 'center' },
     addButton: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10, backgroundColor: '#e8f0fe' },
     addButtonText: { color: '#212c6b', fontSize: 13, fontWeight: '600' },
@@ -2057,7 +2057,7 @@ const styles = StyleSheet.create({
     checkedInBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#d4edda', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
     checkedInText: { fontSize: 12, color: '#28a745', fontWeight: '600' },
     checkedOutBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#e9ecef', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
-    checkedOutText: { fontSize: 12, color: '#6c757d', fontWeight: '600' },
+    checkedOutText: { fontSize: 12, color: '#000000', fontWeight: '600' },
     otherProjectBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#fff4e6', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
     otherProjectText: { fontSize: 12, color: '#ff7a1a', fontWeight: '600' },
     pendingBadge: { flexDirection: 'row', alignItems: 'center', gap: 2, backgroundColor: '#fff4e6', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 },
@@ -2067,13 +2067,13 @@ const styles = StyleSheet.create({
     warningInfoText: { fontSize: 14, color: '#ff7a1a', fontWeight: '500', flex: 1 },
 
     attendanceHistory: { marginTop: 8 },
-    attendanceHistoryTitle: { fontSize: 14, fontWeight: '600', color: '#6c757d', marginBottom: 8 },
+    attendanceHistoryTitle: { fontSize: 14, fontWeight: '600', color: '#000000', marginBottom: 8 },
     attendanceRecordCard: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#fff', padding: 12, borderRadius: 10, marginBottom: 6, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2, elevation: 1 },
     attendanceRecordLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
     attendanceRecordDate: { fontSize: 13, fontWeight: '600', color: '#343a40', minWidth: 80 },
     attendanceRecordTimes: { gap: 2 },
     attendanceTimeRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-    attendanceTimeText: { fontSize: 12, color: '#6c757d' },
+    attendanceTimeText: { fontSize: 12, color: '#000000' },
     attendanceRecordRight: { alignItems: 'flex-end' },
     attendanceStatusBadge: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 10 },
     attendanceStatusText: { fontSize: 11, fontWeight: '600' },
@@ -2103,7 +2103,7 @@ const styles = StyleSheet.create({
     employeeAvatarText: { fontSize: 20, fontWeight: 'bold', color: '#fff' },
     employeeInfo: { flex: 1 },
     employeeName: { fontSize: 16, fontWeight: '600', color: '#343a40' },
-    employeeId: { fontSize: 12, color: '#6c757d' },
+    employeeId: { fontSize: 12, color: '#000000' },
     employeeRole: { fontSize: 12, color: '#212c6b', fontWeight: '500' },
 
     violationCard: {
@@ -2120,7 +2120,7 @@ const styles = StyleSheet.create({
     violationHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
     violationEmpno: { fontSize: 14, fontWeight: '600', color: '#343a40' },
     violationType: { fontSize: 13, color: '#212c6b', fontWeight: '500' },
-    violationDesc: { fontSize: 13, color: '#6c757d', marginTop: 2 },
+    violationDesc: { fontSize: 13, color: '#000000', marginTop: 2 },
     violationDate: { fontSize: 11, color: '#adb5bd', marginTop: 4 },
     penaltyText: { fontSize: 12, color: '#dc3545', fontWeight: '600', marginTop: 2 },
 
@@ -2140,7 +2140,7 @@ const styles = StyleSheet.create({
     docIcon: { width: 40, height: 40, borderRadius: 10, backgroundColor: '#e8f0fe', alignItems: 'center', justifyContent: 'center', marginRight: 12 },
     docInfo: { flex: 1 },
     docTitle: { fontSize: 14, fontWeight: '500', color: '#343a40' },
-    docMeta: { fontSize: 12, color: '#6c757d' },
+    docMeta: { fontSize: 12, color: '#000000' },
     docDate: { fontSize: 11, color: '#adb5bd' },
     docActions: { alignItems: 'flex-end', gap: 4 },
     docStatusBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
@@ -2163,10 +2163,10 @@ const styles = StyleSheet.create({
     filterScroll: { flexDirection: 'row', marginBottom: 12 },
     filterChip: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 16, backgroundColor: '#e9ecef', marginRight: 8 },
     filterChipActive: { backgroundColor: '#212c6b' },
-    filterChipText: { fontSize: 12, color: '#6c757d', fontWeight: '500' },
+    filterChipText: { fontSize: 12, color: '#000000', fontWeight: '500' },
     filterChipTextActive: { color: '#fff' },
 
-    emptyText: { textAlign: 'center', color: '#6c757d', padding: 20 },
+    emptyText: { textAlign: 'center', color: '#000000', padding: 20 },
 
     // Camera styles
     cameraContainer: { flex: 1, backgroundColor: '#000' },
@@ -2210,21 +2210,21 @@ const styles = StyleSheet.create({
     evidencePreviewText: { fontSize: 13, color: '#28a745' },
 
     reviewInfoCard: { backgroundColor: '#f8f9fa', borderRadius: 12, padding: 16, marginBottom: 16, gap: 4 },
-    reviewInfoLabel: { fontSize: 11, color: '#6c757d', fontWeight: '600', marginTop: 4 },
+    reviewInfoLabel: { fontSize: 11, color: '#000000', fontWeight: '600', marginTop: 4 },
     reviewInfoValue: { fontSize: 14, color: '#343a40' },
     reviewActionRow: { flexDirection: 'row', gap: 12 },
     reviewActionButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, padding: 12, borderRadius: 10, borderWidth: 2, borderColor: '#e9ecef', backgroundColor: '#fff' },
     reviewActionApprove: { backgroundColor: '#28a745', borderColor: '#28a745' },
     reviewActionReject: { backgroundColor: '#dc3545', borderColor: '#dc3545' },
-    reviewActionText: { fontSize: 14, fontWeight: '600', color: '#6c757d' },
+    reviewActionText: { fontSize: 14, fontWeight: '600', color: '#000000' },
     reviewActionTextActive: { color: '#fff' },
 
     profileAvatar: { width: 80, height: 80, borderRadius: 40, backgroundColor: '#212c6b', alignItems: 'center', justifyContent: 'center', alignSelf: 'center', marginBottom: 12 },
     profileAvatarText: { fontSize: 36, fontWeight: 'bold', color: '#fff' },
     profileName: { fontSize: 22, fontWeight: 'bold', color: '#343a40', textAlign: 'center' },
-    profileEmpno: { fontSize: 14, color: '#6c757d', textAlign: 'center', marginBottom: 16 },
+    profileEmpno: { fontSize: 14, color: '#000000', textAlign: 'center', marginBottom: 16 },
     profileRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#f1f3f5' },
-    profileLabel: { fontSize: 14, color: '#6c757d' },
+    profileLabel: { fontSize: 14, color: '#000000' },
     profileValue: { fontSize: 14, color: '#343a40', fontWeight: '500' },
 
     // Shift Picker Modal Styles
