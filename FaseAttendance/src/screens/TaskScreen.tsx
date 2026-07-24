@@ -9,6 +9,7 @@ import {
     Alert,
     ActivityIndicator,
     RefreshControl,
+    InteractionManager,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -72,7 +73,9 @@ const TaskScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
     useEffect(() => {
         loadUserData();
-        requestLocationPermission();
+        InteractionManager.runAfterInteractions(() => {
+            requestLocationPermission();
+        });
     }, []);
 
     useEffect(() => {

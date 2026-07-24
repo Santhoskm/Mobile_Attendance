@@ -278,7 +278,10 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
 
     useEffect(() => {
         loadUserData();
-        requestPermissions();
+
+        InteractionManager.runAfterInteractions(() => {
+            requestPermissions();
+        });
         if (isSupervisor) {
             loadViolationTypes();
         }

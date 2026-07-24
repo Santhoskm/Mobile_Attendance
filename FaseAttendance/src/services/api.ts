@@ -196,6 +196,7 @@ export const apiService = {
             // even if the server call fails, still clear local storage
         } finally {
             await this.clearAuthData();
+            await AsyncStorage.multiRemove(['@fase_last_broadcast_id', '@fase_last_chat_admin_id']);
         }
     },
 
@@ -829,6 +830,19 @@ export const apiService = {
         } catch (error) {
             console.log('Get chat messages error:', error);
             return { messages: [] };
+        }
+    },
+
+    async getChatUnreadCount(): Promise<any> {
+        try {
+            const response = await api.get('/api/chat/unread-count/', {
+                timeout: 10000,
+                cancelToken: cancelTokenSource.token,
+            });
+            return response.data;
+        } catch (error) {
+            console.log('Get chat unread count error:', error);
+            return { unread_count: 0 };
         }
     },
 

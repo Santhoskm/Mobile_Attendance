@@ -1,9 +1,10 @@
 
 // HomeScreen.tsx - Grid dashboard landing screen
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
     View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, Alert,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { Swipeable } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -119,6 +120,9 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const [recentAttendance, setRecentAttendance] = useState<RecentAttendanceItem[]>([]);
     const [attendanceHistoryLoading, setAttendanceHistoryLoading] = useState(true);
 
+    const [chatUnread, setChatUnread] = useState(0);
+    const [broadcastUnread, setBroadcastUnread] = useState(0);
+
     useEffect(() => {
         loadUserData();
         resolveLocationLabel();
@@ -130,6 +134,17 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             if (undoTimeoutRef.current) clearTimeout(undoTimeoutRef.current);
         };
     }, []);
+
+    useFocusEffect(
+        useCallback(() => {
+            apiService.getChatUnreadCount().then((res) => {
+                setChatUnread(res?.unread_count ?? 0);
+            });
+            apiService.getBroadcasts().then((res) => {
+                setBroadcastUnread(res?.unread_count ?? 0);
+            });
+        }, [])
+    );
 
     const loadDismissedNotifIds = async () => {
         try {
@@ -466,6 +481,21 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                                             size={26}
                                             color={isDisabled ? '#adb5bd' : tile.color}
                                         />
+
+                                        {tile.key === 'supportChat' && chatUnread > 0 && (
+                                            <View style={styles.tileBadge}>
+                                                <Text style={styles.tileBadgeText}>
+                                                    {chatUnread > 9 ? '9+' : chatUnread}
+                                                </Text>
+                                            </View>
+                                        )}
+                                        {tile.key === 'broadcasts' && broadcastUnread > 0 && (
+                                            <View style={styles.tileBadge}>
+                                                <Text style={styles.tileBadgeText}>
+                                                    {broadcastUnread > 9 ? '9+' : broadcastUnread}
+                                                </Text>
+                                            </View>
+                                        )}
                                     </View>
                                     <Text style={[styles.tileLabel, isDisabled && styles.tileLabelDisabled]}>
                                         {isFaceTile && faceEnrolled ? 'Enrolled' : tile.label}
@@ -709,7 +739,16 @@ const styles = StyleSheet.create({
     tileIconWrap: {
         width: 48, height: 48, borderRadius: 24,
         alignItems: 'center', justifyContent: 'center', marginBottom: 8,
+        position: 'relative',
     },
+    tileBadge: {
+        position: 'absolute', top: -4, right: -4,
+        backgroundColor: '#dc3545', borderRadius: 9,
+        minWidth: 18, height: 18, paddingHorizontal: 4,
+        alignItems: 'center', justifyContent: 'center',
+        borderWidth: 1.5, borderColor: '#fff',
+    },
+    tileBadgeText: { color: '#fff', fontSize: 10, fontWeight: '700' },
     tileLabel: { fontSize: 11, fontWeight: '600', color: '#343a40', textAlign: 'center' },
     tileDisabled: { opacity: 0.6 },
     tileLabelDisabled: { color: '#adb5bd' },
