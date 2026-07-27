@@ -3,6 +3,16 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const BASE_URL = 'http://143.198.220.10';
 
+function isTokenExpiringSoon(token: string, bufferSeconds = 10): boolean {
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const expiresAt = payload.exp * 1000; // exp is in seconds
+        return Date.now() >= expiresAt - bufferSeconds * 1000;
+    } catch {
+        return true; // if we can't read it, treat it as expiring so we refresh
+    }
+}
+
 export interface LoginCredentials {
     empid: string;
     password: string;
@@ -120,6 +130,8 @@ export interface LeaveRecord {
     submitted_at: string;
 }
 
+
+
 const api = axios.create({
     baseURL: BASE_URL,
     timeout: 15000,
@@ -133,7 +145,26 @@ let cancelTokenSource = axios.CancelToken.source();
 
 // Request interceptor
 api.interceptors.request.use(
-    (config) => {
+    async (config) => {
+        const skipUrls = ['/api/login/', '/api/register/', '/api/token/refresh/'];
+        const isAuthEndpoint = skipUrls.some((u) => config.url?.includes(u));
+
+        if (!isAuthEndpoint) {
+            let token = await AsyncStorage.getItem('authToken');
+
+            if (token && isTokenExpiringSoon(token)) {
+                const refreshed = await apiService.refreshAuthToken();
+                if (refreshed) {
+                    token = await AsyncStorage.getItem('authToken');
+                }
+            }
+
+            if (token) {
+                config.headers = config.headers ?? {};
+                config.headers['Authorization'] = `Bearer ${token}`;
+            }
+        }
+
         console.log(`Making ${config.method?.toUpperCase()} request to: ${config.baseURL}${config.url}`);
         console.log('Request data:', config.data);
         return config;
@@ -724,7 +755,7 @@ export const apiService = {
             const refreshToken = await AsyncStorage.getItem('refreshToken');
             if (!refreshToken) return false;
 
-            const response = await api.post('/token/refresh/', { refresh: refreshToken });
+            const response = await api.post('/api/token/refresh/', { refresh: refreshToken });
             const newAccess = response.data.access;
 
             this.setAuthToken(newAccess);

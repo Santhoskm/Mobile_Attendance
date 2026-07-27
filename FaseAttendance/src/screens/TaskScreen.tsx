@@ -87,16 +87,41 @@ const TaskScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
     const requestLocationPermission = async () => {
         try {
+            // 1. Check if device system Location (GPS) is ON
+            const isServicesEnabled = await Location.hasServicesEnabledAsync();
+            if (!isServicesEnabled) {
+                console.log('Location services are turned off on the device.');
+                setLocationPermission(false);
+                return;
+            }
+
+            // 2. Request Foreground Permission
             const { status } = await Location.requestForegroundPermissionsAsync();
             setLocationPermission(status === 'granted');
+
             if (status === 'granted') {
-                const location = await Location.getCurrentPositionAsync({
-                    accuracy: Location.Accuracy.High,
-                });
-                setCurrentLocation({
-                    latitude: location.coords.latitude,
-                    longitude: location.coords.longitude,
-                });
+                let location = null;
+
+                try {
+                    // 3. Try getting location using Balanced accuracy
+                    location = await Location.getCurrentPositionAsync({
+                        accuracy: Location.Accuracy.Balanced,
+                    });
+                } catch (currentPosError) {
+                    console.warn('Real-time location lookup failed, attempting last known location:', currentPosError);
+
+                    // 4. Fallback to cached/last known position
+                    location = await Location.getLastKnownPositionAsync();
+                }
+
+                if (location) {
+                    setCurrentLocation({
+                        latitude: location.coords.latitude,
+                        longitude: location.coords.longitude,
+                    });
+                } else {
+                    console.log('Unable to retrieve current or cached location.');
+                }
             }
         } catch (error) {
             console.log('Location permission error:', error);

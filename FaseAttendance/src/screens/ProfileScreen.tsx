@@ -15,6 +15,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { apiService } from '../services/api';
+import { Linking } from 'react-native';
 
 interface ProfileData {
     full_name?: string;
@@ -244,7 +245,7 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                             <Text style={styles.userRole}>{profile.designation}</Text>
                         )}
                         <View style={styles.badgeRow}>
-                            {profile?.worker_type && (
+                            {profile?.worker_type && profile.worker_type.trim().length > 0 && (
                                 <View style={styles.badge}>
                                     <Text style={styles.badgeText}>{profile.worker_type}</Text>
                                 </View>
@@ -527,7 +528,10 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     <Ionicons name="chevron-forward" size={18} color="#adb5bd" />
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.menuItem}>
+                <TouchableOpacity
+                    style={styles.menuItem}
+                    onPress={() => Linking.openURL('https://yourdomain.com/terms')}
+                >
                     <View style={[styles.menuIcon, { backgroundColor: '#f3f0ff' }]}>
                         <Ionicons name="document-text-outline" size={22} color="#6f42c1" />
                     </View>
@@ -537,7 +541,10 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     <Ionicons name="chevron-forward" size={18} color="#adb5bd" />
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.menuItem}>
+                <TouchableOpacity
+                    style={styles.menuItem}
+                    onPress={() => Linking.openURL('https://yourdomain.com/privacy-policy')}
+                >
                     <View style={[styles.menuIcon, { backgroundColor: '#e8f8ee' }]}>
                         <Ionicons name="shield-checkmark-outline" size={22} color="#28a745" />
                     </View>
