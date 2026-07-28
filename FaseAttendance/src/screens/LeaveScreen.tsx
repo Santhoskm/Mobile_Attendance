@@ -9,7 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as DocumentPicker from 'expo-document-picker';
 import { apiService, LeaveRecord } from '../services/api';
 
-type SubTab = 'summary' | 'calendar' | 'apply' | 'history';
+type SubTab = 'summary' | 'apply' | 'history';
 
 const WEEKDAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 const MONTH_LABELS = [
@@ -169,6 +169,8 @@ const LeaveScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         </View>
     );
 
+
+
     const renderSummary = () => {
         const pending = myLeaves.filter((l) => l.status === 'Pending').length;
         const approved = myLeaves.filter((l) => l.status === 'Approved').length;
@@ -177,44 +179,6 @@ const LeaveScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             .filter((l) => l.status !== 'Rejected')
             .sort((a, b) => a.from_date.localeCompare(b.from_date));
 
-        return (
-            <ScrollView showsVerticalScrollIndicator={false}>
-                <View style={styles.statsRow}>
-                    <View style={styles.statCard}>
-                        <Text style={styles.statNumber}>{pending}</Text>
-                        <Text style={styles.statLabel}>Pending</Text>
-                    </View>
-                    <View style={styles.statCard}>
-                        <Text style={[styles.statNumber, { color: '#28a745' }]}>{approved}</Text>
-                        <Text style={styles.statLabel}>Approved</Text>
-                    </View>
-                    <View style={styles.statCard}>
-                        <Text style={[styles.statNumber, { color: '#dc3545' }]}>{rejected}</Text>
-                        <Text style={styles.statLabel}>Rejected</Text>
-                    </View>
-                </View>
-
-                <Text style={styles.sectionHeading}>Upcoming / Recent</Text>
-                {loading ? (
-                    <ActivityIndicator color="#212c6b" style={{ marginTop: 20 }} />
-                ) : upcoming.length === 0 ? (
-                    <Text style={styles.emptyText}>No leave records yet.</Text>
-                ) : (
-                    upcoming.map((l) => (
-                        <View key={l.id} style={styles.leaveRow}>
-                            <View style={{ flex: 1 }}>
-                                <Text style={styles.leaveType}>{l.leave_type}</Text>
-                                <Text style={styles.leaveDates}>{l.from_date} → {l.to_date} · {l.days} day(s)</Text>
-                            </View>
-                            {renderStatusBadge(l.status)}
-                        </View>
-                    ))
-                )}
-            </ScrollView>
-        );
-    };
-
-    const renderCalendar = () => {
         const year = calendarMonth.getFullYear();
         const month = calendarMonth.getMonth();
         const firstWeekday = new Date(year, month, 1).getDay();
@@ -239,6 +203,22 @@ const LeaveScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
         return (
             <ScrollView showsVerticalScrollIndicator={false}>
+                <View style={styles.statsRow}>
+                    <View style={styles.statCard}>
+                        <Text style={styles.statNumber}>{pending}</Text>
+                        <Text style={styles.statLabel}>Pending</Text>
+                    </View>
+                    <View style={styles.statCard}>
+                        <Text style={[styles.statNumber, { color: '#28a745' }]}>{approved}</Text>
+                        <Text style={styles.statLabel}>Approved</Text>
+                    </View>
+                    <View style={styles.statCard}>
+                        <Text style={[styles.statNumber, { color: '#dc3545' }]}>{rejected}</Text>
+                        <Text style={styles.statLabel}>Rejected</Text>
+                    </View>
+                </View>
+
+                {/* Calendar - merged directly into Summary */}
                 <View style={styles.calendarCard}>
                     <View style={styles.calendarNavRow}>
                         <TouchableOpacity
@@ -282,7 +262,7 @@ const LeaveScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                                     <TouchableOpacity
                                         key={idx}
                                         style={styles.calendarCell}
-                                        onPress={() => setSelectedDay(dateStr)}
+                                        onPress={() => setSelectedDay(isSelected ? null : dateStr)}
                                         activeOpacity={0.7}
                                     >
                                         <View
@@ -322,21 +302,43 @@ const LeaveScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     </View>
                 </View>
 
-                <Text style={styles.sectionHeading}>
-                    {selectedDay ? `Leaves on ${selectedDay}` : 'Tap a day to see details'}
-                </Text>
-                {selectedDay && selectedDayLeaves.length === 0 && (
-                    <Text style={styles.emptyText}>No leave on this day — attendance is normal.</Text>
+                {selectedDay ? (
+                    <>
+                        <Text style={styles.sectionHeading}>Leaves on {selectedDay}</Text>
+                        {selectedDayLeaves.length === 0 ? (
+                            <Text style={styles.emptyText}>No leave on this day — attendance is normal.</Text>
+                        ) : (
+                            selectedDayLeaves.map((l) => (
+                                <View key={l.id} style={styles.leaveRow}>
+                                    <View style={{ flex: 1 }}>
+                                        <Text style={styles.leaveType}>{l.employee_name} · {l.leave_type}</Text>
+                                        <Text style={styles.leaveDates}>{l.from_date} → {l.to_date} · {l.days} day(s)</Text>
+                                    </View>
+                                    {renderStatusBadge(l.status)}
+                                </View>
+                            ))
+                        )}
+                    </>
+                ) : (
+                    <>
+                        <Text style={styles.sectionHeading}>Upcoming / Recent</Text>
+                        {loading ? (
+                            <ActivityIndicator color="#212c6b" style={{ marginTop: 20 }} />
+                        ) : upcoming.length === 0 ? (
+                            <Text style={styles.emptyText}>No leave records yet.</Text>
+                        ) : (
+                            upcoming.map((l) => (
+                                <View key={l.id} style={styles.leaveRow}>
+                                    <View style={{ flex: 1 }}>
+                                        <Text style={styles.leaveType}>{l.leave_type}</Text>
+                                        <Text style={styles.leaveDates}>{l.from_date} → {l.to_date} · {l.days} day(s)</Text>
+                                    </View>
+                                    {renderStatusBadge(l.status)}
+                                </View>
+                            ))
+                        )}
+                    </>
                 )}
-                {selectedDayLeaves.map((l) => (
-                    <View key={l.id} style={styles.leaveRow}>
-                        <View style={{ flex: 1 }}>
-                            <Text style={styles.leaveType}>{l.employee_name} · {l.leave_type}</Text>
-                            <Text style={styles.leaveDates}>{l.from_date} → {l.to_date} · {l.days} day(s)</Text>
-                        </View>
-                        {renderStatusBadge(l.status)}
-                    </View>
-                ))}
             </ScrollView>
         );
     };
@@ -447,7 +449,6 @@ const LeaveScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const renderContent = () => {
         switch (activeSubTab) {
             case 'summary': return renderSummary();
-            case 'calendar': return renderCalendar();
             case 'apply': return renderApply();
             case 'history': return renderHistory();
         }
@@ -455,7 +456,6 @@ const LeaveScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
     const SUB_TABS: { key: SubTab; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
         { key: 'summary', label: 'Summary', icon: 'grid-outline' },
-        { key: 'calendar', label: 'Calendar', icon: 'calendar-outline' },
         { key: 'apply', label: 'Apply Leave', icon: 'create-outline' },
         { key: 'history', label: 'History', icon: 'time-outline' },
     ];

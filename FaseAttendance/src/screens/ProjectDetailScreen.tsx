@@ -1451,8 +1451,38 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                         ) : (
                             <Text style={styles.emptyText}>No attendance records for this project</Text>
                         )}
+
+                        {/* Project & Location Info Card */}
+                        <View style={styles.projectInfoCard}>
+                            <View style={styles.projectInfoRow}>
+                                <View style={styles.projectInfoIconWrap}>
+                                    <Ionicons name="briefcase-outline" size={20} color="#212c6b" />
+                                </View>
+                                <View style={styles.projectInfoTextWrap}>
+                                    <Text style={styles.projectInfoLabel}>Project</Text>
+                                    <Text style={styles.projectInfoValue}>{projectName || project?.projectname || '--'}</Text>
+                                </View>
+                            </View>
+
+                            <View style={styles.projectInfoDivider} />
+
+                            <View style={styles.projectInfoRow}>
+                                <View style={styles.projectInfoIconWrap}>
+                                    <Ionicons name="location-outline" size={20} color="#212c6b" />
+                                </View>
+                                <View style={styles.projectInfoTextWrap}>
+                                    <Text style={styles.projectInfoLabel}>Location</Text>
+                                    <Text style={styles.projectInfoValue}>
+                                        {attendanceRecords[0]?.checkin_place
+                                            || project?.site_address
+                                            || 'Head Office'}
+                                    </Text>
+                                </View>
+                            </View>
+                        </View>
                     </View>
                 )}
+
 
                 {/* Employee List (Supervisor only) */}
                 {activeTab === 'team' && isSupervisor && (
@@ -2077,6 +2107,13 @@ const styles = StyleSheet.create({
     attendanceRecordRight: { alignItems: 'flex-end' },
     attendanceStatusBadge: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 10 },
     attendanceStatusText: { fontSize: 11, fontWeight: '600' },
+    projectInfoCard: { backgroundColor: '#fff', borderRadius: 12, padding: 16, marginTop: 14, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2, elevation: 1 },
+    projectInfoRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+    projectInfoIconWrap: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#eef1fb', alignItems: 'center', justifyContent: 'center' },
+    projectInfoTextWrap: { flex: 1 },
+    projectInfoLabel: { fontSize: 12, color: '#8a8f9c', marginBottom: 2 },
+    projectInfoValue: { fontSize: 15, fontWeight: '700', color: '#1a2b4c' },
+    projectInfoDivider: { height: 1, backgroundColor: '#eef0f3', marginVertical: 12 },
 
     employeeCard: {
         flexDirection: 'row',
