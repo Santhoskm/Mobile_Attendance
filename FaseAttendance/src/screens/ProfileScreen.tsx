@@ -530,7 +530,7 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
                 <TouchableOpacity
                     style={styles.menuItem}
-                    onPress={() => Linking.openURL('https://yourdomain.com/terms')}
+                    onPress={() => Linking.openURL('https://app.mywebapp.sg/terms')}
                 >
                     <View style={[styles.menuIcon, { backgroundColor: '#f3f0ff' }]}>
                         <Ionicons name="document-text-outline" size={22} color="#6f42c1" />
@@ -543,7 +543,7 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
                 <TouchableOpacity
                     style={styles.menuItem}
-                    onPress={() => Linking.openURL('https://yourdomain.com/privacy-policy')}
+                    onPress={() => Linking.openURL('https://app.mywebapp.sg/privacy-policy')}
                 >
                     <View style={[styles.menuIcon, { backgroundColor: '#e8f8ee' }]}>
                         <Ionicons name="shield-checkmark-outline" size={22} color="#28a745" />

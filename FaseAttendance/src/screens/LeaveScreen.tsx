@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
     View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput,
-    ActivityIndicator, Alert, SafeAreaView, Platform,
+    ActivityIndicator, Alert, SafeAreaView, Platform, Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -50,8 +50,9 @@ const LeaveScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const [leaveType, setLeaveType] = useState(LEAVE_TYPES[0]);
     const [fromDate, setFromDate] = useState('');
     const [toDate, setToDate] = useState('');
-    const [reason, setReason] = useState('');
-    const [attachmentUri, setAttachmentUri] = useState<string | undefined>(undefined);
+    const [pickerFor, setPickerFor] = useState<'from' | 'to' | null>(null);
+    const [pickerMonth, setPickerMonth] = useState(new Date());
+    const [reason, setReason] = useState(''); const [attachmentUri, setAttachmentUri] = useState<string | undefined>(undefined);
     const [attachmentName, setAttachmentName] = useState<string>('');
     const [submitting, setSubmitting] = useState(false);
 
@@ -168,6 +169,22 @@ const LeaveScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             <Text style={[styles.badgeText, { color: STATUS_COLORS[status] || '#adb5bd' }]}>{status.toUpperCase()}</Text>
         </View>
     );
+
+    const openDatePicker = (which: 'from' | 'to') => {
+        const current = which === 'from' ? fromDate : toDate;
+        setPickerMonth(current ? new Date(current) : new Date());
+        setPickerFor(which);
+    };
+
+    const handlePickDate = (dateStr: string) => {
+        if (pickerFor === 'from') {
+            setFromDate(dateStr);
+            if (toDate && toDate < dateStr) setToDate('');
+        } else if (pickerFor === 'to') {
+            setToDate(dateStr);
+        }
+        setPickerFor(null);
+    };
 
 
 
@@ -383,19 +400,19 @@ const LeaveScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             ) : (
                 <View style={styles.formCard}>
                     <Text style={styles.formLabel}>From Date</Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="YYYY-MM-DD"
-                        value={fromDate}
-                        onChangeText={setFromDate}
-                    />
+                    <TouchableOpacity style={styles.dateFieldRow} onPress={() => openDatePicker('from')}>
+                        <Text style={fromDate ? styles.dateFieldText : styles.dateFieldPlaceholder}>
+                            {fromDate || 'Select date'}
+                        </Text>
+                        <Ionicons name="calendar-outline" size={18} color="#212c6b" />
+                    </TouchableOpacity>
                     <Text style={styles.formLabel}>To Date</Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="YYYY-MM-DD"
-                        value={toDate}
-                        onChangeText={setToDate}
-                    />
+                    <TouchableOpacity style={styles.dateFieldRow} onPress={() => openDatePicker('to')}>
+                        <Text style={toDate ? styles.dateFieldText : styles.dateFieldPlaceholder}>
+                            {toDate || 'Select date'}
+                        </Text>
+                        <Ionicons name="calendar-outline" size={18} color="#212c6b" />
+                    </TouchableOpacity>
                     <Text style={styles.formLabel}>Reason</Text>
                     <TextInput
                         style={[styles.input, styles.textArea]}
@@ -489,6 +506,85 @@ const LeaveScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     );
                 })}
             </View>
+
+            <Modal
+                visible={pickerFor !== null}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setPickerFor(null)}
+            >
+                <View style={styles.pickerOverlay}>
+                    <View style={styles.pickerCard}>
+                        <View style={styles.calendarNavRow}>
+                            <TouchableOpacity
+                                style={styles.calendarNavBtn}
+                                onPress={() => setPickerMonth(new Date(pickerMonth.getFullYear(), pickerMonth.getMonth() - 1, 1))}
+                            >
+                                <Ionicons name="chevron-back" size={20} color="#1a2b4c" />
+                            </TouchableOpacity>
+                            <Text style={styles.calendarMonthLabel}>
+                                {MONTH_LABELS[pickerMonth.getMonth()]} {pickerMonth.getFullYear()}
+                            </Text>
+                            <TouchableOpacity
+                                style={styles.calendarNavBtn}
+                                onPress={() => setPickerMonth(new Date(pickerMonth.getFullYear(), pickerMonth.getMonth() + 1, 1))}
+                            >
+                                <Ionicons name="chevron-forward" size={20} color="#1a2b4c" />
+                            </TouchableOpacity>
+                        </View>
+
+                        <View style={styles.calendarWeekRow}>
+                            {WEEKDAY_LABELS.map((w, i) => (
+                                <Text key={i} style={styles.calendarWeekLabel}>{w}</Text>
+                            ))}
+                        </View>
+
+                        <View style={styles.calendarGrid}>
+                            {(() => {
+                                const year = pickerMonth.getFullYear();
+                                const month = pickerMonth.getMonth();
+                                const firstWeekday = new Date(year, month, 1).getDay();
+                                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                                const cells: (number | null)[] = [];
+                                for (let i = 0; i < firstWeekday; i++) cells.push(null);
+                                for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+
+                                return cells.map((day, idx) => {
+                                    if (day === null) return <View key={idx} style={styles.calendarCell} />;
+                                    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                                    const isSelected = dateStr === fromDate || dateStr === toDate;
+                                    const disabled = pickerFor === 'to' && !!fromDate && dateStr < fromDate;
+                                    return (
+                                        <TouchableOpacity
+                                            key={idx}
+                                            style={styles.calendarCell}
+                                            disabled={disabled}
+                                            onPress={() => handlePickDate(dateStr)}
+                                            activeOpacity={0.7}
+                                        >
+                                            <View style={[styles.calendarDayCircle, isSelected && styles.calendarDaySelected]}>
+                                                <Text
+                                                    style={[
+                                                        styles.calendarDayText,
+                                                        isSelected && styles.calendarDayTextOnColor,
+                                                        disabled && styles.pickerDayDisabledText,
+                                                    ]}
+                                                >
+                                                    {day}
+                                                </Text>
+                                            </View>
+                                        </TouchableOpacity>
+                                    );
+                                });
+                            })()}
+                        </View>
+
+                        <TouchableOpacity style={styles.secondaryBtn} onPress={() => setPickerFor(null)}>
+                            <Text style={styles.secondaryBtnText}>Cancel</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 };
@@ -547,6 +643,17 @@ const styles = StyleSheet.create({
         fontSize: 13, color: '#1a2b4c',
     },
     textArea: { height: 80, textAlignVertical: 'top' },
+    dateFieldRow: {
+        flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+        backgroundColor: '#f8f9fb', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 12,
+    },
+    dateFieldText: { fontSize: 13, color: '#1a2b4c' },
+    dateFieldPlaceholder: { fontSize: 13, color: '#adb5bd' },
+    pickerOverlay: {
+        flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center', padding: 24,
+    },
+    pickerCard: { backgroundColor: '#fff', borderRadius: 16, padding: 16, width: '100%' },
+    pickerDayDisabledText: { color: '#ced4da' },
     attachBtn: {
         flexDirection: 'row', alignItems: 'center', gap: 6,
         borderWidth: 1, borderColor: '#dee2e6', borderStyle: 'dashed',

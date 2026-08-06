@@ -225,6 +225,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
     const [cameraAction, setCameraAction] = useState<'checkin' | 'checkout'>('checkin');
     const [cameraReady, setCameraReady] = useState(false);
     const cameraRef = useRef<CameraView>(null);
+    const isCapturingRef = useRef(false);
     const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
     const [locationPermission, setLocationPermission] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -393,6 +394,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
             if (!empid) return;
 
             const response = await apiService.getAttendanceStatus(empid);
+            if (__DEV__) console.log('[checkAttendanceStatus] raw response:', JSON.stringify(response));
             if (response.is_checked_in) {
 
                 // Check if the active check-in is for THIS project
@@ -583,7 +585,8 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
     };
 
     const captureAndVerify = async () => {
-        if (!cameraRef.current || !cameraReady || isLoading) return;
+        if (!cameraRef.current || !cameraReady || isLoading || isCapturingRef.current) return;
+        isCapturingRef.current = true;
 
         let currentLocation: Location.LocationObject | null = null;
         let photo: any = null;
@@ -759,6 +762,8 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                     'Server Slow',
                     'The server took too long to respond. Please check your connection and try again.'
                 );
+                await checkAttendanceStatus();
+                await loadAttendance();
             } else {
                 let errorMessage = `Failed to ${cameraAction}. Please try again.`;
                 if (error.response?.data?.error) {
@@ -767,10 +772,13 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                     errorMessage = error.response.data.message;
                 }
                 Alert.alert('Error', errorMessage);
+                await checkAttendanceStatus();
+                await loadAttendance();
             }
         } finally {
             setIsLoading(false);
             setCameraReady(false);
+            isCapturingRef.current = false;
         }
     };
 
@@ -1014,7 +1022,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
 
     const openFile = async (url: string) => {
         try {
-            const fullUrl = url.startsWith('http') ? url : `http://143.198.220.10${url}`;
+            const fullUrl = url.startsWith('http') ? url : `https://app.mywebapp.sg${url}`;
             const supported = await Linking.canOpenURL(fullUrl);
             if (supported) {
                 await Linking.openURL(fullUrl);

@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "IET",
-    "slug": "IET",
+    "name": "IET HR",
+    "slug": "iet-hr",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -9,15 +9,12 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSAppTransportSecurity": {
-          "NSAllowsArbitraryLoads": true
-        },
         "NSCameraUsageDescription": "This app needs camera access to verify your identity for attendance marking",
         "NSLocationWhenInUseUsageDescription": "This app needs location access to verify your attendance location"
       }
     },
     "android": {
-      "package": "com.IET.app",
+      "package": "com.iet.hr",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -67,15 +64,7 @@
           "color": "#0B84FF"
         }
       ],
-      "expo-video",
-      [
-        "expo-build-properties",
-        {
-          "android": {
-            "usesCleartextTraffic": true
-          }
-        }
-      ]
+      "expo-video"
     ],
     "extra": {
       "eas": {

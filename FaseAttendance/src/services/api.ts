@@ -1,7 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const BASE_URL = 'http://143.198.220.10';
+const BASE_URL = 'https://app.mywebapp.sg';
 
 function isTokenExpiringSoon(token: string, bufferSeconds = 10): boolean {
     try {
@@ -165,8 +165,10 @@ api.interceptors.request.use(
             }
         }
 
-        console.log(`Making ${config.method?.toUpperCase()} request to: ${config.baseURL}${config.url}`);
-        console.log('Request data:', config.data);
+        if (__DEV__) {
+            console.log(`Making ${config.method?.toUpperCase()} request to: ${config.baseURL}${config.url}`);
+            console.log('Request data:', config.data);
+        }
         return config;
     },
     (error) => {
@@ -180,6 +182,7 @@ api.interceptors.response.use(
     (response) => {
         if (__DEV__) {
             console.log('Response status:', response.status);
+            console.log('Response body:', JSON.stringify(response.data));
         }
         return response;
     },
@@ -577,7 +580,7 @@ export const apiService = {
                 timeout: 10000,
                 cancelToken: cancelTokenSource.token,
             });
-            console.log('getMyProjects response:', response.data);
+            if (__DEV__) console.log('getMyProjects response:', response.data);
             return response.data;
         } catch (error) {
             console.log('Get my projects error:', error);

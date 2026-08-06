@@ -57,6 +57,7 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
     const [cameraAction, setCameraAction] = useState<'checkin' | 'checkout'>('checkin');
     const [cameraReady, setCameraReady] = useState(false);
     const cameraRef = useRef<CameraView>(null);
+    const isCapturingRef = useRef(false);
     const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
     const [locationPermission, setLocationPermission] = useState(false);
     const [pendingCount, setPendingCount] = useState(0);
@@ -251,7 +252,8 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
 
     // TO:
     const captureAndVerify = async () => {
-        if (!cameraRef.current || !cameraReady || isLoading) return;
+        if (!cameraRef.current || !cameraReady || isLoading || isCapturingRef.current) return;
+        isCapturingRef.current = true;
         if (cameraRef.current && cameraReady) {
             let currentLocation: Location.LocationObject | null = null;
             let photo: any = null;
@@ -281,7 +283,7 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
 
                 photo = await cameraRef.current.takePictureAsync({
                     quality: 0.6,
-                    base64: true,
+                    base64: false,
                     skipProcessing: true,
                     mute: true,
                     ...(Platform.OS === 'android' && { mute: true })
@@ -472,6 +474,7 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
             } finally {
                 setIsLoading(false);
                 setCameraReady(false);
+                isCapturingRef.current = false;
             }
         }
     };

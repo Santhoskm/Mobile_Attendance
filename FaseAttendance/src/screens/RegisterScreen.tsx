@@ -65,7 +65,9 @@ const RegisterScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
             const response = await apiService.register(credentials);
 
-            console.log('Registration response:', response);
+            if (__DEV__) {
+                console.log('Registration response:', response);
+            }
 
             if (response.status === true) {
                 Alert.alert(

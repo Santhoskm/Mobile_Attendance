@@ -311,7 +311,7 @@ const DocumentsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const openFile = async (url: string) => {
         try {
             // Check if it's a full URL or relative path
-            const fullUrl = url.startsWith('http') ? url : `http://143.198.220.10${url}`;
+            const fullUrl = url.startsWith('http') ? url : `https://app.mywebapp.sg${url}`;
             const supported = await Linking.canOpenURL(fullUrl);
             if (supported) {
                 await Linking.openURL(fullUrl);

@@ -26,6 +26,7 @@ const FaceEnrollmentScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
     const [isLoading, setIsLoading] = useState(false);
     const [showCamera, setShowCamera] = useState(true);
     const cameraRef = useRef<CameraView>(null);
+    const isCapturingRef = useRef(false);
     const [userData, setUserData] = useState<any>(null);
 
     useEffect(() => {
@@ -37,14 +38,14 @@ const FaceEnrollmentScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
     const loadUserData = async () => {
         try {
             const userDataString = await AsyncStorage.getItem('userData');
-            console.log('Raw userData from storage:', userDataString);
+            if (__DEV__) console.log('Raw userData from storage:', userDataString);
 
             if (userDataString) {
                 const data = JSON.parse(userDataString);
-                console.log('Parsed user data:', data);
+                if (__DEV__) console.log('Parsed user data:', data);
 
                 const empid = data.empid || data.employee_id || data.empno || data.employeeId;
-                console.log('Extracted empid:', empid);
+                if (__DEV__) console.log('Extracted empid:', empid);
 
                 setUserData({
                     ...data,
@@ -52,7 +53,7 @@ const FaceEnrollmentScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
                 });
 
                 if (!empid) {
-                    console.log('No empid found in user data');
+                    if (__DEV__) console.log('No empid found in user data');
                     Alert.alert(
                         'Error',
                         'Employee ID not found. Please login again.',
@@ -65,7 +66,7 @@ const FaceEnrollmentScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
                     );
                 }
             } else {
-                console.log('No user data found in storage');
+                if (__DEV__) console.log('No user data found in storage');
                 Alert.alert(
                     'Error',
                     'User data not found. Please login again.',
@@ -100,12 +101,14 @@ const FaceEnrollmentScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
     };
 
     const takePicture = async () => {
+        if (!cameraRef.current || !cameraReady || isCapturingRef.current) return;
+        isCapturingRef.current = true;
         if (cameraRef.current && cameraReady) {
             try {
 
                 const photo = await cameraRef.current.takePictureAsync({
                     quality: 0.7,
-                    base64: true,
+                    base64: false,
                     skipProcessing: true,
                     mute: true,
                     ...(Platform.OS === 'android' && { mute: true })
@@ -118,6 +121,8 @@ const FaceEnrollmentScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
             } catch (error) {
                 console.log('Error taking picture:', error);
                 Alert.alert('Error', 'Failed to take picture. Please try again.');
+            } finally {
+                isCapturingRef.current = false;
             }
         }
     };
@@ -181,11 +186,11 @@ const FaceEnrollmentScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
                 name: 'face_image.jpg',
             } as any);
 
-            console.log('Sending enrollment request for empid:', empid);
+            if (__DEV__) console.log('Sending enrollment request for empid:', empid);
 
             const response = await apiService.enrollFace(formData);
 
-            console.log('Enrollment response:', response);
+            if (__DEV__) console.log('Enrollment response:', response);
 
             if (response.message || response.status === 'success') {
                 await AsyncStorage.setItem('faceEnrolled', 'true');

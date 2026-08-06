@@ -47,7 +47,9 @@ const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
             const response = await apiService.login(credentials);
 
-            console.log('Full response from server:', response);
+            if (__DEV__) {
+                console.log('Full response from server:', response);
+            }
 
             // Check if login was successful based on your API response structure
 
