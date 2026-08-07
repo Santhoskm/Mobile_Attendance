@@ -217,12 +217,12 @@ const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                         )}
                     </TouchableOpacity>
                     {/* Register Link */}
-                    <View style={styles.registerContainer}>
+                    {/* <View style={styles.registerContainer}>
                         <Text style={styles.registerText}>Don't have an account? </Text>
                         <TouchableOpacity onPress={() => navigation.navigate('Register')} disabled={isLoading}>
                             <Text style={styles.registerLink}>Sign Up</Text>
                         </TouchableOpacity>
-                    </View>
+                    </View> */}
 
                     {/* Footer */}
                     <View style={styles.footer}>

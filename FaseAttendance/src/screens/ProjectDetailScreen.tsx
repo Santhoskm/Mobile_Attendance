@@ -307,6 +307,15 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
         }
     }, [userData]);
 
+    useEffect(() => {
+        if (showCamera && cameraReady) {
+            const autoCaptureTimer = setTimeout(() => {
+                captureAndVerify();
+            }, 300);
+            return () => clearTimeout(autoCaptureTimer);
+        }
+    }, [showCamera, cameraReady]);
+
     const requestPermissions = async () => {
         const cameraStatus = await Camera.requestCameraPermissionsAsync();
         setHasCameraPermission(cameraStatus.status === 'granted');
@@ -1665,7 +1674,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                         animateShutter={false}
                         enableTorch={false}
                         zoom={0}
-                        autofocus="on"
+                        autofocus="off"
                     />
 
                     <View style={styles.faceFrameContainer}>

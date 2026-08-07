@@ -27,6 +27,7 @@ import { optimizeCameraForSpeed } from '../utils/cameraOptimizer';
 
 
 
+
 interface UserData {
     user_id?: number;
     username?: string;
@@ -88,6 +89,15 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
             loadAttendanceStatus();
         }
     }, [userData]);
+
+    useEffect(() => {
+        if (showCamera && cameraReady) {
+            const autoCaptureTimer = setTimeout(() => {
+                captureAndVerify();
+            }, 300);
+            return () => clearTimeout(autoCaptureTimer);
+        }
+    }, [showCamera, cameraReady]);
 
     const setupAudioForMute = async () => {
         await optimizeCameraForSpeed();
@@ -283,7 +293,7 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
 
                 photo = await cameraRef.current.takePictureAsync({
                     quality: 0.6,
-                    base64: false,
+
                     skipProcessing: true,
                     mute: true,
                     ...(Platform.OS === 'android' && { mute: true })
@@ -715,7 +725,7 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
                         animateShutter={false}
                         enableTorch={false}
                         zoom={0}
-                        autofocus="on"
+                        autofocus="off"
                     />
 
                     <View style={styles.faceFrameContainer}>
