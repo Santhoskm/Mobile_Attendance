@@ -514,7 +514,7 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 icon="settings-outline"
                 defaultOpen={false}
             >
-                <TouchableOpacity
+                {/* <TouchableOpacity
                     style={styles.menuItem}
                     onPress={() => Alert.alert('Contact Support', 'support@iet.com\n+65 1234 5678')}
                 >
@@ -526,11 +526,11 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                         <Text style={styles.menuSubtext}>Contact support team</Text>
                     </View>
                     <Ionicons name="chevron-forward" size={18} color="#adb5bd" />
-                </TouchableOpacity>
+                </TouchableOpacity> */}
 
                 <TouchableOpacity
                     style={styles.menuItem}
-                    onPress={() => Linking.openURL('https://app.mywebapp.sg/terms')}
+                    onPress={() => Linking.openURL('https://iet.com.sg/terms')}
                 >
                     <View style={[styles.menuIcon, { backgroundColor: '#f3f0ff' }]}>
                         <Ionicons name="document-text-outline" size={22} color="#6f42c1" />
@@ -543,7 +543,7 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
                 <TouchableOpacity
                     style={styles.menuItem}
-                    onPress={() => Linking.openURL('https://app.mywebapp.sg/privacy-policy')}
+                    onPress={() => Linking.openURL('https://iet.com.sg/privacy-policy')}
                 >
                     <View style={[styles.menuIcon, { backgroundColor: '#e8f8ee' }]}>
                         <Ionicons name="shield-checkmark-outline" size={22} color="#28a745" />

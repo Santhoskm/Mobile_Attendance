@@ -269,41 +269,45 @@ const LeaveScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                         <ActivityIndicator color="#212c6b" style={{ marginVertical: 20 }} />
                     ) : (
                         <View style={styles.calendarGrid}>
-                            {cells.map((day, idx) => {
-                                if (day === null) return <View key={idx} style={styles.calendarCell} />;
-                                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                                const status = statusForDay(day);
-                                const isToday = dateStr === todayStr;
-                                const isSelected = dateStr === selectedDay;
-                                return (
-                                    <TouchableOpacity
-                                        key={idx}
-                                        style={styles.calendarCell}
-                                        onPress={() => setSelectedDay(isSelected ? null : dateStr)}
-                                        activeOpacity={0.7}
-                                    >
-                                        <View
-                                            style={[
-                                                styles.calendarDayCircle,
-                                                status === 'Approved' && styles.calendarDayApproved,
-                                                status === 'Pending' && styles.calendarDayPending,
-                                                isSelected && styles.calendarDaySelected,
-                                                isToday && !status && styles.calendarDayToday,
-                                            ]}
-                                        >
-                                            <Text
-                                                style={[
-                                                    styles.calendarDayText,
-                                                    !!status && styles.calendarDayTextOnColor,
-                                                    isSelected && styles.calendarDayTextOnColor,
-                                                ]}
+                            {Array.from({ length: Math.ceil(cells.length / 7) }, (_, w) => cells.slice(w * 7, w * 7 + 7)).map((week, wIdx) => (
+                                <View key={wIdx} style={styles.calendarWeekGridRow}>
+                                    {week.map((day, idx) => {
+                                        if (day === null) return <View key={idx} style={styles.calendarCell} />;
+                                        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                                        const status = statusForDay(day);
+                                        const isToday = dateStr === todayStr;
+                                        const isSelected = dateStr === selectedDay;
+                                        return (
+                                            <TouchableOpacity
+                                                key={idx}
+                                                style={styles.calendarCell}
+                                                onPress={() => setSelectedDay(isSelected ? null : dateStr)}
+                                                activeOpacity={0.7}
                                             >
-                                                {day}
-                                            </Text>
-                                        </View>
-                                    </TouchableOpacity>
-                                );
-                            })}
+                                                <View
+                                                    style={[
+                                                        styles.calendarDayCircle,
+                                                        status === 'Approved' && styles.calendarDayApproved,
+                                                        status === 'Pending' && styles.calendarDayPending,
+                                                        isSelected && styles.calendarDaySelected,
+                                                        isToday && !status && styles.calendarDayToday,
+                                                    ]}
+                                                >
+                                                    <Text
+                                                        style={[
+                                                            styles.calendarDayText,
+                                                            !!status && styles.calendarDayTextOnColor,
+                                                            isSelected && styles.calendarDayTextOnColor,
+                                                        ]}
+                                                    >
+                                                        {day}
+                                                    </Text>
+                                                </View>
+                                            </TouchableOpacity>
+                                        );
+                                    })}
+                                </View>
+                            ))}
                         </View>
                     )}
 
@@ -549,33 +553,42 @@ const LeaveScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                                 for (let i = 0; i < firstWeekday; i++) cells.push(null);
                                 for (let d = 1; d <= daysInMonth; d++) cells.push(d);
 
-                                return cells.map((day, idx) => {
-                                    if (day === null) return <View key={idx} style={styles.calendarCell} />;
-                                    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                                    const isSelected = dateStr === fromDate || dateStr === toDate;
-                                    const disabled = pickerFor === 'to' && !!fromDate && dateStr < fromDate;
-                                    return (
-                                        <TouchableOpacity
-                                            key={idx}
-                                            style={styles.calendarCell}
-                                            disabled={disabled}
-                                            onPress={() => handlePickDate(dateStr)}
-                                            activeOpacity={0.7}
-                                        >
-                                            <View style={[styles.calendarDayCircle, isSelected && styles.calendarDaySelected]}>
-                                                <Text
-                                                    style={[
-                                                        styles.calendarDayText,
-                                                        isSelected && styles.calendarDayTextOnColor,
-                                                        disabled && styles.pickerDayDisabledText,
-                                                    ]}
+                                const weeks = Array.from(
+                                    { length: Math.ceil(cells.length / 7) },
+                                    (_, w) => cells.slice(w * 7, w * 7 + 7)
+                                );
+
+                                return weeks.map((week, wIdx) => (
+                                    <View key={wIdx} style={styles.calendarWeekGridRow}>
+                                        {week.map((day, idx) => {
+                                            if (day === null) return <View key={idx} style={styles.calendarCell} />;
+                                            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                                            const isSelected = dateStr === fromDate || dateStr === toDate;
+                                            const disabled = pickerFor === 'to' && !!fromDate && dateStr < fromDate;
+                                            return (
+                                                <TouchableOpacity
+                                                    key={idx}
+                                                    style={styles.calendarCell}
+                                                    disabled={disabled}
+                                                    onPress={() => handlePickDate(dateStr)}
+                                                    activeOpacity={0.7}
                                                 >
-                                                    {day}
-                                                </Text>
-                                            </View>
-                                        </TouchableOpacity>
-                                    );
-                                });
+                                                    <View style={[styles.calendarDayCircle, isSelected && styles.calendarDaySelected]}>
+                                                        <Text
+                                                            style={[
+                                                                styles.calendarDayText,
+                                                                isSelected && styles.calendarDayTextOnColor,
+                                                                disabled && styles.pickerDayDisabledText,
+                                                            ]}
+                                                        >
+                                                            {day}
+                                                        </Text>
+                                                    </View>
+                                                </TouchableOpacity>
+                                            );
+                                        })}
+                                    </View>
+                                ));
                             })()}
                         </View>
 
@@ -686,7 +699,8 @@ const styles = StyleSheet.create({
     calendarWeekLabel: {
         width: `${100 / 7}%`, textAlign: 'center', fontSize: 11, fontWeight: '700', color: '#adb5bd',
     },
-    calendarGrid: { flexDirection: 'row', flexWrap: 'wrap' },
+    calendarGrid: {},
+    calendarWeekGridRow: { flexDirection: 'row' },
     calendarCell: {
         width: `${100 / 7}%`, aspectRatio: 1, alignItems: 'center', justifyContent: 'center', marginBottom: 4,
     },

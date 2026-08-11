@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "IET HR",
-    "slug": "iet-hr",
+    "slug": "IET",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -64,7 +64,8 @@
           "color": "#0B84FF"
         }
       ],
-      "expo-video"
+      "expo-video",
+      "expo-font"
     ],
     "extra": {
       "eas": {

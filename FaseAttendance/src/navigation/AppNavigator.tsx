@@ -1,8 +1,11 @@
 // AppNavigator.tsx
 import 'react-native-gesture-handler';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { View, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { apiService } from '../services/api';
 
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
@@ -23,9 +26,41 @@ import { navigationRef } from './navigationRef';
 const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => {
+    const [initialRoute, setInitialRoute] = useState<'Login' | 'Main' | null>(null);
+
+    useEffect(() => {
+        (async () => {
+            try {
+                const remembered = await AsyncStorage.getItem('rememberMe');
+                const { token } = await apiService.getAuthData();
+
+                if (remembered === 'true' && token) {
+                    const stillValid = await apiService.refreshAuthToken();
+                    if (stillValid) {
+                        setInitialRoute('Main');
+                        return;
+                    }
+                    await apiService.clearAuthData();
+                }
+
+                setInitialRoute('Login');
+            } catch {
+                setInitialRoute('Login');
+            }
+        })();
+    }, []);
+
+    if (!initialRoute) {
+        return (
+            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                <ActivityIndicator size="large" color="#212c6b" />
+            </View>
+        );
+    }
+
     return (
         <NavigationContainer ref={navigationRef}>
-            <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={initialRoute}>
                 <Stack.Screen name="Login" component={LoginScreen} />
                 <Stack.Screen name="Register" component={RegisterScreen} />
                 <Stack.Screen name="Main" component={MainTabScreen} />
