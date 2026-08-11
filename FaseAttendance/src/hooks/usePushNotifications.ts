@@ -53,6 +53,7 @@ export function usePushNotificationListeners() {
             const data = response.notification.request.content.data as { type?: string };
             if (data?.type === 'broadcast') navigate('Broadcasts');
             else if (data?.type === 'chat_reply') navigate('SupportChat');
+            else if (data?.type === 'leave_status') navigate('Leave');
         });
         return () => responseListener.current?.remove();
     }, []);
