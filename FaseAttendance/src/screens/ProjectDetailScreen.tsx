@@ -311,7 +311,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
         if (showCamera && cameraReady) {
             const autoCaptureTimer = setTimeout(() => {
                 captureAndVerify();
-            }, 300);
+            }, 500);
             return () => clearTimeout(autoCaptureTimer);
         }
     }, [showCamera, cameraReady]);
