@@ -307,14 +307,14 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
         }
     }, [userData]);
 
-    useEffect(() => {
-        if (showCamera && cameraReady) {
-            const autoCaptureTimer = setTimeout(() => {
-                captureAndVerify();
-            }, 500);
-            return () => clearTimeout(autoCaptureTimer);
-        }
-    }, [showCamera, cameraReady]);
+    // useEffect(() => {
+    //     if (showCamera && cameraReady) {
+    //         const autoCaptureTimer = setTimeout(() => {
+    //             captureAndVerify();
+    //         }, 500);
+    //         return () => clearTimeout(autoCaptureTimer);
+    //     }
+    // }, [showCamera, cameraReady]);
 
     const requestPermissions = async () => {
         const cameraStatus = await Camera.requestCameraPermissionsAsync();

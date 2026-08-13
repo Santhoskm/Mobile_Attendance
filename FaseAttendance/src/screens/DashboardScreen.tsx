@@ -94,7 +94,7 @@ const DashboardScreen: React.FC<{ navigation: any; route: any }> = ({ navigation
         if (showCamera && cameraReady) {
             const autoCaptureTimer = setTimeout(() => {
                 captureAndVerify();
-            }, 300);
+            }, 500);
             return () => clearTimeout(autoCaptureTimer);
         }
     }, [showCamera, cameraReady]);
