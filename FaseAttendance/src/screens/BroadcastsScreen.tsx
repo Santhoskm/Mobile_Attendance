@@ -14,6 +14,7 @@ import {
     SafeAreaView,
     Image,
     Modal,
+    ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -44,6 +45,8 @@ const BroadcastsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
+    const [descriptionModal, setDescriptionModal] = useState<Broadcast | null>(null);
+    const [truncatedIds, setTruncatedIds] = useState<Set<number>>(new Set());
 
     useEffect(() => {
         loadBroadcasts();
@@ -103,7 +106,23 @@ const BroadcastsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             <View style={styles.info}>
                 <Text style={styles.title}>{item.title}</Text>
                 {!!item.description && (
-                    <Text style={styles.desc} numberOfLines={2}>{item.description}</Text>
+                    <TouchableOpacity
+                        onPress={() => truncatedIds.has(item.id) && setDescriptionModal(item)}
+                        activeOpacity={truncatedIds.has(item.id) ? 0.6 : 1}
+                        disabled={!truncatedIds.has(item.id)}
+                    >
+                        <Text
+                            style={styles.desc}
+                            numberOfLines={2}
+                            onTextLayout={(e) => {
+                                if (e.nativeEvent.lines.length > 2 && !truncatedIds.has(item.id)) {
+                                    setTruncatedIds(prev => new Set(prev).add(item.id));
+                                }
+                            }}
+                        >
+                            {item.description}
+                        </Text>
+                    </TouchableOpacity>
                 )}
                 <Text style={styles.meta}>
                     {item.document_type} • From {item.sent_by_name || 'Admin'}
@@ -162,6 +181,26 @@ const BroadcastsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     {previewImage && (
                         <Image source={{ uri: previewImage }} style={styles.previewImage} resizeMode="contain" />
                     )}
+                </TouchableOpacity>
+            </Modal>
+            + <Modal
+                visible={!!descriptionModal}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setDescriptionModal(null)}
+            >
+                <TouchableOpacity style={styles.descOverlay} activeOpacity={1} onPress={() => setDescriptionModal(null)}>
+                    <TouchableOpacity style={styles.descBox} activeOpacity={1} onPress={() => { }}>
+                        <View style={styles.descHeader}>
+                            <Text style={styles.descTitle}>{descriptionModal?.title}</Text>
+                            <TouchableOpacity onPress={() => setDescriptionModal(null)}>
+                                <Ionicons name="close" size={24} color="#495057" />
+                            </TouchableOpacity>
+                        </View>
+                        <ScrollView style={styles.descScroll}>
+                            <Text style={styles.descFullText}>{descriptionModal?.description}</Text>
+                        </ScrollView>
+                    </TouchableOpacity>
                 </TouchableOpacity>
             </Modal>
         </SafeAreaView>
@@ -228,6 +267,12 @@ const styles = StyleSheet.create({
         zIndex: 10,
         padding: 6,
     },
+    descOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', alignItems: 'center', justifyContent: 'center', padding: 24 },
+    descBox: { backgroundColor: '#fff', borderRadius: 16, padding: 18, width: '100%', maxHeight: '70%' },
+    descHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
+    descTitle: { fontSize: 16, fontWeight: '600', color: '#1a1a2e', flex: 1, marginRight: 10 },
+    descScroll: { maxHeight: '100%' },
+    descFullText: { fontSize: 14, color: '#495057', lineHeight: 21 },
     info: { flex: 1 },
     title: { fontSize: 14, fontWeight: '600', color: '#1a1a2e' },
     desc: { fontSize: 12, color: '#495057', marginTop: 2 },

@@ -74,6 +74,7 @@ interface Employee {
     contact: string;
     shift_id?: number | null;
     shift_name?: string | null;
+    checked_in_today?: boolean;
 }
 
 interface Violation {
@@ -203,6 +204,13 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
     // Only a supervisor with NO shift assignment falls back to picking among whichever is live right now.
     const isShiftLockedSupervisor = isSupervisor && !!myShift;
     const [supervisorSelectedShift, setSupervisorSelectedShift] = useState<Shift | null>(null);
+
+    // True once today's check-in AND check-out are both done for this project —
+    // used to lock the Check In button for the rest of the day.
+    const todayStr = new Date().toISOString().split('T')[0];
+    const hasCompletedToday = attendanceRecords.some(
+        r => r.date === todayStr && r.status === 'Completed'
+    );
 
     useEffect(() => {
         if (!isSupervisor) return;
@@ -1110,6 +1118,12 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                 <Text style={styles.employeeRole}>{item.role}</Text>
                 {item.shift_name && <Text style={styles.shiftTag}>{item.shift_name}</Text>}
             </View>
+            <Ionicons
+                name={item.checked_in_today ? 'checkmark-circle' : 'ellipse-outline'}
+                size={18}
+                color={item.checked_in_today ? '#2e7d32' : '#9e9e9e'}
+                style={{ marginRight: 8 }}
+            />
             <Ionicons name="chevron-forward" size={20} color="#000000" />
         </TouchableOpacity>
     );
@@ -1411,7 +1425,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                             <TouchableOpacity
                                 style={[
                                     styles.checkInButton,
-                                    (isCheckedIn || otherProjectCheckIn || (shifts.length > 0 && (
+                                    (isCheckedIn || otherProjectCheckIn || hasCompletedToday || (shifts.length > 0 && (
                                         isShiftLockedSupervisor
                                             ? !myShiftIsActiveNow
                                             : isSupervisor
@@ -1420,7 +1434,7 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                                     ))) && styles.disabledButton,
                                 ]}
                                 onPress={() => handleAttendance('checkin')}
-                                disabled={isCheckedIn || !!otherProjectCheckIn || isLoading || (shifts.length > 0 && (
+                                disabled={isCheckedIn || !!otherProjectCheckIn || hasCompletedToday || isLoading || (shifts.length > 0 && (
                                     isShiftLockedSupervisor
                                         ? !myShiftIsActiveNow
                                         : isSupervisor
@@ -1508,7 +1522,9 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                             <Text style={styles.sectionTitle}>
                                 Team Members{myShift ? ` · ${myShift.shift_name}` : ''}
                             </Text>
-                            <Text style={styles.sectionCount}>{employees.length}</Text>
+                            <Text style={styles.sectionCount}>
+                                {employees.filter(e => e.checked_in_today).length} / {employees.length} checked in
+                            </Text>
                         </View>
                         {loadingEmployees ? (
                             <ActivityIndicator size="small" color="#212c6b" />
