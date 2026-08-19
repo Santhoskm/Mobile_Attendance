@@ -41,6 +41,8 @@ interface AssignedProject {
     shift_end?: string;
     shifts?: Shift[];
     assigned_shift_id?: number | null;   // ADD
+    is_off_today?: boolean;
+    scheduling_mode?: 'FIXED' | 'WEEKLY_ROTATION' | 'DAILY_ROTATION';
     role: 'Supervisor' | 'Employee';
 }
 
@@ -195,6 +197,8 @@ const TaskScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     shift_end: p.shift_end || null,
                     shifts: p.shifts || [],
                     assigned_shift_id: p.assigned_shift_id ?? null,   // ADD
+                    is_off_today: p.is_off_today ?? false,
+                    scheduling_mode: p.scheduling_mode || 'FIXED',
                     role: p.role || 'Employee',
                     project_code: p.project_code || p.projectcode || null,
                 }));

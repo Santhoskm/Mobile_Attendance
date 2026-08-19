@@ -59,12 +59,13 @@ interface ProjectDetail {
     shift_end?: string;
     shifts?: Shift[];
     assigned_shift_id?: number | null;
+    is_off_today?: boolean;
+    scheduling_mode?: 'FIXED' | 'WEEKLY_ROTATION' | 'DAILY_ROTATION';
     role: 'Supervisor' | 'Employee';
     latitude?: number;
     longitude?: number;
     geofence_radius?: number;
 }
-
 
 interface Employee {
     empno: string;
@@ -581,6 +582,10 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                     return;
                 }
             } else {
+                if (project?.is_off_today) {
+                    Alert.alert("You're Off Today", "You are not scheduled to work on this project today.");
+                    return;
+                }
                 if (shifts.length > 0 && !myShift) {
                     Alert.alert('No Shift Assigned', 'You have not been assigned a shift on this project. Contact your supervisor.');
                     return;
@@ -1360,7 +1365,17 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
                             </View>
                         )}
 
-                        {shifts.length > 0 && !isCheckedIn && !otherProjectCheckIn && (
+                        {/* Off / rest day for this project — shown regardless of check-in state */}
+                        {!isSupervisor && project?.is_off_today && !isCheckedIn && (
+                            <View style={styles.offTodayBanner}>
+                                <Ionicons name="moon-outline" size={16} color="#6c757d" />
+                                <Text style={styles.offTodayBannerText}>
+                                    You're off today on this project.
+                                </Text>
+                            </View>
+                        )}
+
+                        {shifts.length > 0 && !isCheckedIn && !otherProjectCheckIn && !project?.is_off_today && (
                             <View style={styles.shiftListContainer}>
                                 <Text style={styles.shiftListLabel}>
                                     {myShift
@@ -2128,6 +2143,8 @@ const styles = StyleSheet.create({
 
     warningInfo: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#fff4e6', padding: 10, borderRadius: 8, marginBottom: 12 },
     warningInfoText: { fontSize: 14, color: '#ff7a1a', fontWeight: '500', flex: 1 },
+    offTodayBanner: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#e9ecef', padding: 10, borderRadius: 8, marginBottom: 12 },
+    offTodayBannerText: { fontSize: 14, color: '#495057', fontWeight: '500', flex: 1 },
 
     attendanceHistory: { marginTop: 8 },
     attendanceHistoryTitle: { fontSize: 14, fontWeight: '600', color: '#000000', marginBottom: 8 },
