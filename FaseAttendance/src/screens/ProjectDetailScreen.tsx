@@ -189,11 +189,23 @@ const ProjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({ naviga
         return null;
     };
 
+    const EARLY_CHECKIN_MINUTES = 60; // button opens this many minutes before shift start
+
+    const minusMinutes = (timeStr: string, minutes: number) => {
+        // timeStr is "HH:MM:SS" — do the subtraction on a throwaway Date and format back
+        const [h, m, s] = timeStr.split(':').map(Number);
+        const d = new Date(2000, 0, 1, h, m, s || 0);
+        d.setMinutes(d.getMinutes() - minutes);
+        return d.toTimeString().slice(0, 8);
+    };
+
     const isShiftActiveNow = (s: Shift) => {
         if (!isShiftScheduledToday(s)) return false;
         const nowStr = new Date().toTimeString().slice(0, 8); // "HH:MM:SS"
-        return nowStr >= s.shiftstarttime && nowStr <= s.shiftendtime;
+        const windowStart = minusMinutes(s.shiftstarttime, EARLY_CHECKIN_MINUTES);
+        return nowStr >= windowStart && nowStr <= s.shiftendtime;
     };
+
     const activeShifts = shifts.filter(isShiftActiveNow);
 
     // Worker: shift is fixed by their project assignment — no picking, just a window check.
