@@ -36,6 +36,11 @@ export async function getExpoPushToken(): Promise<string | null> {
             name: 'Announcements',
             importance: Notifications.AndroidImportance.DEFAULT,
         });
+        await Notifications.setNotificationChannelAsync('shift_reminders', {
+            name: 'Shift reminders',
+            importance: Notifications.AndroidImportance.HIGH,
+            sound: 'default',
+        });
     }
 
     const projectId = Constants.expoConfig?.extra?.eas?.projectId;
@@ -50,10 +55,13 @@ export function usePushNotificationListeners() {
 
     useEffect(() => {
         responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
-            const data = response.notification.request.content.data as { type?: string };
+            const data = response.notification.request.content.data as { type?: string; project_id?: number; project_name?: string };
             if (data?.type === 'broadcast') navigate('Broadcasts');
             else if (data?.type === 'chat_reply') navigate('SupportChat');
             else if (data?.type === 'leave_status') navigate('Leave');
+            else if (data?.type === 'checkin_reminder' || data?.type === 'checkout_reminder') {
+                navigate('ProjectDetail', { projectId: data.project_id, projectName: data.project_name });
+            }
         });
         return () => responseListener.current?.remove();
     }, []);

@@ -42,6 +42,7 @@ interface AssignedProject {
     shifts?: Shift[];
     assigned_shift_id?: number | null;   // ADD
     is_off_today?: boolean;
+    project_ended?: boolean;
     scheduling_mode?: 'FIXED' | 'WEEKLY_ROTATION' | 'DAILY_ROTATION';
     role: 'Supervisor' | 'Employee';
 }
@@ -59,6 +60,7 @@ interface LastAttendance {
 const TaskScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const [userData, setUserData] = useState<UserData | null>(null);
     const [projects, setProjects] = useState<AssignedProject[]>([]);
+    const [endedProjects, setEndedProjects] = useState<AssignedProject[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [locationPermission, setLocationPermission] = useState(false);
@@ -198,13 +200,16 @@ const TaskScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     shifts: p.shifts || [],
                     assigned_shift_id: p.assigned_shift_id ?? null,   // ADD
                     is_off_today: p.is_off_today ?? false,
+                    project_ended: p.project_ended ?? false,
                     scheduling_mode: p.scheduling_mode || 'FIXED',
                     role: p.role || 'Employee',
                     project_code: p.project_code || p.projectcode || null,
                 }));
-                setProjects(mappedProjects);
+                setProjects(mappedProjects.filter((p: AssignedProject) => !p.project_ended));
+                setEndedProjects(mappedProjects.filter((p: AssignedProject) => p.project_ended));
             } else {
                 setProjects([]);
+                setEndedProjects([]);
             }
         } catch (error: any) {
             console.log('Error loading projects:', error);
@@ -463,6 +468,19 @@ const TaskScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     <Text style={styles.projectCount}>{projects.length} Projects</Text>
                 </View>
 
+                {endedProjects.length > 0 && (
+                    <TouchableOpacity
+                        style={styles.completedLink}
+                        onPress={() => navigation.navigate('InactiveProjects', { projects: endedProjects })}
+                    >
+                        <Ionicons name="archive-outline" size={16} color="#6c757d" />
+                        <Text style={styles.completedLinkText}>
+                            Completed Projects ({endedProjects.length})
+                        </Text>
+                        <Ionicons name="chevron-forward" size={16} color="#6c757d" />
+                    </TouchableOpacity>
+                )}
+
                 {isLoading ? (
                     <View style={styles.loadingContainer}>
                         <ActivityIndicator size="large" color="#212c6b" />
@@ -552,6 +570,22 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#f8f9fa',
+    },
+    completedLink: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        backgroundColor: '#eef0f3',
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderRadius: 8,
+        marginBottom: 12,
+        alignSelf: 'flex-start',
+    },
+    completedLinkText: {
+        color: '#6c757d',
+        fontSize: 13,
+        fontWeight: '600',
     },
     header: {
         backgroundColor: '#212c6b',

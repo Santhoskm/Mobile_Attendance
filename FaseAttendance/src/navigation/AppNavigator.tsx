@@ -6,6 +6,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { apiService } from '../services/api';
+import { getExpoPushToken } from '../hooks/usePushNotifications';
 
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
@@ -18,6 +19,7 @@ import DocumentsScreen from '../screens/DocumentsScreen';
 import ViolationsScreen from '../screens/ViolationsScreen';
 import MainTabScreen from '../screens/MainTabScreen';
 import ProjectDetailScreen from '../screens/ProjectDetailScreen';
+import InactiveProjectsScreen from '../screens/InactiveProjectsScreen';
 import LeaveScreen from '../screens/LeaveScreen';
 import BroadcastsScreen from '../screens/BroadcastsScreen';
 import SupportChatScreen from '../screens/SupportChatScreen';
@@ -37,6 +39,14 @@ const AppNavigator = () => {
                 if (remembered === 'true' && token) {
                     const stillValid = await apiService.refreshAuthToken();
                     if (stillValid) {
+                        // Stamp "app opened today" even on a silent, already-logged-in
+                        // session resume — not just on a fresh username/password login.
+                        getExpoPushToken()
+                            .then((t) => {
+                                if (t) apiService.registerPushToken(t);
+                            })
+                            .catch(() => { });
+
                         setInitialRoute('Main');
                         return;
                     }
@@ -68,6 +78,7 @@ const AppNavigator = () => {
                 <Stack.Screen name="FaceEnrollment" component={FaceEnrollmentScreen} />
                 <Stack.Screen name="AttendanceHistory" component={AttendanceHistoryScreen} />
                 <Stack.Screen name="ProjectDetail" component={ProjectDetailScreen} />
+                <Stack.Screen name="InactiveProjects" component={InactiveProjectsScreen} />
                 <Stack.Screen name="Leave" component={LeaveScreen} />
                 <Stack.Screen name="Projects" component={TaskScreen} />
                 <Stack.Screen name="Violations" component={ViolationsScreen} />
