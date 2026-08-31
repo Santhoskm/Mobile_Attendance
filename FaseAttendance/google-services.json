@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "963054376301",
+    "project_id": "testpresenter-e1ae5-d2400",
+    "storage_bucket": "testpresenter-e1ae5-d2400.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:963054376301:android:8719d45618284f72aa3664",
+        "android_client_info": {
+          "package_name": "com.iet.hr"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBoZZaNjrUjjz7kKh-U_oxohdapJNeuLk4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
