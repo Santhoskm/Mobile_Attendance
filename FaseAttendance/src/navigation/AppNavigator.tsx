@@ -51,6 +51,12 @@ const AppNavigator = () => {
                         return;
                     }
                     await apiService.clearAuthData();
+
+                } else if (token) {
+                    // A token exists in storage but "remember me" wasn't set —
+                    // don't leave it (and the default Authorization header
+                    // getAuthData() just attached) lying around for the login screen.
+                    await apiService.clearAuthData();
                 }
 
                 setInitialRoute('Login');

@@ -2,15 +2,19 @@
   "expo": {
     "name": "IET HR",
     "slug": "IET",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.iet.hr",
       "infoPlist": {
         "NSCameraUsageDescription": "This app needs camera access to verify your identity for attendance marking",
-        "NSLocationWhenInUseUsageDescription": "This app needs location access to verify your attendance location"
+        "NSLocationWhenInUseUsageDescription": "This app needs location access to verify your attendance location",
+        "UIBackgroundModes": [
+          "remote-notification"
+        ]
       }
     },
     "android": {

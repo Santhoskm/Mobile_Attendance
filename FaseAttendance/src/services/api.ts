@@ -163,6 +163,15 @@ api.interceptors.request.use(
                 config.headers = config.headers ?? {};
                 config.headers['Authorization'] = `Bearer ${token}`;
             }
+
+        } else {
+            // Public endpoints (login/register/refresh) must never carry a token —
+            // a stale api.defaults.headers.common['Authorization'] set by a prior
+            // session can otherwise leak through and cause the backend's JWT auth
+            // to 401 the request before it even reaches the view.
+            if (config.headers) {
+                delete config.headers['Authorization'];
+            }
         }
 
         if (__DEV__) {
